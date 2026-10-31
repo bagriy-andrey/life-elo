@@ -319,3 +319,5 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 6. Keep the optional questionnaire optional, and separate self-reported wellbeing from behavioral metrics.
 7. Ask before choosing numerical coefficients or declaring a final algorithm.
 8. Optimize for a sustainable, motivating product, not a system that induces guilt, compulsive tracking or rigid abstinence from normal life.
+
+вообще в идеале я хотел бы сделать это мобильное приложение, например, для iOS. Нюанс в том что для начала я хотел бы его запустить для себя и попробовать его для себя. Но я не знаю, например, как и могу ли я устанавливать Приложение на телефоне в dev mode или просто как страничку на сайте, на которой будет просто иконка из iPhone. Будет сразу открывать эту страницу в браузере, но чтобы там отображался вид, как будто бы это приложение. Что бы ты посоветовал?

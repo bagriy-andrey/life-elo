@@ -1,0 +1,9 @@
+.pill {
+  padding: var(--space-4) var(--space-10);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--pill-color) 15%, transparent);
+  color: var(--pill-color);
+  font-size: var(--text-xs);
+}
+.pill-pos { --pill-color: var(--pos); }
+.pill-neg { --pill-color: var(--neg); }

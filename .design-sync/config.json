@@ -1,0 +1,45 @@
+{
+  "projectId": "67c2bfac-e6da-422e-98bb-a3415b430a31",
+  "shape": "package",
+  "pkg": "life-elo",
+  "globalName": "LifeElo",
+  "buildCmd": "node .design-sync/build-lib.mjs",
+  "entry": "./.design-sync/.cache/pkg/dist/index.js",
+  "cssEntry": "dist/styles.css",
+  "dtsPropsFor": {
+    "Button": "/** \"primary\" = filled accent call-to-action (one per screen), \"default\" = bordered card-colored button. */\n  variant?: \"default\" | \"primary\";\n  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;\n  disabled?: boolean;\n  type?: \"button\" | \"submit\" | \"reset\";\n  className?: string;\n  style?: React.CSSProperties;\n  children?: React.ReactNode;\n  /** Any other native <button> attribute is forwarded. */\n  [attr: string]: unknown;",
+    "Card": "/** Dimmed (opacity 0.5), e.g. a paused habit. */\n  inactive?: boolean;\n  /** Layout utility from the global stylesheet, e.g. \"stack-sm\" (vertical) or \"row\" (space-between). */\n  className?: string;\n  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;\n  style?: React.CSSProperties;\n  children?: React.ReactNode;\n  /** Any other native <div> attribute is forwarded. */\n  [attr: string]: unknown;",
+    "SegmentedControl": "/** Equal-width buttons, left to right. tone colors the selected segment (pos = green, neg = red), accent when omitted. */\n  options: { value: string; label: string; tone?: \"pos\" | \"neg\" }[];\n  /** Selected option value. Nothing is selected when undefined. */\n  value?: string;\n  onChange: (value: string) => void;",
+    "TabBar": "/** Tabs. badge shows a red attention dot after the label. */\n  items: { id: string; label: string; badge?: boolean }[];\n  /** id of the selected tab (accent color, bold). */\n  active: string;\n  onSelect: (id: string) => void;",
+    "HistoryEntry": "/** One reviewed day from the rating ledger: day is \"YYYY-MM-DD\", delta is the signed day total, contributions explain it line by line (rendered when the entry is expanded). */\n  entry: {\n    day: string; rulesetVersion: string; reviewRevision: number;\n    ratingBefore: number; delta: number; ratingAfter: number; capped: boolean;\n    contributions: {\n      source: { kind: \"habit\"; habitId: string } | { kind: \"clean_day\" };\n      outcome?: \"done\" | \"not_done\" | \"complied\" | \"violated\" | \"not_applicable\" | \"unknown\";\n      base: number; streak: number; multiplier: number; points: number;\n    }[];\n  };\n  /** habitId -> display name, used for habit contribution lines. */\n  habitNames: Map<string, string>;"
+  },
+  "overrides": {
+    "TabBar": {
+      "cardMode": "single",
+      "primaryStory": "WithBadge",
+      "viewport": "420x160"
+    },
+    "Banner": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "EloScore": {
+      "cardMode": "column"
+    },
+    "HistoryEntry": {
+      "cardMode": "column"
+    },
+    "SegmentedControl": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "cardMode": "column"
+    },
+    "Pill": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

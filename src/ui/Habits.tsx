@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { db, newId } from '../db/db'
 import type { Habit, HabitDirection, ImpactTier } from '../domain/types'
+import { Button, Card, SegmentedControl } from './components'
 import { DIRECTION_LABEL, TIER_LABEL } from './labels'
+
+const options = <T extends string>(labels: Record<T, string>) =>
+  (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }))
 
 interface Props {
   habits: Habit[]
@@ -31,43 +35,31 @@ export function Habits({ habits, effectiveFrom }: Props) {
 
   return (
     <section className="stack">
-      <div className="card stack-sm">
+      <Card className="stack-sm">
         <input
           placeholder="Название привычки"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <div className="segmented">
-          {(Object.keys(DIRECTION_LABEL) as HabitDirection[]).map((d) => (
-            <button key={d} className={direction === d ? 'on' : ''} onClick={() => setDirection(d)}>
-              {DIRECTION_LABEL[d]}
-            </button>
-          ))}
-        </div>
-        <div className="segmented">
-          {(Object.keys(TIER_LABEL) as ImpactTier[]).map((t) => (
-            <button key={t} className={tier === t ? 'on' : ''} onClick={() => setTier(t)}>
-              {TIER_LABEL[t]}
-            </button>
-          ))}
-        </div>
-        <button className="primary" onClick={add} disabled={!name.trim()}>
+        <SegmentedControl value={direction} onChange={setDirection} options={options(DIRECTION_LABEL)} />
+        <SegmentedControl value={tier} onChange={setTier} options={options(TIER_LABEL)} />
+        <Button variant="primary" onClick={add} disabled={!name.trim()}>
           Добавить
-        </button>
-      </div>
+        </Button>
+      </Card>
 
       {habits.map((h) => (
-        <div key={h.id} className={`card row ${h.active ? '' : 'inactive'}`}>
+        <Card key={h.id} className="row" inactive={!h.active}>
           <div className="stack-sm">
             <strong>{h.name}</strong>
             <span className="muted">
               {DIRECTION_LABEL[h.direction]} · {TIER_LABEL[h.tier]}
             </span>
           </div>
-          <button onClick={() => db.habits.update(h.id, { active: !h.active })}>
+          <Button onClick={() => db.habits.update(h.id, { active: !h.active })}>
             {h.active ? 'Пауза' : 'Вернуть'}
-          </button>
-        </div>
+          </Button>
+        </Card>
       ))}
     </section>
   )

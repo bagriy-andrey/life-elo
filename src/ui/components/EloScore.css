@@ -1,0 +1,15 @@
+.elo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-28) var(--space-16);
+}
+.elo-value {
+  font-size: var(--text-display);
+  line-height: 1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.elo .pill { margin-top: var(--space-8); }

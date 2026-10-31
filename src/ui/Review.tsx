@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { confirmDay } from '../db/db'
 import type { DayReview, Habit, HabitOutcome } from '../domain/types'
-import { formatDay, OUTCOME_LABEL, OUTCOMES_FOR } from './labels'
+import { Button, Card, SegmentedControl } from './components'
+import { formatDay, OUTCOME_LABEL, OUTCOME_TONE, OUTCOMES_FOR } from './labels'
 
 interface Props {
   day: string
@@ -47,27 +48,25 @@ export function Review({ day, maxDay, habits, existing, onDayChange, onDone }: P
         <p className="muted">Нет привычек для этого дня. Добавьте их во вкладке «Привычки».</p>
       )}
       {applicable.map((h) => (
-        <div key={h.id} className="card stack-sm">
+        <Card key={h.id} className="stack-sm">
           <strong>{h.name}</strong>
-          <div className="segmented">
-            {OUTCOMES_FOR[h.direction].map((o) => (
-              <button
-                key={o}
-                className={outcomes[h.id] === o ? `on ${o}` : ''}
-                onClick={() => set(h.id, o)}
-              >
-                {OUTCOME_LABEL[o]}
-              </button>
-            ))}
-          </div>
-        </div>
+          <SegmentedControl
+            value={outcomes[h.id]}
+            onChange={(o) => set(h.id, o)}
+            options={OUTCOMES_FOR[h.direction].map((o) => ({
+              value: o,
+              label: OUTCOME_LABEL[o],
+              tone: OUTCOME_TONE[o],
+            }))}
+          />
+        </Card>
       ))}
       {applicable.length > 0 && (
         <>
           <p className="muted">Без ответа — «не помню», это не влияет на рейтинг.</p>
-          <button className="primary" onClick={confirm}>
+          <Button variant="primary" onClick={confirm}>
             {existing ? 'Сохранить исправление' : 'Подтвердить день'}
-          </button>
+          </Button>
         </>
       )}
     </section>

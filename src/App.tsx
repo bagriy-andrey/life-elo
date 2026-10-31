@@ -5,6 +5,7 @@ import { reviewDay } from './domain/day'
 import type { DayReview, Habit } from './domain/types'
 import { PLACEHOLDER_RULESET } from './engine/config'
 import { replay } from './engine/rating'
+import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Review } from './ui/Review'
@@ -59,17 +60,15 @@ export default function App() {
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} effectiveFrom={yesterday} />}
       </main>
-      <nav className="tabbar">
-        <button className={tab === 'home' ? 'on' : ''} onClick={() => setTab('home')}>
-          Главная
-        </button>
-        <button className={tab === 'review' ? 'on' : ''} onClick={openReview}>
-          Обзор дня{pendingDay && <span className="dot" />}
-        </button>
-        <button className={tab === 'habits' ? 'on' : ''} onClick={() => setTab('habits')}>
-          Привычки
-        </button>
-      </nav>
+      <TabBar
+        active={tab}
+        onSelect={(id) => (id === 'review' ? openReview() : setTab(id))}
+        items={[
+          { id: 'home', label: 'Главная' },
+          { id: 'review', label: 'Обзор дня', badge: !!pendingDay },
+          { id: 'habits', label: 'Привычки' },
+        ]}
+      />
     </div>
   )
 }

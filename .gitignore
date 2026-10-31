@@ -25,3 +25,10 @@ dist-ssr
 
 # PWA dev service worker
 dev-dist
+
+# design-sync (Claude Design) working state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

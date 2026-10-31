@@ -20,6 +20,13 @@ export const OUTCOME_LABEL: Record<HabitOutcome, string> = {
   unknown: 'Не помню',
 }
 
+/** Selected-state color for an outcome; accent when absent. */
+export const OUTCOME_TONE: Partial<Record<HabitOutcome, 'pos' | 'neg'>> = {
+  done: 'pos',
+  complied: 'pos',
+  violated: 'neg',
+}
+
 export const OUTCOMES_FOR: Record<HabitDirection, HabitOutcome[]> = {
   constructive: ['done', 'not_done', 'not_applicable'],
   destructive: ['complied', 'violated', 'not_applicable'],

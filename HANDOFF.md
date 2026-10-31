@@ -12,9 +12,13 @@ Prepare the UI for Claude Design sync (`/design-sync`, run by the user).
 - Home / Review / Habits / App migrated to components; intended to look identical.
 - `npm test`, `npm run lint`, `npm run build` pass.
 
+- Claude Design sync done (2026-10-31): 8 components uploaded to project "Life Elo"
+  (https://claude.ai/design/p/67c2bfac-e6da-422e-98bb-a3415b430a31). Sync inputs live in `.design-sync/`
+  (config, NOTES.md, conventions.md, previews/, build-lib.mjs); see `.design-sync/NOTES.md`.
+
 ## Next step
-- User checks the app visually (`npm run dev`), then runs `/design-sync` to push the components
-  to a Claude Design design-system project.
+- After changing components/props/tokens: re-run `/design-sync` (re-sync; it reads `.design-sync/`).
+  Prop types for 5 components are hand-written in `.design-sync/config.json` (`dtsPropsFor`), so keep them in step.
 
 ## Decisions & open questions
 - Plain CSS per component + CSS variables; no CSS-in-JS / Tailwind.

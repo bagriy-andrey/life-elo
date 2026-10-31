@@ -1,0 +1,16 @@
+.segmented { display: flex; gap: var(--space-6); }
+.segmented button {
+  flex: 1;
+  padding: var(--space-8) var(--space-6);
+  font-size: var(--text-sm);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.segmented button.on {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: transparent;
+}
+.segmented button.on.tone-pos { background: var(--pos); }
+.segmented button.on.tone-neg { background: var(--neg); }

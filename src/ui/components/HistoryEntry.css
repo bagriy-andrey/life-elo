@@ -1,0 +1,12 @@
+.history-entry summary { list-style: none; cursor: pointer; }
+.history-entry summary::-webkit-details-marker { display: none; }
+.explain {
+  list-style: none;
+  margin: var(--space-10) 0 0;
+  padding: var(--space-10) 0 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  font-size: var(--text-sm);
+}

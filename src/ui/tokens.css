@@ -1,0 +1,53 @@
+/* Design tokens: the single source for colors, type, spacing and radii. */
+:root {
+  /* Color */
+  --bg: #f6f5f2;
+  --card: #ffffff;
+  --text: #1c1b1f;
+  --muted: #6e6b75;
+  --border: #e4e2dd;
+  --accent: #4b5bdc;
+  --accent-text: #ffffff;
+  --pos: #1f8a5b;
+  --neg: #c2553b;
+  --zero: #6e6b75;
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --text-xs: 0.85rem;
+  --text-sm: 0.9rem;
+  --text-md: 1rem;
+  --text-lg: 1.1rem;
+  --text-display: 4rem;
+  --line-height: 1.45;
+
+  /* Spacing */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-28: 28px;
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-full: 999px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121216;
+    --card: #1d1d23;
+    --text: #ecebf0;
+    --muted: #9a97a3;
+    --border: #2d2d35;
+    --accent: #7f8cff;
+    --accent-text: #0f0f14;
+    --pos: #4cc38a;
+    --neg: #f08a6c;
+  }
+}

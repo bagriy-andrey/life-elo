@@ -17,7 +17,7 @@ export function EloScore({ rating, caption, streak = 0 }: Props) {
   return (
     <div className="elo card">
       <span className="muted">Life Elo</span>
-      <strong className={cx('elo-value', sign)}>{formatSigned(rating)}</strong>
+      <strong className={cx('elo-value', sign)}>{formatSigned(rating, 1)}</strong>
       <span className="muted">{caption}</span>
       {streak > 0 && <Pill>Чистых дней подряд: {streak}</Pill>}
     </div>

@@ -114,4 +114,10 @@ describe('versions', () => {
     expect(out).toHaveLength(1)
     expect(out[0].tier).toBe('strong')
   })
+  it('edit dated before effectiveFrom is clamped so the seeded version is kept', () => {
+    const h = habit({ tier: 'weak', effectiveFrom: '2026-03-01' })
+    const out = editedVersions(h, { tier: 'strong', rule: { kind: 'boolean' } }, '2026-02-01')
+    expect(out).toHaveLength(1)
+    expect(out[0]).toMatchObject({ from: '2026-03-01', tier: 'strong' })
+  })
 })

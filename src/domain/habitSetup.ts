@@ -126,7 +126,8 @@ function legacyVersion(habit: Habit): HabitVersion {
 export function editedVersions(habit: Habit, next: Omit<HabitVersion, 'from'>, today: DayKey): HabitVersion[] {
   const existing: HabitVersion[] =
     habit.versions && habit.versions.length > 0 ? habit.versions : [legacyVersion(habit)]
-  const version: HabitVersion = { from: today, tier: next.tier, rule: next.rule }
+  const from = today > habit.effectiveFrom ? today : habit.effectiveFrom
+  const version: HabitVersion = { from, tier: next.tier, rule: next.rule }
   if (next.quota) version.quota = next.quota
   return upsertVersion(existing, version)
 }

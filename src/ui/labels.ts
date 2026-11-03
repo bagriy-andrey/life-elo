@@ -47,8 +47,11 @@ export const OUTCOMES_FOR: Record<HabitDirection, HabitOutcome[]> = {
   destructive: ['complied', 'violated', 'not_applicable'],
 }
 
-export const formatSigned = (n: number) =>
-  n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '0'
+/** Signed number with U+2212 minus, rounded to `digits` (points: 2, rating: 1), no trailing zeros. */
+export const formatSigned = (n: number, digits = 2) => {
+  const r = Number(Math.abs(n).toFixed(digits))
+  return r === 0 ? '0' : n > 0 ? `+${r}` : `−${r}`
+}
 
 export const formatDay = (day: string) =>
   new Date(`${day}T12:00:00`).toLocaleDateString('ru-RU', {

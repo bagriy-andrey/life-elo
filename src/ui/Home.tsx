@@ -21,7 +21,7 @@ export function Home({ result, habits, pendingDay, onReview }: Props) {
         streak={result.cleanDayStreak}
         caption={
           last
-            ? `${formatSigned(last.delta)} за ${formatDay(last.day)}`
+            ? `${formatSigned(last.delta, 1)} за ${formatDay(last.day)}`
             : 'Старт с нуля — подтвердите первый день'
         }
       />

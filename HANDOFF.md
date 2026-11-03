@@ -1,6 +1,6 @@
 # Handoff
 Updated: 2026-11-03 by Claude Code
-Branch: scoring-ruleset-v1 (not pushed, no PR yet)
+Branch: scoring-ruleset-v1 — PR #3 open (https://github.com/bagriy-andrey/life-elo/pull/3)
 Plan: docs/plans/01-scoring-ruleset-v1.md — all 13 steps built + verified PASS, Status: done
 
 ## In progress
@@ -8,7 +8,7 @@ Nothing.
 
 ## Next step
 User: manual check in `npm run dev` (review inputs/zones, habit setup + quota, history ledger, old data upgraded),
-then push + PR to main, then tick «Рейтинг v1» in docs/ROADMAP.md.
+then merge PR #3, then tick «Рейтинг v1» in docs/ROADMAP.md.
 
 ## Broken / open questions
 - Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — product context §13 Open.

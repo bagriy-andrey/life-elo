@@ -177,6 +177,15 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 
 **Review window and unknown days.** A day can be reviewed or corrected until the end of the following day (by the app's day boundary); then it locks. A day with no review is `unknown`: no direct penalty, all streaks break, and for Elo it counts as `S = 0` **only when R > 0** (rating at or below 0 stays frozen — a skip can never raise it).
 
+**Clarifications (2026-11-03).**
+
+- Bad-day multipliers: ×1 on the 1st consecutive bad day, ×1.25 on the 2nd, ×1.5 from the 3rd. A bad day resets that habit's positive streak to 0. Soft decay halves with floor.
+- Recovery (full weight) applies only to the *ok* zone. A quota habit with zero count is *ok*.
+- `not applicable` removes the habit from Σ weights for that day and pauses its streak. A per-habit `unknown` inside a reviewed day stays in Σ, scores 0 and breaks that habit's streak.
+- Clean-day bonus requires at least one applicable habit that can be *bad*.
+- Habit settings (tier, thresholds, quota) are versioned by date: a change applies from that day on; past days keep their old settings.
+- "Usual day" shown in the UI = `R / 10`.
+
 **Life Elo on top of day scores.** `R₀ = 0`, `R ← R + 0.1 × (10 × S − R)`, range ≈ −1000…+1000 (half-way to a new level in ~7 days). A positive day below the user's usual form can lower R; the UI must show the expectation ("your usual day: +30, today: +10") so the move is explainable.
 
 ## 7. Next-morning daily review — explicitly agreed

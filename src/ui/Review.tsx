@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { confirmDay } from '../db/db'
-import type { DayReview, Habit, HabitOutcome } from '../domain/types'
+import { entriesOf } from '../domain/legacy'
+import type { DayReview, Habit, HabitEntry, HabitOutcome } from '../domain/types'
 import { Button, Card, SegmentedControl } from './components'
 import { formatDay, OUTCOME_LABEL, OUTCOME_TONE, OUTCOMES_FOR } from './labels'
 
@@ -13,20 +14,40 @@ interface Props {
   onDone: () => void
 }
 
+// Transitional (until the zone UI in step 10): the screen still edits boolean outcomes.
+function outcomeOf(h: Habit, e: HabitEntry): HabitOutcome {
+  if (e.kind !== 'value') return e.kind
+  const done = e.value === true
+  if (h.direction === 'constructive') return done ? 'done' : 'not_done'
+  return done ? 'complied' : 'violated'
+}
+
+const currentTime = () => new Date()
+
+function entryOf(o: HabitOutcome): HabitEntry {
+  if (o === 'not_applicable' || o === 'unknown') return { kind: o }
+  return { kind: 'value', value: o === 'done' || o === 'complied' }
+}
+
 export function Review({ day, maxDay, habits, existing, onDayChange, onDone }: Props) {
   const applicable = habits.filter((h) => h.active && h.effectiveFrom <= day)
   // Remounted per day (key), so initial state is the saved review, if any.
   const [outcomes, setOutcomes] = useState<Record<string, HabitOutcome>>(
-    () => existing?.outcomes ?? {},
+    () => {
+      const entries = existing ? entriesOf(existing) : {}
+      return Object.fromEntries(
+        habits.filter((h) => h.id in entries).map((h) => [h.id, outcomeOf(h, entries[h.id])]),
+      )
+    },
   )
 
   const set = (id: string, o: HabitOutcome) => setOutcomes((prev) => ({ ...prev, [id]: o }))
 
   const confirm = async () => {
     const full = Object.fromEntries(
-      applicable.map((h) => [h.id, outcomes[h.id] ?? ('unknown' as const)]),
+      applicable.map((h) => [h.id, entryOf(outcomes[h.id] ?? 'unknown')]),
     )
-    await confirmDay(day, full)
+    await confirmDay(day, full, currentTime())
     onDone()
   }
 

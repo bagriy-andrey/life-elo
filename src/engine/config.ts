@@ -1,4 +1,4 @@
-import type { ImpactTier } from '../domain/types'
+import type { ImpactTier, Zone } from '../domain/types'
 
 /**
  * Versioned ruleset. Every ledger entry records the version it was computed with.
@@ -25,9 +25,6 @@ export interface LegacyRulesetConfig {
   gapBreaksStreak: boolean
 }
 
-/** Zone of a habit's outcome for one day. */
-export type ZoneKey = 'excellent' | 'ok' | 'tolerable' | 'bad'
-
 /**
  * Ruleset v1 shape. Numbers of `RULESET_V1` come literally from
  * LIFE_ELO_PRODUCT_CONTEXT.md §6.5 (agreed 2026-11-03).
@@ -38,7 +35,7 @@ export interface RulesetConfig {
   /** Day score budget: habitBase + cleanDay + streak = 100. */
   budget: { habitBase: number; cleanDay: number; streak: number }
   /** Share of `weight x unit` per zone (bad is negative, before the negative-streak multiplier). */
-  zoneShare: Record<ZoneKey, number>
+  zoneShare: Record<Zone, number>
   /** Streak length at which the streak bonus is full. */
   streakFullDays: number
   /** Positive streak is multiplied by this (then floored) on a tolerable day. */

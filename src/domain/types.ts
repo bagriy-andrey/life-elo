@@ -28,7 +28,8 @@ export type ZonedRule =
       better: 'lower' | 'higher'
       excellent: number | string
       ok?: number | string
-      tolerable: number | string
+      /** When omitted, anything beyond `ok` (or `excellent`) is bad. */
+      tolerable?: number | string
     }
 
 /** Limits on a habit's count; `reducedByDaysOf` is another habit id (one level only). */

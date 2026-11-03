@@ -180,7 +180,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 **Clarifications (2026-11-03).**
 
 - Bad-day multipliers: ×1 on the 1st consecutive bad day, ×1.25 on the 2nd, ×1.5 from the 3rd. A bad day resets that habit's positive streak to 0. Soft decay halves with floor.
-- Recovery (full weight) applies only to the *ok* zone. A quota habit with zero count is *ok*.
+- Recovery (full weight) applies only to the *ok* zone. A quota habit with zero count is *ok*, unless the cumulative weekly count already exceeds the limit as of that day (e.g. after a reducer day): then it is *bad* even with zero.
 - `not applicable` removes the habit from Σ weights for that day and pauses its streak. A per-habit `unknown` inside a reviewed day stays in Σ, scores 0 and breaks that habit's streak.
 - Clean-day bonus requires at least one applicable habit that can be *bad*.
 - Habit settings (tier, thresholds, quota) are versioned by date: a change applies from that day on; past days keep their old settings.

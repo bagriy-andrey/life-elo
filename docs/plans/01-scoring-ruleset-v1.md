@@ -61,7 +61,8 @@ No coefficient outside §6.5 may be invented; anything unclear is under "Open qu
 
 ## Resolved questions (confirmed by the user on 2026-11-03)
 1. Reducer count "so far this week" includes the day being scored.
-2. Quota habit with zero count is `ok` (+50%), not `excellent`.
+2. Quota habit with zero count is `ok` (+50%), not `excellent` — unless the cumulative weekly count already exceeds
+   the (reduced) limit as of that day: then the day is `bad` even with 0 (confirmed by the user on 2026-11-03).
 3. Soft decay halves the positive streak with floor (7 -> 3, 1 -> 0).
 4. Streak bonus uses the streak after today's update (for tolerable: the halved value).
 5. Negative multipliers: x1 on the 1st consecutive bad day, x1.25 on the 2nd, x1.5 from the 3rd.

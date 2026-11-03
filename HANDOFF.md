@@ -1,18 +1,18 @@
 # Handoff
 Updated: 2026-11-03 by Claude Code
-Branch: agents-setup (PR to main)
-Plan: docs/plans/01-scoring-ruleset-v1.md, step 0 of 13 (approved)
+Branch: scoring-ruleset-v1 (not pushed, no PR yet)
+Plan: docs/plans/01-scoring-ruleset-v1.md, step 9 of 13 (steps 1–9 built + verified PASS)
 
 ## In progress
-Nothing. Scoring ruleset v1 agreed and recorded in LIFE_ELO_PRODUCT_CONTEXT.md §6.5;
-plan 01 approved; task list in docs/ROADMAP.md.
+Nothing. Paused by agreement: show the user a worked week on their habits before UI steps 10–13.
 
 ## Next step
-Agreed order, one roadmap task at a time (plan → user decisions → /build-plan → check on phone → tick ROADMAP):
-1. Deploy to Vercel + install on iPhone (small task before plan 01; needs a short plan).
-2. Plan 01: run steps 1–9 in one go, then stop and show the user a worked week with their 6 habits
-   before UI; then steps 10–13 one at a time.
+After the user OKs the worked week: `/build-plan docs/plans/01-scoring-ruleset-v1.md` for step 10, one step at a time.
 
 ## Broken / open questions
-- Stray iOS question at the end of LIFE_ELO_PRODUCT_CONTEXT.md — remove during the deploy task.
-- Optional, user-only: `.claude/settings.json` allowlist not created.
+- Step 10 must: remove the boolean bridge in `src/ui/Review.tsx` (saves numeric/time as false on re-save),
+  set date input `min` / catch `DayLockedError` (locked day pick → unhandled rejection).
+- Manual check not done: `npm run dev` with existing v1 IndexedDB data → Dexie v2 upgrade runs, history renders.
+- `App.tsx` `yesterday` from useState init: `today` may go stale if the app stays open past the day boundary.
+- Pending `/design-sync` (HistoryEntry changed in step 8); then write HEAD to `.design-sync/last-sync`.
+- Deploy to Vercel postponed by the user. Stray iOS note at end of LIFE_ELO_PRODUCT_CONTEXT.md still there.

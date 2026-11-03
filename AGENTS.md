@@ -23,9 +23,31 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - Reward Coins (future) are separate from Elo; spending never lowers Elo.
 - Numbers in `PLACEHOLDER_RULESET` are placeholders, not agreed. Ask the user before choosing coefficients or declaring a final formula.
 
+## Gotchas
+Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
+- `src/ui/components/` is mirrored in Claude Design: prop types for Button, Card, SegmentedControl,
+  TabBar, HistoryEntry are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+- Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
+  Text input is still styled globally in `src/index.css` (no TextInput component yet).
+
+## Workflow: plan → build → verify
+Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude wrappers.
+- `planner` — `docs/agents/planner.md`: feature (or Claude Design link) → `docs/plans/NN-slug.md`.
+- `implementer` — `docs/agents/implementer.md`: one plan step → code + tests + commit + checkbox.
+- `verifier` — `docs/agents/verifier.md`: read-only; plan coverage, rules above, design-sync drift.
+Skills in `.claude/skills/` (Codex: open the SKILL.md and follow it yourself):
+`build-plan` (implement → verify → ≤1 fix round), `handoff`, `workflow-retro`.
+Plan checkboxes are the progress source of truth; scoring decisions always go to the user.
+
+## Claude Design
+Components/tokens are synced to Claude Design by the user-run `/design-sync` (reads `.design-sync/`,
+see its `NOTES.md`). `.design-sync/last-sync` holds the commit of the last sync: after a successful
+`/design-sync`, write the current HEAD hash there and commit it.
+
 ## Working across agents (Claude Code ↔ Codex)
-This repo is worked on by both Claude Code and Codex; either may pick up where the other stopped.
-- At the start of a session, read `HANDOFF.md` and continue from "Next step".
-- After each meaningful step (and before stopping), update `HANDOFF.md`: what was done, what's next, decisions, open questions.
-- Commit small, finished steps. Before handing off, make sure `npm test` and `npm run lint` pass, or note in `HANDOFF.md` what is broken and why.
+Either agent may continue where the other stopped (e.g. when usage limits run out).
+- Start of session: read `HANDOFF.md`, continue from "Next step" (or the plan's first unchecked step).
+- Commit every finished step; when stopping or near a limit, run the `handoff` skill
+  (rewrites `HANDOFF.md`, ≤20 lines, + `wip:` commit) so at most one step is lost.
+- Before handing off, `npm test` and `npm run lint` pass, or `HANDOFF.md` says what is broken.
 - Keep shared instructions in this file only; `CLAUDE.md` just imports it.

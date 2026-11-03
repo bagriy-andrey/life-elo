@@ -148,6 +148,46 @@ Possible high-level identity: `R(today) = R(yesterday) + daily_delta`. The actua
 - A lapse should not erase all long-term progress or previously earned gifts.
 - Rewards for 3/7/14/30/90 days were discussed as examples, not approved thresholds.
 
+### 6.5 Scoring ruleset v1 — agreed with the user on 2026-11-03
+
+Supersedes the "open math" above where they overlap. Numbers are agreed starting values; they live in a versioned ruleset and may be tuned later.
+
+**Day score `S` ∈ [−100, +100]** — budget split 60 / 20 / 20:
+
+- **60 — habit base.** `unit = 60 / Σ tierWeight(active habits)`, tier weights weak 1 / medium 2 / strong 3. So 100 is reached only when every habit is in its *excellent* zone.
+- **20 — clean-day bonus.** Granted when no applicable habit landed in the *bad* zone. Constructive habits do not affect it; any `unknown` on a destructive/limit habit means not clean.
+- **20 — streak bonuses.** Per habit: `20 × (weight / Σ weights) × min(streak, 7) / 7` (full at 7 consecutive days).
+- Final day score is clamped to ±100.
+
+**Zoned habits (single outcome per habit per day).** Every habit maps its measured value (yes/no, time, count, minutes, steps) to one zone; zone thresholds are configured per habit. Plain yes/no habits are a special case.
+
+| Zone | Points | Streak |
+|---|---|---|
+| excellent | +100% of weight × unit | positive streak +1 |
+| ok (within limit) | +50% | positive streak +1 |
+| tolerable | 0 | positive streak halved (soft decay); negative streak reset |
+| bad | −100% × negative-streak multiplier | negative streak +1 |
+
+- Constructive done = *excellent*; constructive not done = *tolerable*.
+- Destructive complied = *ok* (50%, anti-farming). **Recovery:** the first non-bad day after ≥2 consecutive bad days scores the full weight instead of 50%.
+- Negative-streak multiplier: ×1 → ×1.25 → ×1.5 (cap from the 3rd consecutive bad day).
+- Examples: bedtime ≤23:00 excellent / 23:00–01:00 tolerable / after 01:00 bad; steps ≥10 000 excellent / 5 000–9 999 tolerable / <5 000 bad; social media 0 min excellent / ≤20 min ok / >20 min bad (entered manually at review).
+
+**Period quotas.** A habit may have a limit per calendar week (Mon–Sun) and per day. Example: masturbation ≤1/day and ≤2/week; the weekly limit is reduced by 1 for each day with sex so far this week (not below 0). Sex is a constructive habit with no limit. A day is *bad* if the cumulative count so far this week exceeds the limit as of that day (no retroactive changes to earlier days); otherwise *ok*.
+
+**Review window and unknown days.** A day can be reviewed or corrected until the end of the following day (by the app's day boundary); then it locks. A day with no review is `unknown`: no direct penalty, all streaks break, and for Elo it counts as `S = 0` **only when R > 0** (rating at or below 0 stays frozen — a skip can never raise it).
+
+**Clarifications (2026-11-03).**
+
+- Bad-day multipliers: ×1 on the 1st consecutive bad day, ×1.25 on the 2nd, ×1.5 from the 3rd. A bad day resets that habit's positive streak to 0. Soft decay halves with floor.
+- Recovery (full weight) applies only to the *ok* zone. A quota habit with zero count is *ok*.
+- `not applicable` removes the habit from Σ weights for that day and pauses its streak. A per-habit `unknown` inside a reviewed day stays in Σ, scores 0 and breaks that habit's streak.
+- Clean-day bonus requires at least one applicable habit that can be *bad*.
+- Habit settings (tier, thresholds, quota) are versioned by date: a change applies from that day on; past days keep their old settings.
+- "Usual day" shown in the UI = `R / 10`.
+
+**Life Elo on top of day scores.** `R₀ = 0`, `R ← R + 0.1 × (10 × S − R)`, range ≈ −1000…+1000 (half-way to a new level in ~7 days). A positive day below the user's usual form can lower R; the UI must show the expectation ("your usual day: +30, today: +10") so the move is explainable.
+
 ## 7. Next-morning daily review — explicitly agreed
 
 - Users can record provisional actions during the day.
@@ -155,7 +195,7 @@ Possible high-level identity: `R(today) = R(yesterday) + daily_delta`. The actua
 - Review should cover relevant chosen habit rules and previously logged activities, including events late at night.
 - Provide outcomes such as complied / violated / not applicable / skip or unknown, where appropriate.
 - Only confirmed data should drive final rating updates. Unconfirmed days remain pending and are not assumed clean.
-- Skipping a review should not incur a rating penalty.
+- Skipping a review should not incur a rating penalty. (v1: no direct penalty, but streaks break and a positive Elo decays toward 0 — see §6.5.)
 - Corrections to earlier days should be supported with recalculation and idempotent reward handling.
 - A bedtime after midnight should be associated with the prior evening/night by a clearly defined day-boundary rule.
 
@@ -294,15 +334,12 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 - Wishlist, Unlock Rewards, Surprise Reward.
 - Goal: correlate and, when possible, align rating with real subjective wellbeing without confusing the two.
 - User selects habits from suggestions and can add their own.
+- Scoring ruleset v1 (§6.5): 60/20/20 day budget, zoned habits, weekly quotas, streak rules, review window, Elo formula.
 
 ### Open / requires discussion
 
-- Exact scoring formula, base weights, multipliers, caps and Elo adaptation.
-- Whether a single destructive habit repeated in one day is scored per occurrence or by total intensity.
-- How much to reward a clean day vs individual adherence.
-- Exact clean-day definition and negative-streak rules.
-- Habit thresholds, categories, default tier assignment, and final catalog.
-- Frequency of constructive habits and whether non-daily goals exist.
+- Habit categories, default tier assignment, and final catalog.
+- Habits scheduled on specific days / "N times per week" goals (v1 treats all habits as daily).
 - Reward Coins earning rates, redemption prices, unlock conditions and surprise mechanics.
 - Whether wellbeing directly modifies Elo or is only used for calibration/validation (recommend latter initially).
 - How to treat missing/unknown data and very long gaps.

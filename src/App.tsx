@@ -53,6 +53,7 @@ export default function App() {
             day={reviewing}
             maxDay={yesterday}
             habits={sortedHabits}
+            reviews={reviews}
             existing={reviews.find((r) => r.day === reviewing)}
             onDayChange={setReviewing}
             onDone={() => setTab('home')}

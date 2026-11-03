@@ -1,4 +1,4 @@
-import type { HabitDirection, HabitOutcome, ImpactTier, Zone } from '../domain/types'
+import type { HabitDirection, HabitOutcome, ImpactTier, Zone, ZonedRule } from '../domain/types'
 
 export const TIER_LABEL: Record<ImpactTier, string> = {
   weak: 'Слабая',
@@ -16,6 +16,13 @@ export const ZONE_LABEL: Record<Zone, string> = {
   ok: 'В рамках',
   tolerable: 'Терпимо',
   bad: 'Плохо',
+}
+
+export const UNIT_LABEL: Record<Extract<ZonedRule, { kind: 'measured' }>['unit'], string> = {
+  count: 'раз',
+  minutes: 'мин',
+  steps: 'шагов',
+  time: 'время',
 }
 
 export const OUTCOME_LABEL: Record<HabitOutcome, string> = {

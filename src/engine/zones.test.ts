@@ -55,3 +55,11 @@ describe('classifyZone entries without a zone', () => {
     expect(classifyZone({ direction: 'constructive', rule: bool }, v(3))).toBeNull()
   })
 })
+
+describe('classifyZone invalid time', () => {
+  it('returns null for unparsable times', () => {
+    const h = { direction: 'constructive' as const, rule: bedtime }
+    expect(classifyZone(h, v('abc'))).toBeNull()
+    expect(classifyZone(h, v('25:xx'))).toBeNull()
+  })
+})

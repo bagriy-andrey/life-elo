@@ -7,7 +7,11 @@ type Measured = Extract<ZonedRule, { kind: 'measured' }>
 export type ZonedHabit = Pick<Habit, 'direction'> & { rule: ZonedRule }
 
 function toNumber(unit: Measured['unit'], v: number | string): number | null {
-  if (unit === 'time') return typeof v === 'string' ? timeToMinutes(v) : null
+  if (unit === 'time') {
+    if (typeof v !== 'string') return null
+    const minutes = timeToMinutes(v)
+    return Number.isNaN(minutes) ? null : minutes
+  }
   return typeof v === 'number' ? v : null
 }
 

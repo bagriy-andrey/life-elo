@@ -14,5 +14,4 @@ After the user OKs the worked week: `/build-plan docs/plans/01-scoring-ruleset-v
   set date input `min` / catch `DayLockedError` (locked day pick → unhandled rejection).
 - Manual check not done: `npm run dev` with existing v1 IndexedDB data → Dexie v2 upgrade runs, history renders.
 - `App.tsx` `yesterday` from useState init: `today` may go stale if the app stays open past the day boundary.
-- Pending `/design-sync` (HistoryEntry changed in step 8); then write HEAD to `.design-sync/last-sync`.
 - Deploy to Vercel postponed by the user. Stray iOS note at end of LIFE_ELO_PRODUCT_CONTEXT.md still there.

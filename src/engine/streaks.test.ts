@@ -56,3 +56,14 @@ describe('negativeMultiplier / isRecovery', () => {
     expect(isRecovery(s, cfg)).toBe(false)
   })
 })
+
+describe('advanceStreak extra cases', () => {
+  it('excellent resets neg while pos > 0', () => {
+    expect(step({ pos: 3, neg: 2 }, 'excellent')).toEqual({ pos: 4, neg: 0 })
+  })
+
+  it('tolerable followed by bad', () => {
+    const s = step({ pos: 7, neg: 0 }, 'tolerable')
+    expect(step(s, 'bad')).toEqual({ pos: 0, neg: 1 })
+  })
+})

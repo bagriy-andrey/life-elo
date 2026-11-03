@@ -8,20 +8,21 @@ import {
   validateReducer,
   type HabitForm,
 } from './habitSetup'
-import type { Habit, HabitVersion } from './types'
+import type { Habit, HabitVersion, Quota } from './types'
 
 const form = (p: Partial<HabitForm>): HabitForm => ({ ...EMPTY_FORM, ...p })
 const habit = (p: Partial<Habit>): Habit => ({
   id: 'a',
   name: 'A',
   direction: 'constructive',
-  tier: 'medium',
-  rule: { kind: 'boolean' },
+  versions: [{ from: '2026-01-01', tier: 'medium', rule: { kind: 'boolean' } }],
   active: true,
   effectiveFrom: '2026-01-01',
   createdAt: 0,
   ...p,
 })
+const withQuota = (id: string, quota: Quota): Habit =>
+  habit({ id, versions: [{ from: '2026-01-01', tier: 'medium', rule: { kind: 'boolean' }, quota }] })
 const v = (from: string, tier: HabitVersion['tier'] = 'medium'): HabitVersion => ({
   from,
   tier,
@@ -80,11 +81,11 @@ describe('validateReducer', () => {
     expect(validateReducer('sex', { perDay: 1, reducedByDaysOf: 'sex' }, [sex], day)).toBeDefined()
   })
   it('rejects a reducer that is itself reduced', () => {
-    const reduced = habit({ id: 'sex', quota: { perDay: 1, reducedByDaysOf: 'x' } })
+    const reduced = withQuota('sex', { perDay: 1, reducedByDaysOf: 'x' })
     expect(validateReducer('m', { perDay: 1, reducedByDaysOf: 'sex' }, [reduced], day)).toBeDefined()
   })
   it('rejects reducing a habit that already serves as a reducer', () => {
-    const m = habit({ id: 'm', quota: { perDay: 1, reducedByDaysOf: 'sex' } })
+    const m = withQuota('m', { perDay: 1, reducedByDaysOf: 'sex' })
     expect(validateReducer('sex', { perDay: 1, reducedByDaysOf: 'other' }, [m, sex, habit({ id: 'other' })], day)).toBeDefined()
   })
 })
@@ -100,8 +101,8 @@ describe('versions', () => {
     expect(out[1].tier).toBe('strong')
     expect(out[0].tier).toBe('medium')
   })
-  it('edit of a legacy habit seeds versions[0] from its old settings', () => {
-    const h = habit({ tier: 'weak', effectiveFrom: '2026-01-01' })
+  it('edit keeps the earlier version and appends the new one', () => {
+    const h = habit({ versions: [v('2026-01-01', 'weak')], effectiveFrom: '2026-01-01' })
     const out = editedVersions(h, { tier: 'strong', rule: { kind: 'boolean' } }, '2026-03-01')
     expect(out).toEqual([
       { from: '2026-01-01', tier: 'weak', rule: { kind: 'boolean' }, },
@@ -115,7 +116,7 @@ describe('versions', () => {
     expect(out[0].tier).toBe('strong')
   })
   it('edit dated before effectiveFrom is clamped so the seeded version is kept', () => {
-    const h = habit({ tier: 'weak', effectiveFrom: '2026-03-01' })
+    const h = habit({ versions: [v('2026-03-01', 'weak')], effectiveFrom: '2026-03-01' })
     const out = editedVersions(h, { tier: 'strong', rule: { kind: 'boolean' } }, '2026-02-01')
     expect(out).toHaveLength(1)
     expect(out[0]).toMatchObject({ from: '2026-03-01', tier: 'strong' })

@@ -2,12 +2,19 @@ import { useState } from 'react'
 import { confirmDay } from '../db/db'
 import { DayLockedError } from '../db/confirm'
 import { addDays, dayOf, isDayLocked } from '../domain/day'
-import { entriesOf, settingsOn } from '../domain/legacy'
-import type { DayReview, Habit, HabitEntry, HabitOutcome, Zone } from '../domain/types'
+import { settingsOn } from '../domain/settings'
+import type { DayReview, Habit, HabitEntry, Zone } from '../domain/types'
 import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
 import { Button, Card, Pill, SegmentedControl } from './components'
-import { formatDay, OUTCOME_LABEL, OUTCOME_TONE, OUTCOMES_FOR, UNIT_LABEL, ZONE_LABEL } from './labels'
+import {
+  BOOLEAN_OPTIONS,
+  formatDay,
+  NOT_APPLICABLE_LABEL,
+  UNIT_LABEL,
+  ZONE_LABEL,
+  type BooleanAnswer,
+} from './labels'
 
 interface Props {
   day: string
@@ -24,16 +31,14 @@ type Entries = Record<string, HabitEntry>
 const UNKNOWN: HabitEntry = { kind: 'unknown' }
 const NOT_APPLICABLE: HabitEntry = { kind: 'not_applicable' }
 
-function outcomeOf(h: Habit, e: HabitEntry | undefined): HabitOutcome | undefined {
+function answerOf(e: HabitEntry | undefined): BooleanAnswer | undefined {
   if (!e || e.kind === 'unknown') return undefined
-  if (e.kind === 'not_applicable') return 'not_applicable'
-  if (h.direction === 'constructive') return e.value ? 'done' : 'not_done'
-  return e.value ? 'complied' : 'violated'
+  if (e.kind === 'not_applicable') return 'na'
+  return e.value ? 'true' : 'false'
 }
 
-function entryOfOutcome(o: HabitOutcome): HabitEntry {
-  if (o === 'not_applicable' || o === 'unknown') return { kind: o }
-  return { kind: 'value', value: o === 'done' || o === 'complied' }
+function entryOfAnswer(a: BooleanAnswer): HabitEntry {
+  return a === 'na' ? NOT_APPLICABLE : { kind: 'value', value: a === 'true' }
 }
 
 const currentTime = () => new Date()
@@ -43,7 +48,7 @@ const toneOfZone = (z: Zone) => (z === 'excellent' || z === 'ok' ? 'pos' : 'neg'
 export function Review({ day, maxDay, habits, reviews, existing, onDayChange, onDone }: Props) {
   const applicable = habits.filter((h) => h.active && h.effectiveFrom <= day)
   // Remounted per day (key), so initial state is the saved review, if any.
-  const [entries, setEntries] = useState<Entries>(() => (existing ? { ...entriesOf(existing) } : {}))
+  const [entries, setEntries] = useState<Entries>(() => (existing ? { ...existing.entries } : {}))
   const [error, setError] = useState<string>()
 
   const [now] = useState(currentTime) // fixed at mount; the screen is remounted per day
@@ -58,7 +63,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
     const s = settingsOn(h, day)
     if (s.quota) {
       const byDay: Record<string, Entries> = {}
-      for (const r of reviews) byDay[r.day] = entriesOf(r)
+      for (const r of reviews) byDay[r.day] = r.entries
       byDay[day] = entries
       return quotaZone({ id: h.id, quota: s.quota }, day, byDay)
     }
@@ -87,15 +92,16 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
     const timed = !s.quota && s.rule.kind === 'measured' && s.rule.unit === 'time'
     if (!numeric && !timed) {
       return (
-        <SegmentedControl
-          value={outcomeOf(h, entry)}
-          onChange={(o) => set(h.id, entryOfOutcome(o))}
-          options={OUTCOMES_FOR[h.direction].map((o) => ({
-            value: o,
-            label: OUTCOME_LABEL[o],
-            tone: OUTCOME_TONE[o],
-          }))}
-        />
+        <div className="stack-sm">
+          <SegmentedControl
+            value={answerOf(entry)}
+            onChange={(a) => set(h.id, entryOfAnswer(a))}
+            options={BOOLEAN_OPTIONS[h.direction]}
+          />
+          {entry && entry.kind !== 'unknown' && (
+            <Button onClick={() => set(h.id, UNKNOWN)}>Сбросить ответ</Button>
+          )}
+        </div>
       )
     }
     const unit = s.quota ? 'раз' : s.rule.kind === 'measured' ? UNIT_LABEL[s.rule.unit] : ''
@@ -120,7 +126,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
         />
         <span className="muted">{unit}</span>
         <Button onClick={() => set(h.id, na ? UNKNOWN : NOT_APPLICABLE)}>
-          {na ? 'Указать значение' : OUTCOME_LABEL.not_applicable}
+          {na ? 'Указать значение' : NOT_APPLICABLE_LABEL}
         </Button>
       </div>
     )

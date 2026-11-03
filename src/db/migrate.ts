@@ -1,28 +1,73 @@
-import { entriesOf, normalizeRule } from '../domain/legacy'
-import type { DayReview, Habit, HabitEntry } from '../domain/types'
+import type { DayReview, Habit, HabitEntry, HabitVersion, ImpactTier, Quota, ZonedRule } from '../domain/types'
 
-/** Stored review shape after v2: `entries` only (legacy `outcomes` dropped). */
-export type StoredReview = Omit<DayReview, 'outcomes' | 'entries'> & {
-  entries: Record<string, HabitEntry>
+// Legacy stored shapes (before the v2 upgrade); only used to read old IndexedDB data.
+type LegacyOutcome = 'done' | 'not_done' | 'complied' | 'violated' | 'not_applicable' | 'unknown'
+type LegacyRule =
+  | { kind: 'boolean' }
+  | { kind: 'count'; limit: number }
+  | { kind: 'minutes'; limit: number }
+  | { kind: 'time'; notAfter: string }
+
+/** A review as stored by v1: `outcomes`, or already `entries` (which win). */
+export interface LegacyReview {
+  day: string
+  outcomes?: Record<string, LegacyOutcome>
+  entries?: Record<string, HabitEntry>
+  confirmedAt: number
+  revision: number
 }
 
-export function migrateReview(review: DayReview): StoredReview {
+/** A habit as stored by v1: top-level tier/rule/quota, `versions` possibly missing. */
+export interface LegacyHabit extends Omit<Habit, 'versions'> {
+  tier?: ImpactTier
+  rule?: LegacyRule | ZonedRule
+  quota?: Quota
+  versions?: HabitVersion[]
+}
+
+function entryOfOutcome(outcome: LegacyOutcome): HabitEntry {
+  switch (outcome) {
+    case 'done':
+    case 'complied':
+      return { kind: 'value', value: true }
+    case 'not_done':
+    case 'violated':
+      return { kind: 'value', value: false }
+    case 'not_applicable':
+      return { kind: 'not_applicable' }
+    default:
+      return { kind: 'unknown' }
+  }
+}
+
+/** Legacy rules carry no zones; all are treated as plain boolean. */
+function normalizeRule(rule: LegacyRule | ZonedRule | undefined): ZonedRule {
+  return rule?.kind === 'measured' ? rule : { kind: 'boolean' }
+}
+
+/** Review with `entries` only (legacy `outcomes` dropped). Idempotent. */
+export function migrateReview(review: LegacyReview): DayReview {
+  const entries: Record<string, HabitEntry> = review.entries ?? {}
+  if (!review.entries) {
+    for (const [id, o] of Object.entries(review.outcomes ?? {})) entries[id] = entryOfOutcome(o)
+  }
   return {
     day: review.day,
-    entries: entriesOf(review),
+    entries,
     confirmedAt: review.confirmedAt,
     revision: review.revision,
   }
 }
 
-/** Ensures `versions[0]` exists, built from the top-level tier/rule/quota. Idempotent. */
-export function migrateHabit(habit: Habit): Habit {
-  if (habit.versions && habit.versions.length > 0) return habit
-  const version: NonNullable<Habit['versions']>[number] = {
+/** Ensures `versions[0]` exists, built from the top-level tier/rule/quota; drops those. Idempotent. */
+export function migrateHabit(habit: LegacyHabit): Habit {
+  const { tier, rule, quota, versions, ...rest } = habit
+  if (versions && versions.length > 0) return { ...rest, versions }
+  const version: HabitVersion = {
     from: habit.effectiveFrom,
-    tier: habit.tier,
-    rule: normalizeRule(habit.rule),
+    tier: tier ?? 'medium',
+    rule: normalizeRule(rule),
   }
-  if (habit.quota) version.quota = habit.quota
-  return { ...habit, versions: [version] }
+  if (quota) version.quota = quota
+  return { ...rest, versions: [version] }
 }

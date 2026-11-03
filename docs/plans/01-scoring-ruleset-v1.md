@@ -1,6 +1,6 @@
 # 01 — Scoring ruleset v1
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -103,4 +103,5 @@ No coefficient outside §6.5 may be invented; anything unclear is under "Open qu
   - Note: quota only offered for «Число» habits; `src/index.css` untouched (no design re-sync); also hid the zone Pill for `tolerable` in Review.tsx; logic in `src/domain/habitSetup.ts` (+test).
 - [x] 12. [design-sync] Explainable ledger UI: `HistoryEntry` shows S, «Обычный день: +N, сегодня: +M» (expected = ratingBefore/10), zone label per contribution, streak-bonus and unknown-day lines, clamp note; `Home` caption uses the new entry; update `OUTCOME_LABEL` usages to zone labels — files: `src/ui/components/HistoryEntry.tsx`, `src/ui/components/HistoryEntry.css` (if needed), `src/ui/Home.tsx`, `.design-sync/config.json` (hand-update `dtsPropsFor` for HistoryEntry: inlined `LedgerEntry`/`Contribution`), `.design-sync/previews/HistoryEntry.tsx` (new sample ledgers incl. unknown day and expected) — verify: `npm run build`, `npm run lint`, previews compile; drift check: config types equal real types. User later runs `/design-sync` and commits `.design-sync/last-sync`.
   - Note: HistoryEntry props unchanged (config `dtsPropsFor` already equal). «сегодня» shows S (usual day = R/10 in S units). `formatSigned(n, digits=2)` rounds; rating/Home caption use 1. Unknown-zone label «Не помню». Side fix: `editedVersions` clamps `from` to max(today, effectiveFrom).
-- [ ] 13. Remove legacy: delete `PLACEHOLDER_RULESET`, `HabitOutcome`, `OUTCOME_LABEL/TONE/OUTCOMES_FOR` leftovers, legacy `HabitRule` kinds, `DayReview.outcomes` optionality and `src/domain/legacy.ts` normalizers not needed after migration (keep migration helpers in `src/db/migrate.ts`); make `entries` required — files: `src/domain/types.ts`, `src/engine/config.ts`, `src/ui/labels.ts`, `src/domain/legacy.ts` (or removal), `src/engine/rating.test.ts` — verify: `npm test`, `npm run lint`, `npm run build`, grep finds no `PLACEHOLDER_RULESET` / `outcomes`.
+- [x] 13. Remove legacy: delete `PLACEHOLDER_RULESET`, `HabitOutcome`, `OUTCOME_LABEL/TONE/OUTCOMES_FOR` leftovers, legacy `HabitRule` kinds, `DayReview.outcomes` optionality and `src/domain/legacy.ts` normalizers not needed after migration (keep migration helpers in `src/db/migrate.ts`); make `entries` required — files: `src/domain/types.ts`, `src/engine/config.ts`, `src/ui/labels.ts`, `src/domain/legacy.ts` (or removal), `src/engine/rating.test.ts` — verify: `npm test`, `npm run lint`, `npm run build`, grep finds no `PLACEHOLDER_RULESET` / `outcomes`.
+  - Note: `legacy.ts` removed; `settingsOn` moved to `src/domain/settings.ts`; `Habit.versions` required and top-level `tier`/`rule`/`quota` removed; legacy input types (`LegacyHabit`, `LegacyReview`) live in `src/db/migrate.ts`, so `outcomes` remains there + tests only. Review boolean answers are entry-based (`BOOLEAN_OPTIONS`) with a reset-to-unknown button; `Clamped` preview removed.

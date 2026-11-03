@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { buildReview, DayLockedError } from './confirm'
 import { migrateHabit, migrateReview } from './migrate'
-import type { DayReview, Habit } from '../domain/types'
+import type { LegacyHabit, LegacyReview } from './migrate'
 
-const habit = (over: Partial<Habit> = {}): Habit => ({
+const habit = (over: Partial<LegacyHabit> = {}): LegacyHabit => ({
   id: 'h',
   name: 'H',
   direction: 'constructive',
@@ -17,7 +17,7 @@ const habit = (over: Partial<Habit> = {}): Habit => ({
 
 describe('migrateReview', () => {
   it('rewrites outcomes into entries and drops outcomes', () => {
-    const r: DayReview = {
+    const r: LegacyReview = {
       day: '2026-01-06',
       outcomes: { a: 'done', b: 'violated', c: 'not_applicable', d: 'unknown' },
       confirmedAt: 5,
@@ -48,18 +48,20 @@ describe('migrateHabit', () => {
   it('builds versions[0] from effectiveFrom with normalized rule', () => {
     const m = migrateHabit(habit({ rule: { kind: 'count', limit: 3 }, tier: 'strong' }))
     expect(m.versions).toEqual([{ from: '2026-01-05', tier: 'strong', rule: { kind: 'boolean' } }])
+    expect('tier' in m || 'rule' in m || 'quota' in m).toBe(false)
   })
 
   it('carries an existing quota', () => {
     const quota = { perWeek: 2 }
-    expect(migrateHabit(habit({ quota })).versions?.[0].quota).toEqual(quota)
+    expect(migrateHabit(habit({ quota })).versions[0].quota).toEqual(quota)
   })
 
   it('keeps existing versions untouched', () => {
     const h = habit({
       versions: [{ from: '2026-01-05', tier: 'weak', rule: { kind: 'boolean' } }],
     })
-    expect(migrateHabit(h)).toBe(h)
+    expect(migrateHabit(h)).toEqual({ ...h, tier: undefined, rule: undefined })
+    expect('tier' in migrateHabit(h)).toBe(false)
   })
 })
 

@@ -24,7 +24,7 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 
 ## Re-sync risks
 - `dtsPropsFor` duplicates prop types: if Button/Card/SegmentedControl/TabBar/HistoryEntry props
-  or `LedgerEntry`/`Contribution`/`HabitOutcome` change, update the config by hand, or the agent codes against stale types.
+  or `LedgerEntry`/`Contribution` change, update the config by hand, or the agent codes against stale types.
 - Adding a component: export it from `src/ui/components/index.ts`; check its emitted `.d.ts` and author a preview.
 - Global CSS (`src/index.css`) ships with the bundle, including app-shell rules for `main` and `.app`.
 - Toolchain at first sync: TypeScript 7.0.2 (tsgo), node 24, esbuild 0.28.

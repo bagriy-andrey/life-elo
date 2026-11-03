@@ -11,7 +11,7 @@ import {
   type HabitForm,
   type RuleChoice,
 } from '../domain/habitSetup'
-import { settingsOn } from '../domain/legacy'
+import { settingsOn } from '../domain/settings'
 import type { Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { Button, Card, SegmentedControl } from './components'
 import {
@@ -157,9 +157,6 @@ export function Habits({ habits, effectiveFrom }: Props) {
       id: newId(),
       name: name.trim(),
       direction,
-      tier,
-      rule: { kind: 'boolean' }, // legacy field; the real rule lives in `versions`
-      ...(s.quota ? { quota: s.quota } : {}),
       versions: [version],
       active: true,
       effectiveFrom,

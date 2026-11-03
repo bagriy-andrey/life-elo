@@ -1,22 +1,29 @@
 import { describe, expect, it } from 'vitest'
 import { addDays, dayOf, reviewDay } from '../domain/day'
-import type { DayReview, Habit, HabitEntry } from '../domain/types'
+import type { DayReview, Habit, HabitEntry, ImpactTier, Quota } from '../domain/types'
 import { RULESET_V1 as cfg } from './config'
 import { replay } from './rating'
 
 const START = '2026-01-01'
 
-const habit = (id: string, direction: Habit['direction'], tier: Habit['tier'], extra: Partial<Habit> = {}): Habit => ({
-  id,
-  name: id,
-  direction,
-  tier,
-  rule: { kind: 'boolean' },
-  active: true,
-  effectiveFrom: START,
-  createdAt: 0,
-  ...extra,
-})
+const habit = (
+  id: string,
+  direction: Habit['direction'],
+  tier: ImpactTier,
+  extra: Partial<Habit> & { quota?: Quota } = {},
+): Habit => {
+  const { quota, ...rest } = extra
+  return {
+    id,
+    name: id,
+    direction,
+    versions: [{ from: START, tier, rule: { kind: 'boolean' }, ...(quota ? { quota } : {}) }],
+    active: true,
+    effectiveFrom: START,
+    createdAt: 0,
+    ...rest,
+  }
+}
 
 const yes: HabitEntry = { kind: 'value', value: true }
 const no: HabitEntry = { kind: 'value', value: false }
@@ -258,12 +265,6 @@ describe('quota and entries', () => {
     expect(r.ledger[0].contributions[0].zone).toBe('unknown')
     expect(r.ledger[0].contributions.find((c) => c.source.kind === 'habit' && c.zone === 'not_applicable'))
       .toBeUndefined()
-  })
-
-  it('reads legacy outcomes through entriesOf', () => {
-    const legacy: DayReview = { day: START, outcomes: { gym: 'done' }, confirmedAt: 0, revision: 1 }
-    const r = rp([gym], [legacy])
-    expect(r.ledger[0].contributions[0].zone).toBe('excellent')
   })
 })
 

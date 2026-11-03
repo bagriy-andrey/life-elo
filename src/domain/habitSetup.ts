@@ -1,5 +1,5 @@
 import { timeToMinutes } from './day'
-import { settingsOn } from './legacy'
+import { settingsOn } from './settings'
 import type { DayKey, Habit, HabitVersion, ImpactTier, Quota, ZonedRule } from './types'
 
 /** Rule kinds offered in the setup form. */
@@ -117,15 +117,9 @@ export function upsertVersion(versions: HabitVersion[], next: HabitVersion): Hab
   return [...kept, next]
 }
 
-function legacyVersion(habit: Habit): HabitVersion {
-  const { quota, ...rest } = settingsOn(habit, habit.effectiveFrom)
-  return quota ? { ...rest, quota } : rest
-}
-
 /** Versions for an edit made on `today`, starting from the habit's current history. */
 export function editedVersions(habit: Habit, next: Omit<HabitVersion, 'from'>, today: DayKey): HabitVersion[] {
-  const existing: HabitVersion[] =
-    habit.versions && habit.versions.length > 0 ? habit.versions : [legacyVersion(habit)]
+  const existing = habit.versions
   const from = today > habit.effectiveFrom ? today : habit.effectiveFrom
   const version: HabitVersion = { from, tier: next.tier, rule: next.rule }
   if (next.quota) version.quota = next.quota

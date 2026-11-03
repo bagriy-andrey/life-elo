@@ -1,6 +1,5 @@
 import { isDayLocked } from '../domain/day'
 import type { DayReview, HabitEntry } from '../domain/types'
-import type { StoredReview } from './migrate'
 
 export class DayLockedError extends Error {
   constructor(day: string) {
@@ -15,7 +14,7 @@ export function buildReview(
   entries: Record<string, HabitEntry>,
   now: Date,
   existing?: Pick<DayReview, 'revision'>,
-): StoredReview {
+): DayReview {
   if (isDayLocked(day, now)) throw new DayLockedError(day)
   return {
     day,

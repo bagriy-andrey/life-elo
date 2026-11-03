@@ -1,4 +1,4 @@
-import type { HabitDirection, HabitOutcome, ImpactTier, Quota, Zone, ZonedRule } from '../domain/types'
+import type { HabitDirection, ImpactTier, Quota, Zone, ZonedRule } from '../domain/types'
 import type { RuleChoice } from '../domain/habitSetup'
 
 export const TIER_LABEL: Record<ImpactTier, string> = {
@@ -26,26 +26,26 @@ export const UNIT_LABEL: Record<Extract<ZonedRule, { kind: 'measured' }>['unit']
   time: 'время',
 }
 
-export const OUTCOME_LABEL: Record<HabitOutcome, string> = {
-  done: 'Сделал',
-  not_done: 'Не сделал',
-  complied: 'Соблюдал',
-  violated: 'Нарушил',
-  not_applicable: 'Не актуально',
-  unknown: 'Не помню',
+/** Answer options for a boolean habit; `value` is the string form of the stored entry. */
+export type BooleanAnswer = 'true' | 'false' | 'na'
+
+export const BOOLEAN_OPTIONS: Record<
+  HabitDirection,
+  { value: BooleanAnswer; label: string; tone?: 'pos' | 'neg' }[]
+> = {
+  constructive: [
+    { value: 'true', label: 'Сделал', tone: 'pos' },
+    { value: 'false', label: 'Не сделал' },
+    { value: 'na', label: 'Не актуально' },
+  ],
+  destructive: [
+    { value: 'true', label: 'Соблюдал', tone: 'pos' },
+    { value: 'false', label: 'Нарушил', tone: 'neg' },
+    { value: 'na', label: 'Не актуально' },
+  ],
 }
 
-/** Selected-state color for an outcome; accent when absent. */
-export const OUTCOME_TONE: Partial<Record<HabitOutcome, 'pos' | 'neg'>> = {
-  done: 'pos',
-  complied: 'pos',
-  violated: 'neg',
-}
-
-export const OUTCOMES_FOR: Record<HabitDirection, HabitOutcome[]> = {
-  constructive: ['done', 'not_done', 'not_applicable'],
-  destructive: ['complied', 'violated', 'not_applicable'],
-}
+export const NOT_APPLICABLE_LABEL = 'Не актуально'
 
 /** Signed number with U+2212 minus, rounded to `digits` (points: 2, rating: 1), no trailing zeros. */
 export const formatSigned = (n: number, digits = 2) => {

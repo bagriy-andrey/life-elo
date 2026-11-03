@@ -8,7 +8,7 @@ import type {
   WellbeingCheckIn,
 } from '../domain/types'
 import { buildReview } from './confirm'
-import { migrateHabit, migrateReview } from './migrate'
+import { migrateHabit, migrateReview, type LegacyHabit, type LegacyReview } from './migrate'
 
 /**
  * Local-only storage (IndexedDB) on the device.
@@ -31,14 +31,14 @@ db.version(1).stores({
   rewards: 'id, kind, status',
 })
 
-// v2: reviews store measured `entries` (not `outcomes`); habits get `versions[0]`.
+// v2: reviews store measured `entries` (legacy per-habit answers rewritten); habits get `versions[0]`.
 db.version(2)
   .stores({})
   .upgrade(async (tx) => {
-    await tx.table('reviews').toCollection().modify((r: DayReview, ref) => {
+    await tx.table('reviews').toCollection().modify((r: LegacyReview, ref) => {
       ref.value = migrateReview(r)
     })
-    await tx.table('habits').toCollection().modify((h: Habit, ref) => {
+    await tx.table('habits').toCollection().modify((h: LegacyHabit, ref) => {
       ref.value = migrateHabit(h)
     })
   })

@@ -32,16 +32,6 @@ const unknownDay = {
   contributions: [{ source: { kind: 'unknown_day' as const }, points: 0, multiplier: 1 }],
 }
 
-const clampedDay = {
-  day: '2026-10-27', rulesetVersion: 'v1', reviewRevision: 2, status: 'reviewed' as const,
-  ratingBefore: 120, delta: 88, ratingAfter: 208, dayScore: 100, expected: 12, clamped: true,
-  contributions: [
-    { source: { kind: 'habit' as const, habitId: 'h1' }, zone: 'excellent' as const, points: 70, multiplier: 1 },
-    { source: { kind: 'habit' as const, habitId: 'h3' }, zone: 'unknown' as const, points: 0, multiplier: 1 },
-    { source: { kind: 'streak_bonus' as const, habitId: 'h1' }, points: 52, multiplier: 1 },
-  ],
-}
-
 // <details> starts closed; open it so the contribution breakdown is visible.
 const openDetails = (el: HTMLDivElement | null) => el?.querySelector('details')?.setAttribute('open', '')
 
@@ -61,12 +51,6 @@ export const Collapsed = () => (
 export const NegativeExpanded = () => (
   <div ref={openDetails} style={{ width: 360 }}>
     <HistoryEntry entry={badDay} habitNames={habitNames} />
-  </div>
-)
-
-export const Clamped = () => (
-  <div ref={openDetails} style={{ width: 360 }}>
-    <HistoryEntry entry={clampedDay} habitNames={habitNames} />
   </div>
 )
 

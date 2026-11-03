@@ -1,5 +1,5 @@
 import { addDays, eachDay } from '../domain/day'
-import { entriesOf, settingsOn } from '../domain/legacy'
+import { settingsOn } from '../domain/settings'
 import type { DayKey, DayReview, Habit, HabitEntry } from '../domain/types'
 import type { RulesetConfig } from './config'
 import { scoreDay } from './dayScore'
@@ -65,7 +65,7 @@ export function replay(
 ): ReplayResult {
   const byDay = new Map(reviews.map((r) => [r.day, r]))
   const entriesByDay: Record<DayKey, DayEntries> = {}
-  for (const r of reviews) entriesByDay[r.day] = entriesOf(r)
+  for (const r of reviews) entriesByDay[r.day] = r.entries
 
   let rating = 0 // Confirmed: R0 = 0.
   let streaks: Record<string, StreakState> = {}

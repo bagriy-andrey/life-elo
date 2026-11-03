@@ -1,154 +1,160 @@
-import { addDays } from '../domain/day'
-import type { DayKey, DayReview, Habit, HabitOutcome } from '../domain/types'
-import type { LegacyRulesetConfig as RulesetConfig } from './config'
+import { addDays, eachDay } from '../domain/day'
+import { entriesOf, settingsOn } from '../domain/legacy'
+import type { DayKey, DayReview, Habit, HabitEntry } from '../domain/types'
+import type { RulesetConfig } from './config'
+import { scoreDay } from './dayScore'
+import type { DayHabit, DayZone } from './dayScore'
+import { quotaZone } from './quota'
+import { breakStreak } from './streaks'
+import type { StreakState } from './streaks'
+import { classifyZone } from './zones'
 
 /** Why the rating moved: one line per contributing habit or bonus. */
 export interface Contribution {
-  source: { kind: 'habit'; habitId: string } | { kind: 'clean_day' }
-  outcome?: HabitOutcome
-  base: number
-  streak: number
-  multiplier: number
+  source:
+    | { kind: 'habit'; habitId: string }
+    | { kind: 'clean_day' }
+    | { kind: 'streak_bonus'; habitId: string }
+    | { kind: 'unknown_day' }
+  zone?: DayZone
   points: number
+  multiplier: number
 }
 
 export interface LedgerEntry {
   day: DayKey
   rulesetVersion: string
+  /** 0 for an unknown (never reviewed) day. */
   reviewRevision: number
+  status: 'reviewed' | 'unknown'
   ratingBefore: number
   delta: number
   ratingAfter: number
+  /** Day score S (0 for an unknown day). */
+  dayScore: number
+  /** The usual day: ratingBefore / eloScale. */
+  expected: number
+  /** True when the raw day score exceeded the clamp. */
+  clamped: boolean
   contributions: Contribution[]
-  /** True when |raw delta| exceeded the daily cap. */
-  capped: boolean
 }
-
-/** Signed streak per habit: >0 consecutive good days, <0 consecutive violations. */
-export type StreakState = Record<string, number>
 
 export interface ReplayResult {
   rating: number
   ledger: LedgerEntry[]
-  streaks: StreakState
+  /** Streaks per habit after the last processed day. */
+  streaks: Record<string, StreakState>
+  /** Consecutive clean days ending at the last processed day. */
   cleanDayStreak: number
 }
 
-/** Sign of an outcome for streak purposes; 0 = neutral (does not touch streak). */
-function outcomeSign(outcome: HabitOutcome): -1 | 0 | 1 {
-  switch (outcome) {
-    case 'done':
-    case 'complied':
-      return 1
-    case 'violated':
-      return -1
-    default:
-      return 0
-  }
-}
-
-function nextStreak(prev: number, sign: -1 | 0 | 1): number {
-  if (sign === 0) return prev
-  if (sign > 0) return prev > 0 ? prev + 1 : 1
-  return prev < 0 ? prev - 1 : -1
-}
-
-function multiplierFor(streak: number, cfg: RulesetConfig): number {
-  const extra = (Math.abs(streak) - 1) * cfg.streakStep
-  return Math.min(1 + Math.max(0, extra), cfg.streakMaxMultiplier)
-}
-
-const round = (n: number) => Math.round(n * 100) / 100
+type DayEntries = Record<string, HabitEntry | undefined>
 
 /**
- * Deterministically rebuilds the whole rating history from confirmed reviews.
- * Pure: the same inputs always produce the same ledger, so correcting a past
- * day is just "save the review, replay" — no duplicate rewards.
+ * Deterministically rebuilds the whole rating history from confirmed reviews
+ * (LIFE_ELO_PRODUCT_CONTEXT.md §6.5). Pure: the same inputs always produce the
+ * same ledger, so correcting a past day is just "save the review, replay".
+ * `today` is a day-boundary-aware key (`dayOf(now)`); it decides which
+ * unreviewed days are already locked (unknown) and which are still pending.
  */
 export function replay(
   habits: Habit[],
   reviews: DayReview[],
   cfg: RulesetConfig,
+  today: DayKey,
 ): ReplayResult {
-  const byId = new Map(habits.map((h) => [h.id, h]))
-  const sorted = [...reviews].sort((a, b) => a.day.localeCompare(b.day))
+  const byDay = new Map(reviews.map((r) => [r.day, r]))
+  const entriesByDay: Record<DayKey, DayEntries> = {}
+  for (const r of reviews) entriesByDay[r.day] = entriesOf(r)
 
   let rating = 0 // Confirmed: R0 = 0.
-  let streaks: StreakState = {}
+  let streaks: Record<string, StreakState> = {}
   let cleanDayStreak = 0
-  let prevDay: DayKey | undefined
   const ledger: LedgerEntry[] = []
+  if (habits.length === 0) return { rating, ledger, streaks, cleanDayStreak }
 
-  for (const review of sorted) {
-    if (cfg.gapBreaksStreak && prevDay && addDays(prevDay, 1) !== review.day) {
-      streaks = {}
-      cleanDayStreak = 0
-    }
-    prevDay = review.day
+  const first = habits.reduce((min, h) => (h.effectiveFrom < min ? h.effectiveFrom : min), habits[0].effectiveFrom)
+  const lastLocked = addDays(today, -1 - cfg.reviewWindowDays)
+  const lastReviewed = reviews.reduce((max, r) => (r.day > max ? r.day : max), first)
+  const last = lastReviewed > lastLocked ? lastReviewed : lastLocked
 
-    const contributions: Contribution[] = []
-    let destructiveApplicable = 0
-    let destructiveComplied = 0
-
-    for (const [habitId, outcome] of Object.entries(review.outcomes ?? {})) {
-      const habit = byId.get(habitId)
-      if (!habit || habit.effectiveFrom > review.day) continue
-
-      const sign = outcomeSign(outcome)
-      const streak = nextStreak(streaks[habitId] ?? 0, sign)
-      streaks[habitId] = streak
-
-      if (habit.direction === 'destructive' && (outcome === 'complied' || outcome === 'violated')) {
-        destructiveApplicable++
-        if (outcome === 'complied') destructiveComplied++
-      }
-
-      // Constructive not_done, not_applicable and unknown are neutral.
-      if (sign === 0) continue
-
-      const weight = cfg.tierWeight[habit.tier]
-      const base =
-        outcome === 'complied' ? weight * cfg.compliedFactor : sign * weight
-      const multiplier = multiplierFor(streak, cfg)
-      contributions.push({
-        source: { kind: 'habit', habitId },
-        outcome,
-        base,
-        streak,
-        multiplier,
-        points: round(base * multiplier),
-      })
-    }
-
-    const isCleanDay =
-      destructiveApplicable > 0 && destructiveComplied === destructiveApplicable
-    cleanDayStreak = isCleanDay ? cleanDayStreak + 1 : 0
-    if (isCleanDay) {
-      const multiplier = multiplierFor(cleanDayStreak, cfg)
-      contributions.push({
-        source: { kind: 'clean_day' },
-        base: cfg.cleanDayBonus,
-        streak: cleanDayStreak,
-        multiplier,
-        points: round(cfg.cleanDayBonus * multiplier),
-      })
-    }
-
-    const raw = contributions.reduce((sum, c) => sum + c.points, 0)
-    const delta = round(
-      Math.max(-cfg.dailyDeltaCap, Math.min(cfg.dailyDeltaCap, raw)),
+  for (const day of eachDay(first, last)) {
+    const review = byDay.get(day)
+    const entries = entriesByDay[day] ?? {}
+    const tracked = habits.filter(
+      (h) => h.effectiveFrom <= day && (review ? h.active || h.id in entries : h.active),
     )
+    if (tracked.length === 0) continue
+
+    if (!review) {
+      if (day > lastLocked) continue // Still pending: neither reviewed nor unknown yet.
+      const ratingBefore = rating
+      if (rating > 0) rating += cfg.eloRate * (0 - rating) // S = 0 only when R > 0.
+      streaks = { ...streaks, ...Object.fromEntries(tracked.map((h) => [h.id, breakStreak()])) }
+      cleanDayStreak = 0
+      ledger.push({
+        day,
+        rulesetVersion: cfg.version,
+        reviewRevision: 0,
+        status: 'unknown',
+        ratingBefore,
+        delta: rating - ratingBefore,
+        ratingAfter: rating,
+        dayScore: 0,
+        expected: ratingBefore / cfg.eloScale,
+        clamped: false,
+        contributions: [{ source: { kind: 'unknown_day' }, points: 0, multiplier: 1 }],
+      })
+      continue
+    }
+
+    const dayHabits: DayHabit[] = []
+    const zones: Record<string, DayZone> = {}
+    for (const h of tracked) {
+      const s = settingsOn(h, day)
+      dayHabits.push({
+        id: h.id,
+        tier: s.tier,
+        // §6.5: only destructive or quota habits can be bad; constructive habits never join the clean day.
+        canBeBad: h.direction === 'destructive' || s.quota !== undefined,
+      })
+      const entry = entries[h.id]
+      if (!entry || entry.kind === 'unknown') zones[h.id] = 'unknown'
+      else if (entry.kind === 'not_applicable') zones[h.id] = 'not_applicable'
+      else {
+        const habitFor = { id: h.id, direction: h.direction, rule: s.rule, quota: s.quota }
+        const zone = s.quota ? quotaZone(habitFor, day, entriesByDay) : classifyZone(habitFor, entry)
+        zones[h.id] = zone ?? 'unknown' // Mistyped value: no zone, treated as unknown.
+      }
+    }
+
+    const result = scoreDay({ habits: dayHabits, zones, streaks, cfg })
+    streaks = { ...streaks, ...result.streaks }
+    cleanDayStreak = result.clean ? cleanDayStreak + 1 : 0
+
+    const ratingBefore = rating
+    rating += cfg.eloRate * (cfg.eloScale * result.S - rating)
     ledger.push({
-      day: review.day,
+      day,
       rulesetVersion: cfg.version,
       reviewRevision: review.revision,
-      ratingBefore: rating,
-      delta,
-      ratingAfter: round(rating + delta),
-      contributions,
-      capped: delta !== round(raw),
+      status: 'reviewed',
+      ratingBefore,
+      delta: rating - ratingBefore,
+      ratingAfter: rating,
+      dayScore: result.S,
+      expected: ratingBefore / cfg.eloScale,
+      clamped: result.clamped,
+      contributions: result.contributions.map((c) => ({
+        source:
+          c.source === 'clean_day'
+            ? { kind: 'clean_day' }
+            : { kind: c.source, habitId: c.habitId! },
+        zone: c.zone,
+        points: c.points,
+        multiplier: c.multiplier,
+      })),
     })
-    rating = round(rating + delta)
   }
 
   return { rating, ledger, streaks, cleanDayStreak }

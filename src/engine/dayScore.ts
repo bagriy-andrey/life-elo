@@ -7,7 +7,7 @@ import type { StreakState } from './streaks'
 export interface DayHabit {
   id: string
   tier: ImpactTier
-  /** True if the habit can land in the `bad` zone; only such habits take part in the clean-day bonus. */
+  /** Destructive or quota habit; constructive habits never take part in the clean day. */
   canBeBad: boolean
 }
 
@@ -79,7 +79,7 @@ export function scoreDay({ habits, zones, streaks, cfg }: DayScoreInput): DaySco
         share = cfg.zoneShare.bad
         multiplier = negativeMultiplier(after[h.id].neg, cfg)
       } else if (z === 'ok' && isRecovery(before, cfg)) share = cfg.zoneShare.excellent
-      else share = cfg.zoneShare[z]
+      else share = cfg.zoneShare[z as Zone]
       push({ source: 'habit', habitId: h.id, zone: z, points: w * unit * share * multiplier, multiplier })
     }
   }
@@ -103,4 +103,3 @@ export function scoreDay({ habits, zones, streaks, cfg }: DayScoreInput): DaySco
   const S = Math.max(-cfg.dayClamp, Math.min(cfg.dayClamp, raw))
   return { S, raw, clamped: S !== raw, contributions, clean, streaks: after }
 }
-

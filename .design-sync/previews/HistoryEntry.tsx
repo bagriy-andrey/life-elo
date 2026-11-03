@@ -7,27 +7,29 @@ const habitNames = new Map([
 ])
 
 const goodDay = {
-  day: '2026-10-30', rulesetVersion: 'v0', reviewRevision: 1,
-  ratingBefore: 36, delta: 6, ratingAfter: 42, capped: false,
+  day: '2026-10-30', rulesetVersion: 'v1', reviewRevision: 1, status: 'reviewed' as const,
+  ratingBefore: 36, delta: 4.2, ratingAfter: 40.2, dayScore: 78, expected: 3.6, clamped: false,
   contributions: [
-    { source: { kind: 'habit' as const, habitId: 'h1' }, outcome: 'done' as const, base: 3, streak: 3, multiplier: 1.2, points: 4 },
-    { source: { kind: 'habit' as const, habitId: 'h2' }, outcome: 'complied' as const, base: 1, streak: 1, multiplier: 1, points: 1 },
-    { source: { kind: 'clean_day' as const }, base: 1, streak: 5, multiplier: 1, points: 1 },
+    { source: { kind: 'habit' as const, habitId: 'h1' }, zone: 'excellent' as const, points: 30, multiplier: 1 },
+    { source: { kind: 'habit' as const, habitId: 'h2' }, zone: 'ok' as const, points: 10, multiplier: 1 },
+    { source: { kind: 'clean_day' as const }, points: 20, multiplier: 1 },
+    { source: { kind: 'streak_bonus' as const, habitId: 'h1' }, points: 18, multiplier: 1 },
   ],
 }
 
 const badDay = {
-  day: '2026-10-29', rulesetVersion: 'v0', reviewRevision: 1,
-  ratingBefore: 39, delta: -3, ratingAfter: 36, capped: false,
+  day: '2026-10-29', rulesetVersion: 'v1', reviewRevision: 1, status: 'reviewed' as const,
+  ratingBefore: 39, delta: -6.5, ratingAfter: 32.5, dayScore: -20, expected: 3.9, clamped: false,
   contributions: [
-    { source: { kind: 'habit' as const, habitId: 'h2' }, outcome: 'violated' as const, base: -2, streak: -1, multiplier: 1, points: -2 },
-    { source: { kind: 'habit' as const, habitId: 'h3' }, outcome: 'violated' as const, base: -1, streak: -1, multiplier: 1, points: -1 },
+    { source: { kind: 'habit' as const, habitId: 'h2' }, zone: 'bad' as const, points: -25, multiplier: 1.25 },
+    { source: { kind: 'habit' as const, habitId: 'h3' }, zone: 'tolerable' as const, points: 0, multiplier: 1 },
   ],
 }
 
-const neutralDay = {
-  day: '2026-10-28', rulesetVersion: 'v0', reviewRevision: 1,
-  ratingBefore: 39, delta: 0, ratingAfter: 39, capped: false, contributions: [],
+const unknownDay = {
+  day: '2026-10-28', rulesetVersion: 'v1', reviewRevision: 0, status: 'unknown' as const,
+  ratingBefore: 39, delta: -3.9, ratingAfter: 35.1, dayScore: 0, expected: 3.9, clamped: false,
+  contributions: [{ source: { kind: 'unknown_day' as const }, points: 0, multiplier: 1 }],
 }
 
 // <details> starts closed; open it so the contribution breakdown is visible.
@@ -54,6 +56,6 @@ export const NegativeExpanded = () => (
 
 export const NoChange = () => (
   <div ref={openDetails} style={{ width: 360 }}>
-    <HistoryEntry entry={neutralDay} habitNames={habitNames} />
+    <HistoryEntry entry={unknownDay} habitNames={habitNames} />
   </div>
 )

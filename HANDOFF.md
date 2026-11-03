@@ -1,18 +1,20 @@
 # Handoff
 Updated: 2026-11-03 by Claude Code
 Branch: scoring-ruleset-v1 (not pushed, no PR yet)
-Plan: docs/plans/01-scoring-ruleset-v1.md, step 9 of 13 (steps 1–9 built + verified PASS)
+Plan: docs/plans/01-scoring-ruleset-v1.md — all 13 steps built + verified PASS, Status: done
 
 ## In progress
-Nothing. Paused by agreement: show the user a worked week on their habits before UI steps 10–13.
+Nothing.
 
 ## Next step
-After the user OKs the worked week: `/build-plan docs/plans/01-scoring-ruleset-v1.md` for step 10, one step at a time.
+User: manual check in `npm run dev` (review inputs/zones, habit setup + quota, history ledger, old data upgraded),
+then `/design-sync`, then push + PR to main, then tick «Рейтинг v1» in docs/ROADMAP.md.
 
 ## Broken / open questions
-- Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — see product context §13 Open.
-- Step 10 must: remove the boolean bridge in `src/ui/Review.tsx` (saves numeric/time as false on re-save),
-  set date input `min` / catch `DayLockedError` (locked day pick → unhandled rejection).
-- Manual check not done: `npm run dev` with existing v1 IndexedDB data → Dexie v2 upgrade runs, history renders.
+- Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — product context §13 Open.
+- Pending `/design-sync`: index.css, EloScore, HistoryEntry changed since .design-sync/last-sync.
+- Hardening (optional): settingsOn / r.entries assume v2 shape with no runtime guard; a v3 upgrade re-running
+  the idempotent migrations would cover habits written by intermediate builds.
+- `HistoryEntry` clamp note hardcodes «±100» (fine for v1; read dayClamp when a v2 ruleset appears).
 - `App.tsx` `yesterday` from useState init: `today` may go stale if the app stays open past the day boundary.
 - Deploy to Vercel postponed by the user. Stray iOS note at end of LIFE_ELO_PRODUCT_CONTEXT.md still there.

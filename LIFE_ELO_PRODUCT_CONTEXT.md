@@ -339,6 +339,7 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 ### Open / requires discussion
 
 - Habit categories, default tier assignment, and final catalog.
+- Quota habit after a weekly overrun (deferred 2026-11-03, rule kept as is for now): once the cumulative weekly count exceeds the (reduced) limit, every later day that week is *bad* even with zero, with growing ×1.25/×1.5 multipliers and no clean-day bonus. Worked example: masturbation 1 on Thu after sex on Wed → Fri–Sun bad with 0. Alternative: *bad* only on days with count > 0 that push the total over. Revisit after real use.
 - Habits scheduled on specific days / "N times per week" goals (v1 treats all habits as daily).
 - Reward Coins earning rates, redemption prices, unlock conditions and surprise mechanics.
 - Whether wellbeing directly modifies Elo or is only used for calibration/validation (recommend latter initially).

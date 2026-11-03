@@ -151,7 +151,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
           <Card key={h.id} className="stack-sm">
             <div className="row">
               <strong>{h.name}</strong>
-              {zone && <Pill tone={toneOfZone(zone)}>{ZONE_LABEL[zone]}</Pill>}
+              {zone && zone !== 'tolerable' && <Pill tone={toneOfZone(zone)}>{ZONE_LABEL[zone]}</Pill>}
             </div>
             <fieldset className="plain" disabled={locked}>
               {control(h)}

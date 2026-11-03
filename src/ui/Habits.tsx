@@ -1,8 +1,27 @@
 import { useState } from 'react'
 import { db, newId } from '../db/db'
-import type { Habit, HabitDirection, ImpactTier } from '../domain/types'
+import { dayOf } from '../domain/day'
+import {
+  buildQuota,
+  buildRule,
+  EMPTY_FORM,
+  editedVersions,
+  formOf,
+  validateReducer,
+  type HabitForm,
+  type RuleChoice,
+} from '../domain/habitSetup'
+import { settingsOn } from '../domain/legacy'
+import type { Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { Button, Card, SegmentedControl } from './components'
-import { DIRECTION_LABEL, TIER_LABEL } from './labels'
+import {
+  BETTER_LABEL,
+  DIRECTION_LABEL,
+  quotaSummary,
+  RULE_CHOICE_LABEL,
+  ruleSummary,
+  TIER_LABEL,
+} from './labels'
 
 const options = <T extends string>(labels: Record<T, string>) =>
   (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }))
@@ -13,24 +32,159 @@ interface Props {
   effectiveFrom: string
 }
 
+interface FieldsProps {
+  form: HabitForm
+  onChange: (form: HabitForm) => void
+  /** Habits that can serve as a quota reducer (never the one being edited). */
+  reducers: Habit[]
+}
+
+const UNIT_HINT: Record<Exclude<RuleChoice, 'boolean'>, string> = {
+  count: 'раз',
+  minutes: 'мин',
+  steps: 'шагов',
+  time: 'ЧЧ:ММ',
+}
+
+function RuleFields({ form, onChange, reducers }: FieldsProps) {
+  const set = (patch: Partial<HabitForm>) => onChange({ ...form, ...patch })
+  const measured = form.kind !== 'boolean'
+  const isTime = form.kind === 'time'
+  const field = (key: 'excellent' | 'ok' | 'tolerable', label: string) => (
+    <input
+      type={isTime ? 'time' : 'number'}
+      inputMode={isTime ? undefined : 'decimal'}
+      min={isTime ? undefined : 0}
+      aria-label={label}
+      placeholder={label}
+      value={form[key]}
+      onChange={(e) => set({ [key]: e.target.value })}
+    />
+  )
+  return (
+    <>
+      <SegmentedControl
+        value={form.kind}
+        onChange={(kind) => set({ kind })}
+        options={options(RULE_CHOICE_LABEL)}
+      />
+      {measured && (
+        <>
+          <SegmentedControl
+            value={form.better}
+            onChange={(better) => set({ better })}
+            options={options(BETTER_LABEL)}
+          />
+          <span className="muted">Пороги включительно, {UNIT_HINT[form.kind as Exclude<RuleChoice, 'boolean'>]}</span>
+          {field('excellent', 'Отлично')}
+          {field('ok', 'В рамках (необяз.)')}
+          {field('tolerable', 'Терпимо (необяз.)')}
+        </>
+      )}
+      {form.kind === 'count' && (
+        <>
+          <span className="muted">Лимит (необязательно)</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="В день"
+            aria-label="Лимит в день"
+            value={form.perDay}
+            onChange={(e) => set({ perDay: e.target.value })}
+          />
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="В неделю"
+            aria-label="Лимит в неделю"
+            value={form.perWeek}
+            onChange={(e) => set({ perWeek: e.target.value })}
+          />
+          <select
+            aria-label="Уменьшается днями привычки"
+            value={form.reducedByDaysOf}
+            onChange={(e) => set({ reducedByDaysOf: e.target.value })}
+          >
+            <option value="">Лимит не уменьшается</option>
+            {reducers.map((h) => (
+              <option key={h.id} value={h.id}>
+                Уменьшается днями «{h.name}»
+              </option>
+            ))}
+          </select>
+        </>
+      )}
+    </>
+  )
+}
+
+const today = () => dayOf(new Date())
+
 export function Habits({ habits, effectiveFrom }: Props) {
   const [name, setName] = useState('')
   const [direction, setDirection] = useState<HabitDirection>('destructive')
   const [tier, setTier] = useState<ImpactTier>('medium')
+  const [form, setForm] = useState<HabitForm>(EMPTY_FORM)
+  const [error, setError] = useState<string>()
+
+  const [editingId, setEditingId] = useState<string>()
+  const [editTier, setEditTier] = useState<ImpactTier>('medium')
+  const [editForm, setEditForm] = useState<HabitForm>(EMPTY_FORM)
+  const [editError, setEditError] = useState<string>()
+
+  const nameOf = (id: string) => habits.find((h) => h.id === id)?.name
+
+  /** Validated settings from a form, or an error message. */
+  const settingsFrom = (f: HabitForm, habitId: string | undefined, day: string) => {
+    const rule = buildRule(f)
+    if (!rule.ok) return { error: rule.error }
+    const quota = buildQuota(f)
+    if (!quota.ok) return { error: quota.error }
+    const reducerError = validateReducer(habitId, quota.value, habits, day)
+    if (reducerError) return { error: reducerError }
+    return { rule: rule.value, quota: quota.value }
+  }
 
   const add = async () => {
     if (!name.trim()) return
+    const s = settingsFrom(form, undefined, effectiveFrom)
+    if ('error' in s) return setError(s.error)
+    const version: HabitVersion = { from: effectiveFrom, tier, rule: s.rule }
+    if (s.quota) version.quota = s.quota
     await db.habits.add({
       id: newId(),
       name: name.trim(),
       direction,
       tier,
-      rule: { kind: 'boolean' },
+      rule: { kind: 'boolean' }, // legacy field; the real rule lives in `versions`
+      ...(s.quota ? { quota: s.quota } : {}),
+      versions: [version],
       active: true,
       effectiveFrom,
       createdAt: Date.now(),
     })
     setName('')
+    setForm(EMPTY_FORM)
+    setError(undefined)
+  }
+
+  const startEdit = (h: Habit) => {
+    const cur = settingsOn(h, today())
+    setEditingId(h.id)
+    setEditTier(cur.tier)
+    setEditForm(formOf(cur.rule, cur.quota))
+    setEditError(undefined)
+  }
+
+  const saveEdit = async (h: Habit) => {
+    const day = today()
+    const s = settingsFrom(editForm, h.id, day)
+    if ('error' in s) return setEditError(s.error)
+    const versions = editedVersions(h, { tier: editTier, rule: s.rule, quota: s.quota }, day)
+    await db.habits.update(h.id, { versions })
+    setEditingId(undefined)
   }
 
   return (
@@ -43,24 +197,53 @@ export function Habits({ habits, effectiveFrom }: Props) {
         />
         <SegmentedControl value={direction} onChange={setDirection} options={options(DIRECTION_LABEL)} />
         <SegmentedControl value={tier} onChange={setTier} options={options(TIER_LABEL)} />
+        <RuleFields form={form} onChange={setForm} reducers={habits} />
+        {error && <span className="neg">{error}</span>}
         <Button variant="primary" onClick={add} disabled={!name.trim()}>
           Добавить
         </Button>
       </Card>
 
-      {habits.map((h) => (
-        <Card key={h.id} className="row" inactive={!h.active}>
-          <div className="stack-sm">
-            <strong>{h.name}</strong>
-            <span className="muted">
-              {DIRECTION_LABEL[h.direction]} · {TIER_LABEL[h.tier]}
-            </span>
-          </div>
-          <Button onClick={() => db.habits.update(h.id, { active: !h.active })}>
-            {h.active ? 'Пауза' : 'Вернуть'}
-          </Button>
-        </Card>
-      ))}
+      {habits.map((h) => {
+        const cur = settingsOn(h, today())
+        if (editingId === h.id) {
+          return (
+            <Card key={h.id} className="stack-sm">
+              <strong>{h.name}</strong>
+              <span className="muted">Изменения действуют с сегодняшнего дня</span>
+              <SegmentedControl value={editTier} onChange={setEditTier} options={options(TIER_LABEL)} />
+              <RuleFields
+                form={editForm}
+                onChange={setEditForm}
+                reducers={habits.filter((x) => x.id !== h.id)}
+              />
+              {editError && <span className="neg">{editError}</span>}
+              <Button variant="primary" onClick={() => saveEdit(h)}>
+                Сохранить
+              </Button>
+              <Button onClick={() => setEditingId(undefined)}>Отмена</Button>
+            </Card>
+          )
+        }
+        return (
+          <Card key={h.id} className="row" inactive={!h.active}>
+            <div className="stack-sm">
+              <strong>{h.name}</strong>
+              <span className="muted">
+                {DIRECTION_LABEL[h.direction]} · {TIER_LABEL[cur.tier]}
+              </span>
+              <span className="muted">{ruleSummary(cur.rule)}</span>
+              {cur.quota && <span className="muted">{quotaSummary(cur.quota, nameOf)}</span>}
+            </div>
+            <div className="stack-sm">
+              <Button onClick={() => startEdit(h)}>Изменить</Button>
+              <Button onClick={() => db.habits.update(h.id, { active: !h.active })}>
+                {h.active ? 'Пауза' : 'Вернуть'}
+              </Button>
+            </div>
+          </Card>
+        )
+      })}
     </section>
   )
 }

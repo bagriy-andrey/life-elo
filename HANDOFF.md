@@ -8,11 +8,10 @@ Nothing.
 
 ## Next step
 User: manual check in `npm run dev` (review inputs/zones, habit setup + quota, history ledger, old data upgraded),
-then `/design-sync`, then push + PR to main, then tick «Рейтинг v1» in docs/ROADMAP.md.
+then push + PR to main, then tick «Рейтинг v1» in docs/ROADMAP.md.
 
 ## Broken / open questions
 - Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — product context §13 Open.
-- Pending `/design-sync`: index.css, EloScore, HistoryEntry changed since .design-sync/last-sync.
 - Hardening (optional): settingsOn / r.entries assume v2 shape with no runtime guard; a v3 upgrade re-running
   the idempotent migrations would cover habits written by intermediate builds.
 - `HistoryEntry` clamp note hardcodes «±100» (fine for v1; read dayClamp when a v2 ruleset appears).

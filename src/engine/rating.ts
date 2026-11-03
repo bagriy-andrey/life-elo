@@ -90,7 +90,7 @@ export function replay(
     let destructiveApplicable = 0
     let destructiveComplied = 0
 
-    for (const [habitId, outcome] of Object.entries(review.outcomes)) {
+    for (const [habitId, outcome] of Object.entries(review.outcomes ?? {})) {
       const habit = byId.get(habitId)
       if (!habit || habit.effectiveFrom > review.day) continue
 

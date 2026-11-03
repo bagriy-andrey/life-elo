@@ -16,6 +16,36 @@ export type HabitRule =
   /** Time of day `HH:MM`; e.g. bedtime "not after 23:00". */
   | { kind: 'time'; notAfter: string }
 
+/** Derived from a measured value + habit rule + ruleset; never stored. */
+export type Zone = 'excellent' | 'ok' | 'tolerable' | 'bad'
+
+/** Scoring rule v1: boolean, or measured with inclusive thresholds on the good side. */
+export type ZonedRule =
+  | { kind: 'boolean' }
+  | {
+      kind: 'measured'
+      unit: 'count' | 'minutes' | 'steps' | 'time'
+      better: 'lower' | 'higher'
+      excellent: number | string
+      ok?: number | string
+      tolerable: number | string
+    }
+
+/** Limits on a habit's count; `reducedByDaysOf` is another habit id (one level only). */
+export interface Quota {
+  perDay?: number
+  perWeek?: number
+  reducedByDaysOf?: string
+}
+
+/** Habit settings in effect from day `from` (inclusive). */
+export interface HabitVersion {
+  from: DayKey
+  tier: ImpactTier
+  rule: ZonedRule
+  quota?: Quota
+}
+
 export interface Habit {
   id: string
   name: string
@@ -24,6 +54,9 @@ export interface Habit {
   direction: HabitDirection
   tier: ImpactTier
   rule: HabitRule
+  /** Optional until migration; sorted by `from`. See `settingsOn`. */
+  quota?: Quota
+  versions?: HabitVersion[]
   rationale?: string
   active: boolean
   /** First day the habit is tracked. */
@@ -56,9 +89,17 @@ export type HabitOutcome =
   | 'not_applicable'
   | 'unknown'
 
+/** Measured review answer for one habit. */
+export type HabitEntry =
+  | { kind: 'value'; value: boolean | number | string }
+  | { kind: 'not_applicable' }
+  | { kind: 'unknown' }
+
 export interface DayReview {
   day: DayKey
-  outcomes: Record<string, HabitOutcome>
+  /** Legacy; normalized by `entriesOf`. */
+  outcomes?: Record<string, HabitOutcome>
+  entries?: Record<string, HabitEntry>
   confirmedAt: number
   /** Increments on every correction of an already confirmed day. */
   revision: number

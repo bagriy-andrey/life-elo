@@ -53,7 +53,7 @@ export function daysInWeekUpTo(day: DayKey): DayKey[] {
   return eachDay(weekStart(day), day)
 }
 
-/** A day is locked once the day before-ending-today is no longer reachable. */
+/** A day is locked once review of the day is no longer possible (D+2 after the boundary hour). */
 export function isDayLocked(day: DayKey, now: Date, boundaryHour = DAY_BOUNDARY_HOUR): boolean {
   return dayOf(now, boundaryHour) > addDays(day, 1)
 }

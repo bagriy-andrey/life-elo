@@ -1,6 +1,6 @@
 import { addDays } from '../domain/day'
 import type { DayKey, DayReview, Habit, HabitOutcome } from '../domain/types'
-import type { RulesetConfig } from './config'
+import type { LegacyRulesetConfig as RulesetConfig } from './config'
 
 /** Why the rating moved: one line per contributing habit or bonus. */
 export interface Contribution {

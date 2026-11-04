@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
+import type { Profile } from '../domain/profile'
 import type {
   DayReview,
   Habit,
@@ -21,6 +22,7 @@ export const db = new Dexie('life-elo') as Dexie & {
   reviews: EntityTable<DayReview, 'day'>
   wellbeing: EntityTable<WellbeingCheckIn, 'day'>
   rewards: EntityTable<Reward, 'id'>
+  profile: EntityTable<Profile, 'id'>
 }
 
 db.version(1).stores({
@@ -42,6 +44,9 @@ db.version(2)
       ref.value = migrateHabit(h)
     })
   })
+
+// v3: single-row `profile` store (id 'me'). Never affects Elo.
+db.version(3).stores({ profile: 'id' })
 
 export const newId = () => crypto.randomUUID()
 

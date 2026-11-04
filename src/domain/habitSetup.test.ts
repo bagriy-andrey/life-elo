@@ -48,11 +48,14 @@ describe('buildRule', () => {
     expect(buildRule(form({ kind: 'time', excellent: '00:30', tolerable: '23:00' })).ok).toBe(false)
   })
   it('rejects missing, malformed and misordered thresholds', () => {
-    expect(buildRule(form({ kind: 'minutes' })).ok).toBe(false)
-    expect(buildRule(form({ kind: 'minutes', excellent: 'abc' })).ok).toBe(false)
-    expect(buildRule(form({ kind: 'time', excellent: '25:00' })).ok).toBe(false)
-    expect(buildRule(form({ kind: 'minutes', excellent: '10', ok: '5' })).ok).toBe(false)
-    expect(buildRule(form({ kind: 'steps', better: 'higher', excellent: '5000', ok: '9000' })).ok).toBe(false)
+    const err = { ok: false, error: { key: 'habitError.badThreshold' } }
+    expect(buildRule(form({ kind: 'minutes' }))).toEqual({ ok: false, error: { key: 'habitError.excellentRequired' } })
+    expect(buildRule(form({ kind: 'minutes', excellent: 'abc' }))).toEqual(err)
+    expect(buildRule(form({ kind: 'time', excellent: '25:00' }))).toEqual(err)
+    const order = { ok: false, error: { key: 'habitError.thresholdOrder' } }
+    expect(buildRule(form({ kind: 'time', excellent: '00:30', tolerable: '23:00' }))).toEqual(order)
+    expect(buildRule(form({ kind: 'minutes', excellent: '10', ok: '5' }))).toEqual(order)
+    expect(buildRule(form({ kind: 'steps', better: 'higher', excellent: '5000', ok: '9000' }))).toEqual(order)
   })
 })
 
@@ -68,8 +71,8 @@ describe('buildQuota', () => {
     })
   })
   it('rejects bad numbers and a reducer without limits', () => {
-    expect(buildQuota(form({ kind: 'count', perDay: '1.5' })).ok).toBe(false)
-    expect(buildQuota(form({ kind: 'count', reducedByDaysOf: 'sex' })).ok).toBe(false)
+    expect(buildQuota(form({ kind: 'count', perDay: '1.5' }))).toEqual({ ok: false, error: { key: 'habitError.limitsInteger' } })
+    expect(buildQuota(form({ kind: 'count', reducedByDaysOf: 'sex' }))).toEqual({ ok: false, error: { key: 'habitError.reducerNeedsLimit' } })
   })
 })
 
@@ -81,15 +84,18 @@ describe('validateReducer', () => {
     expect(validateReducer(undefined, undefined, [sex], day)).toBeUndefined()
   })
   it('rejects self-reduction', () => {
-    expect(validateReducer('sex', { perDay: 1, reducedByDaysOf: 'sex' }, [sex], day)).toBeDefined()
+    expect(validateReducer('sex', { perDay: 1, reducedByDaysOf: 'sex' }, [sex], day)).toEqual({ key: 'habitError.reducerSelf' })
+  })
+  it('rejects a missing reducer', () => {
+    expect(validateReducer('m', { perDay: 1, reducedByDaysOf: 'nope' }, [sex], day)).toEqual({ key: 'habitError.reducerMissing' })
   })
   it('rejects a reducer that is itself reduced', () => {
     const reduced = withQuota('sex', { perDay: 1, reducedByDaysOf: 'x' })
-    expect(validateReducer('m', { perDay: 1, reducedByDaysOf: 'sex' }, [reduced], day)).toBeDefined()
+    expect(validateReducer('m', { perDay: 1, reducedByDaysOf: 'sex' }, [reduced], day)).toEqual({ key: 'habitError.reducerReduced' })
   })
   it('rejects reducing a habit that already serves as a reducer', () => {
     const m = withQuota('m', { perDay: 1, reducedByDaysOf: 'sex' })
-    expect(validateReducer('sex', { perDay: 1, reducedByDaysOf: 'other' }, [m, sex, habit({ id: 'other' })], day)).toBeDefined()
+    expect(validateReducer('sex', { perDay: 1, reducedByDaysOf: 'other' }, [m, sex, habit({ id: 'other' })], day)).toEqual({ key: 'habitError.alreadyReducer' })
   })
 })
 

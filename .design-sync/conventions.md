@@ -1,10 +1,10 @@
 # Life Elo — how to build with this design system
 
-Life Elo is a mobile-first (iPhone PWA) habit tracker with a signed rating. UI copy is **Russian**. Screens are a single centered column (max-width 560px) with a bottom `TabBar`.
+Life Elo is a mobile-first (iPhone PWA) habit tracker with a signed rating. UI copy defaults to **Russian** (the app also ships en/uk; components render Russian without a provider). Screens are a single centered column (max-width 560px) with a bottom `TabBar`.
 
 ## Setup
 
-No provider or wrapper component. Linking `styles.css` is enough: it carries the tokens, the base typography (`:root` font, color, `--bg` background), the layout utilities, and every component's CSS. Without it, components render as unstyled browser defaults. Light/dark theming is automatic via `prefers-color-scheme` (tokens are redefined in dark), so never hard-code colors.
+No provider or wrapper component. Linking `styles.css` is enough: it carries the tokens, the base typography (`:root` font, color, `--bg` background), the layout utilities, and every component's CSS. Without it, components render as unstyled browser defaults. Light/dark theming is automatic via `prefers-color-scheme` (tokens are redefined in dark); `data-theme="light"|"dark"` on `<html>` forces a theme, so never hard-code colors.
 
 ## Styling idiom: plain CSS classes + CSS custom properties
 
@@ -24,7 +24,7 @@ Tokens (all in `styles.css` → `_ds_bundle.css`):
 - Spacing: `--space-2`, `-4`, `-6`, `-8`, `-10`, `-12`, `-14`, `-16`, `-28`
 - Radius: `--radius-sm` (12px, buttons), `--radius-md` (16px, cards), `--radius-full` (pills)
 
-Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A native `<input>` is pre-styled globally (bordered, `--radius-sm`). There is no TextInput component, so use `<input>` directly.
+Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A native `<input>` is pre-styled globally (bordered, `--radius-sm`). For labeled form fields wrap it in `Field` (below).
 
 ## Conventions
 
@@ -32,6 +32,10 @@ Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A nati
 - `Card` is the generic surface. Give it a layout class: `className="row"` for list rows, `className="stack-sm"` for stacked content. `inactive` dims it.
 - `Button variant="primary"` is the main action (one per screen). Default buttons are secondary/inline actions.
 - `SegmentedControl` options use `tone: "pos"` for good outcomes and `"neg"` for violations. Omit `tone` for neutral choices (accent color).
+- Text inputs: wrap a native `<input>` in `Field` (`label`, `required`, `prefix="@"`, `hint`, `error`); the input gets `aria-invalid` automatically.
+- `Button variant="danger"` is a destructive confirm (filled `--neg`); `variant="quiet"` is text-only (add `className="neg"` for destructive text actions).
+- `Avatar name src`: photo or initials on an accent tint (`size` defaults to 96). With `onClick` it becomes a button: always pass `label`.
+- `Dialog open title onClose`: confirm modal. Children = `<p className="dialog-body">` + `<div className="dialog-actions">`; put `autoFocus` on the safe action.
 - `TabBar` is `position: fixed` to the viewport bottom. Render it once per screen and leave ~96px bottom padding on the content.
 
 ## Where the truth lives

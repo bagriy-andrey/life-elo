@@ -7,8 +7,7 @@ Plan: docs/plans/04-profile-settings.md — 19/19 steps built + verified, Status
 Nothing.
 
 ## Next step
-User: `/design-sync` (new Field, Avatar, Dialog; Button danger/quiet; tokens data-theme; EloScore/HistoryEntry i18n),
-then manual check in `npm run dev` (list below), then push + PR.
+Design sync done (last-sync 9f27464). User: manual check in `npm run dev` (list below), then push + PR.
 
 ## Broken / open questions
 - Manual checks not done by agents: en/uk on every screen; theme no-flash on reload + «Системная» follows OS;

@@ -4,11 +4,14 @@ import {
   buildRule,
   EMPTY_FORM,
   editedVersions,
+  hasAnswers,
+  reducerUsers,
+  withoutHabit,
   upsertVersion,
   validateReducer,
   type HabitForm,
 } from './habitSetup'
-import type { Habit, HabitVersion, Quota } from './types'
+import type { DayReview, Habit, HabitVersion, Quota } from './types'
 
 const form = (p: Partial<HabitForm>): HabitForm => ({ ...EMPTY_FORM, ...p })
 const habit = (p: Partial<Habit>): Habit => ({
@@ -120,5 +123,40 @@ describe('versions', () => {
     const out = editedVersions(h, { tier: 'strong', rule: { kind: 'boolean' } }, '2026-02-01')
     expect(out).toHaveLength(1)
     expect(out[0]).toMatchObject({ from: '2026-03-01', tier: 'strong' })
+  })
+})
+
+describe('delete helpers', () => {
+  const review = (entries: DayReview['entries']): DayReview => ({
+    day: '2026-02-01',
+    entries,
+    confirmedAt: 5,
+    revision: 2,
+  })
+
+  it('hasAnswers only counts value entries', () => {
+    expect(hasAnswers('a', [review({ a: { kind: 'unknown' } }), review({ a: { kind: 'not_applicable' } })])).toBe(false)
+    expect(hasAnswers('a', [review({ b: { kind: 'value', value: true } })])).toBe(false)
+    expect(hasAnswers('a', [review({}), review({ a: { kind: 'value', value: false } })])).toBe(true)
+  })
+
+  it('reducerUsers finds users in any version, excluding self', () => {
+    const old = habit({
+      id: 'x',
+      versions: [
+        { from: '2026-01-01', tier: 'medium', rule: { kind: 'boolean' }, quota: { perDay: 2, reducedByDaysOf: 'a' } },
+        { from: '2026-02-01', tier: 'medium', rule: { kind: 'boolean' } },
+      ],
+    })
+    const other = withQuota('y', { perDay: 1 })
+    expect(reducerUsers('a', [habit({ id: 'a' }), old, other]).map((h) => h.id)).toEqual(['x'])
+    expect(reducerUsers('y', [old, other])).toEqual([])
+  })
+
+  it('withoutHabit removes only that key', () => {
+    const r = review({ a: { kind: 'unknown' }, b: { kind: 'value', value: 1 } })
+    const out = withoutHabit(r, 'a')
+    expect(out).toEqual({ ...r, entries: { b: { kind: 'value', value: 1 } } })
+    expect(r.entries.a).toBeDefined()
   })
 })

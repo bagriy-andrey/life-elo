@@ -27,7 +27,7 @@ silently reinterpret past days. Rating is never stored, so deleting data = save 
 (none)
 
 ## Steps
-- [ ] 1. Pure helpers: `hasAnswers(habitId, reviews)`, `reducerUsers(habitId, habits)` (habits whose any
+- [x] 1. Pure helpers: `hasAnswers(habitId, reviews)`, `reducerUsers(habitId, habits)` (habits whose any
   version's quota has `reducedByDaysOf === habitId`), `withoutHabit(review, habitId)` (returns review with the
   entry key removed, other fields untouched) — files: `src/domain/habitSetup.ts`, `src/domain/habitSetup.test.ts`
   — verify: `npm test`.

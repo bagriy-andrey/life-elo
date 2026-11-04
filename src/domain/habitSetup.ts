@@ -1,6 +1,6 @@
 import { timeToMinutes } from './day'
 import { settingsOn } from './settings'
-import type { DayKey, Habit, HabitVersion, ImpactTier, Quota, ZonedRule } from './types'
+import type { DayKey, DayReview, Habit, HabitVersion, ImpactTier, Quota, ZonedRule } from './types'
 
 /** Rule kinds offered in the setup form. */
 export type RuleChoice = 'boolean' | 'count' | 'minutes' | 'steps' | 'time'
@@ -142,3 +142,21 @@ export function formOf(rule: ZonedRule, quota: Quota | undefined): HabitForm {
 }
 
 export const TIER_KEYS: ImpactTier[] = ['weak', 'medium', 'strong']
+
+/** True when any stored review has a value answer for this habit. */
+export function hasAnswers(habitId: string, reviews: DayReview[]): boolean {
+  return reviews.some((r) => r.entries[habitId]?.kind === 'value')
+}
+
+/** Other habits whose quota uses `habitId` as `reducedByDaysOf` in any version. */
+export function reducerUsers(habitId: string, habits: Habit[]): Habit[] {
+  return habits.filter(
+    (h) => h.id !== habitId && h.versions.some((v) => v.quota?.reducedByDaysOf === habitId),
+  )
+}
+
+/** Review with the habit's entry removed; other fields untouched. */
+export function withoutHabit(review: DayReview, habitId: string): DayReview {
+  const { [habitId]: _removed, ...entries } = review.entries
+  return { ...review, entries }
+}

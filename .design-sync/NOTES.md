@@ -14,7 +14,7 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
   (playwright is installed into `.ds-sync/` alongside esbuild/ts-morph).
 - esbuild splits component CSS into `dist/index.css`; without merging it into cssEntry the previews
   render as unstyled browser defaults while global utilities still work. build-lib.mjs does the merge.
-- `cfg.dtsPropsFor` is hand-written for Button, Card (native attrs are otherwise filtered out),
+- `cfg.dtsPropsFor` is hand-written for Button (incl. variants), Field, Avatar, Dialog, Card (native attrs are otherwise filtered out),
   SegmentedControl, TabBar (generic `T extends string` → `string`), and HistoryEntry (LedgerEntry inlined).
 - TabBar is `position: fixed`: its preview wraps it in a `transform: translateZ(0)` frame, and the card is
   `cardMode: single`. HistoryEntry previews open `<details>` via a ref callback.
@@ -27,9 +27,10 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 ## Re-sync risks
 - `previews/HistoryEntry.tsx` sample ledgers are hand-computed from RULESET_V1 (Σw=6, clean day 20, R ← R + 0.1·(10S − R)).
   A new ruleset version makes them stale — recompute, don't let numbers drift (an earlier draft showed clean day +2).
-- `dtsPropsFor` duplicates prop types: if Button/Card/SegmentedControl/TabBar/HistoryEntry props
+- `dtsPropsFor` duplicates prop types: if Button/Card/SegmentedControl/TabBar/HistoryEntry/Field/Avatar/Dialog props
   or `LedgerEntry`/`Contribution` change, update the config by hand, or the agent codes against stale types.
 - Adding a component: export it from `src/ui/components/index.ts`; check its emitted `.d.ts` and author a preview.
 - Global CSS (`src/index.css`) ships with the bundle, including app-shell rules for `main` and `.app`.
 - Toolchain at first sync: TypeScript 7.0.2 (tsgo), node 24, esbuild 0.28.
 - Tokens now have forced-theme selectors (`:root[data-theme='dark'|'light']`) besides the `prefers-color-scheme` media block; dark values are duplicated and must stay in sync.
+- New components Field, Avatar, Dialog (previews authored); Dialog previews use `open`. Theme: `data-theme` on `:root` forces light/dark, no attribute = system.

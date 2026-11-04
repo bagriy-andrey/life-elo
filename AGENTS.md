@@ -5,7 +5,7 @@ Product source of truth: `LIFE_ELO_PRODUCT_CONTEXT.md` — read it before produc
 
 ## Stack
 Vite + React + TypeScript PWA (`vite-plugin-pwa`), local-only storage in IndexedDB via Dexie. No backend.
-Target: installed on iPhone via Safari → "Add to Home Screen". UI language: Russian (for now).
+Target: installed on iPhone via Safari → "Add to Home Screen". UI language: ru/en/uk via `src/i18n` (ru is the key source of truth).
 
 Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run build`.
 
@@ -25,10 +25,12 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
-- `src/ui/components/` is mirrored in Claude Design: prop types for Button, Card, SegmentedControl,
-  TabBar, HistoryEntry are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+- `src/ui/components/` is mirrored in Claude Design: props of Button (variants), Card, SegmentedControl,
+  TabBar, HistoryEntry, Field, Avatar, Dialog are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
-  Text input is still styled globally in `src/index.css` (no TextInput component yet).
+  Text inputs go through `Field` (global input styles live in `src/index.css`).
+- Screens have `renderToString` smoke tests (`src/ui/Profile.test.tsx`); add one per new screen, as unit tests don't render JSX.
+- Age/birth use the calendar date `toDayKey(new Date())`, not `dayOf`/`reviewDay` (04:00 boundary).
 
 ## Workflow: plan → build → verify
 Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude wrappers.

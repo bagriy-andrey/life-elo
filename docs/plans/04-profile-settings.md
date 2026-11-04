@@ -1,6 +1,6 @@
 # 04 — Profile, settings, full i18n (ru / en / uk)
 
-Status: approved
+Status: done
 Design input: https://claude.ai/design/p/67c2bfac-e6da-422e-98bb-a3415b430a31?file=templates%2Fprofile%2FProfile.dc.html
 (not readable by agents; the summary below is the contract. Roadmap item «Профиль и настройки», `docs/ROADMAP.md`.)
 
@@ -199,7 +199,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   profile, cancel (overlay, Esc, button) changes nothing; confirm leaves empty Home (0, no history), Habits empty,
   Profile in edit mode, language ru, theme system.
   Note: clearAllData: derive the table list once (e.g. `db.tables`) instead of duplicating it in the transaction scope and the map.
-- [ ] 19. Docs and sync notes — `AGENTS.md` (UI language: ru/en/uk via `src/i18n`, ru is the key source of truth;
+- [x] 19. Docs and sync notes — `AGENTS.md` (UI language: ru/en/uk via `src/i18n`, ru is the key source of truth;
   update the `src/ui/components/` gotcha list to include Field/Avatar/Dialog if their props are in `dtsPropsFor`;
   keep Gotchas ≤10 lines), `docs/ROADMAP.md` (check «Профиль и настройки»), `.design-sync/NOTES.md` (new
   components, prefs/theme selectors), set this plan's status to `done` — files: `AGENTS.md`, `docs/ROADMAP.md`,

@@ -161,12 +161,13 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   + DNS records → Supabase custom SMTP (sender `Life Elo <no-reply@DOMAIN>`); paste recovery template from
   `supabase/templates/recovery.html`; `npx supabase link` + `db push`; Vercel project + env vars — files:
   `AGENTS.md`, `LIFE_ELO_PRODUCT_CONTEXT.md`, `.env.example`, `.gitignore`, `docs/setup/backend.md` — verify: read-through.
-- [ ] 2. Backend schema: `npx supabase init` (config only), migration with `records`, sequence, index, RLS policies,
+- [x] 2. Backend schema: `npx supabase init` (config only), migration with `records`, sequence, index, RLS policies,
   `push_records`, `reset_records`; Russian recovery email template (subject «Восстановление пароля Life Elo», link
   `{{ .SiteURL }}/?type=recovery&token_hash={{ .TokenHash }}`, «Ссылка действует 1 час») — files:
   `supabase/config.toml`, `supabase/migrations/<ts>_records.sql`, `supabase/templates/recovery.html`, `package.json`
   (devDep `supabase`) — verify: if Docker is available `npx supabase start && npx supabase db reset` applies cleanly;
   otherwise SQL review + user runs `db push`; note which in the step.
+  Note: Docker unavailable, SQL reviewed only (not applied); user runs `db push`. `rev` has a column default from the sequence too.
 - [ ] 3. Pure auth helpers from the design: `EMAIL_RE`, `strength`, `newPasswordError`, `validateAuthForm(screen, f,
   googleOnly)`, `authErrorText(error)` (Supabase error code/status → Russian texts in the Spec) — files:
   `src/auth/validation.ts`, `src/auth/validation.test.ts`, `src/auth/errors.ts`, `src/auth/errors.test.ts` — verify: `npm test`.

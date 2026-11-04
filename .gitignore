@@ -32,3 +32,8 @@ ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
+
+# Environment (never commit real values; copy to .env.local)
+.env
+.env.*
+!.env.example

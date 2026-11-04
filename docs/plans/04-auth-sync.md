@@ -149,7 +149,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 (none — defaults chosen above: terms line omitted, no account deletion yet, Google linking per Supabase default)
 
 ## Steps
-- [ ] 1. Docs & config: AGENTS.md (stack: Supabase; layout `src/auth/`, `src/sync/`, `supabase/`; rule «rating is
+- [x] 1. Docs & config: AGENTS.md (stack: Supabase; layout `src/auth/`, `src/sync/`, `supabase/`; rule «rating is
   never stored on the server»; remove «No backend»), product context §13 decision entry (2026-11-04 decisions from
   «Why»), `.env.example`, `.gitignore` has `.env*` except example, `docs/setup/backend.md` — the user's manual
   checklist, written for someone creating every account from scratch (the user has none yet), in this order:

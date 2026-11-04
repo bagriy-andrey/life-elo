@@ -336,6 +336,7 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 - Goal: correlate and, when possible, align rating with real subjective wellbeing without confusing the two.
 - User selects habits from suggestions and can add their own.
 - Scoring ruleset v1 (§6.5): 60/20/20 day budget, zoned habits, weekly quotas, streak rules, review window, Elo formula.
+- Accounts and sync (2026-11-04): Supabase backend; sign-in required (email + password or Google); no email confirmation; password reset by email via Resend SMTP on the user's own domain; offline-first sync with background push/pull of raw records only (rating and streaks are never stored on the server); first sign-in uploads local data if the account is empty, otherwise asks which copy to keep; deployment on Vercel.
 
 ### Open / requires discussion
 

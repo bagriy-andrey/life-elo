@@ -103,7 +103,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
 - [x] 6. Translate Habits — `src/ui/Habits.tsx` (all remaining strings, delete confirmation, locked-direction note,
   placeholders), ru/en/uk keys — verify: `npm run build`, `npm run lint`; manual: create/edit/delete a habit in en/uk.
   Note: unit hints reuse plural `unit.*` keys (count 5); delete-in-use is `habitError.deleteInUse` with `{names}`, so `editError` is `SetupError` again.
-- [ ] 7. [design-sync] Theme tokens — `src/ui/tokens.css`: keep light defaults in `:root`; dark values in
+- [x] 7. [design-sync] Theme tokens — `src/ui/tokens.css`: keep light defaults in `:root`; dark values in
   `:root[data-theme='dark']` and in `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { … } }`
   (identical values, comment that they must stay in sync); `color-scheme` per theme (`light dark` default,
   `light`/`dark` when forced) — move from `src/index.css`. New `src/ui/prefs.ts`: `type Theme = 'system'|'light'|'dark'`,
@@ -114,6 +114,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `index.html`, `src/main.tsx` — verify: `npm test`; manual: set prefs theme to light/dark in devtools and reload —
   no flash, correct colors with OS in the opposite mode. `.design-sync/NOTES.md`: tokens now have forced-theme
   selectors.
+  Note: Prefs/Theme/parse live in `src/i18n/prefs.ts` (step 1); tests in `src/i18n/i18n.test.ts`; `src/ui/prefs.ts` has only `applyTheme`.
 - [ ] 8. Pure profile logic — `src/domain/profile.ts` (+ `profile.test.ts`): `Profile` type
   `{ id:'me', name, nick?, email?, birth?: 'YYYY-MM-DD', photo?: string, createdAt: number }` (also add to
   `types.ts` if that is the convention), `normalizeNick` (strip leading `@`, trim), `validateProfile(input, today)`

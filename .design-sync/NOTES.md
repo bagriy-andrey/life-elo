@@ -32,3 +32,4 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - Adding a component: export it from `src/ui/components/index.ts`; check its emitted `.d.ts` and author a preview.
 - Global CSS (`src/index.css`) ships with the bundle, including app-shell rules for `main` and `.app`.
 - Toolchain at first sync: TypeScript 7.0.2 (tsgo), node 24, esbuild 0.28.
+- Tokens now have forced-theme selectors (`:root[data-theme='dark'|'light']`) besides the `prefers-color-scheme` media block; dark values are duplicated and must stay in sync.

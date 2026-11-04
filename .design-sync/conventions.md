@@ -4,7 +4,7 @@ Life Elo is a mobile-first (iPhone PWA) habit tracker with a signed rating. UI c
 
 ## Setup
 
-No provider or wrapper component. Linking `styles.css` is enough: it carries the tokens, the base typography (`:root` font, color, `--bg` background), the layout utilities, and every component's CSS. Without it, components render as unstyled browser defaults. Light/dark theming is automatic via `prefers-color-scheme` (tokens are redefined in dark), so never hard-code colors.
+No provider or wrapper component. Linking `styles.css` is enough: it carries the tokens, the base typography (`:root` font, color, `--bg` background), the layout utilities, and every component's CSS. Without it, components render as unstyled browser defaults. Light/dark theming is automatic via `prefers-color-scheme` (tokens are redefined in dark); `data-theme="light"|"dark"` on `<html>` forces a theme, so never hard-code colors.
 
 ## Styling idiom: plain CSS classes + CSS custom properties
 

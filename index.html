@@ -8,6 +8,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Life Elo" />
+    <script>
+      try {
+        var p = JSON.parse(localStorage.getItem('life-elo:prefs') || 'null') || {}
+        var r = document.documentElement
+        if (p.theme === 'light' || p.theme === 'dark') r.setAttribute('data-theme', p.theme)
+        if (p.lang === 'ru' || p.lang === 'en' || p.lang === 'uk') r.lang = p.lang
+      } catch (e) {}
+    </script>
     <title>Life Elo</title>
   </head>
   <body>

@@ -51,11 +51,16 @@ describe('dictionaries', () => {
 
 describe('parsePrefs', () => {
   it('reads a valid language', () => {
-    expect(parsePrefs('{"lang":"en"}')).toEqual({ lang: 'en' })
+    expect(parsePrefs('{"lang":"en"}')).toEqual({ lang: 'en', theme: 'system' })
+  })
+  it('reads a valid theme and defaults each field independently', () => {
+    expect(parsePrefs('{"lang":"uk","theme":"dark"}')).toEqual({ lang: 'uk', theme: 'dark' })
+    expect(parsePrefs('{"theme":"light"}')).toEqual({ lang: 'ru', theme: 'light' })
+    expect(parsePrefs('{"lang":"en","theme":"pink"}')).toEqual({ lang: 'en', theme: 'system' })
   })
   it('tolerates garbage', () => {
     for (const raw of [null, '', '{', 'null', '[]', '{"lang":"de"}', '{"lang":5}', '42']) {
-      expect(parsePrefs(raw)).toEqual({ lang: 'ru' })
+      expect(parsePrefs(raw)).toEqual({ lang: 'ru', theme: 'system' })
     }
   })
 })

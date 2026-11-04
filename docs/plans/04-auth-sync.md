@@ -208,8 +208,9 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   `src/sync/engine.test.ts` (with a fake remote), `src/App.tsx` — verify: `npm test`; manual: two browsers, edit in one,
   see it in the other.
   Note: manual two-browser check pending (user). Sync starts in App only when syncState.userId === session user (TODO hook for step 12). Tests simulate devices by snapshot/restore of one fake-indexeddb.
-- [ ] 12. First sign-in flow + choice screen — files: `src/sync/firstSignIn.ts`, `src/ui/SyncChoice.tsx`, `src/App.tsx`
+- [x] 12. First sign-in flow + choice screen — files: `src/sync/firstSignIn.ts`, `src/ui/SyncChoice.tsx`, `src/App.tsx`
   — verify: tests for the flow with a fake remote; manual: existing local data → empty account uploads.
+  Note: automated part done; manual check pending.
 - [ ] 13. Profile tab: TabBar 4th item «Профиль», `Profile.tsx` (name, email, sync status, «Синхронизировать заново»,
   logout with unsynced-changes confirm; clear Dexie ONLY on explicit logout, never on a `SIGNED_OUT` event — a
   recovery elsewhere signs out globally and unsynced edits must survive until the next sign-in of the same user) — files: `src/ui/Profile.tsx`, `src/App.tsx` — verify: build, lint; manual

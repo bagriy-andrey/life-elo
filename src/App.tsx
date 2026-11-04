@@ -6,15 +6,17 @@ import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/AuthProvider'
+import { adoptRemote, keepDevice, prepareFirstSignIn, resolveAutomatic } from './sync/firstSignIn'
 import { createSyncEngine, startSync } from './sync/engine'
 import { getSyncState } from './sync/outbox'
 import { supabaseRemote } from './sync/remote'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
-import { TabBar } from './ui/components'
+import { Button, TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Review } from './ui/Review'
+import { SyncChoice } from './ui/SyncChoice'
 
 type Tab = 'home' | 'review' | 'habits'
 
@@ -86,10 +88,69 @@ const syncEngine = createSyncEngine({ remote: supabaseRemote })
 function useBackgroundSync(userId: string | undefined) {
   const syncedUserId = useLiveQuery(async () => (await getSyncState()).userId, [])
   useEffect(() => {
-    // TODO(step 12): first sign-in decision (upload / pull / ask) sets syncState.userId; until then nothing syncs.
     if (!userId || syncedUserId !== userId) return
     return startSync(syncEngine)
   }, [userId, syncedUserId])
+}
+
+/** Stops any running sync before local data is replaced. */
+async function stopSync() {
+  syncEngine.cancel()
+  await syncEngine.settled()
+}
+
+type Gate = 'checking' | 'offline' | 'ask' | 'ready'
+
+/** First sign-in on this device: decides upload / pull / ask. Never decides without the remote state. */
+function FirstSignInGate({ userId }: { userId: string }) {
+  const [gate, setGate] = useState<Gate>('checking')
+  const [attempt, setAttempt] = useState(0)
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const mode = await prepareFirstSignIn(userId, supabaseRemote)
+        const done = await resolveAutomatic(mode, userId)
+        if (alive) setGate(done ? 'ready' : 'ask')
+      } catch {
+        if (alive) setGate('offline')
+      }
+    })()
+    return () => {
+      alive = false
+    }
+  }, [userId, attempt])
+
+  if (gate === 'ready') return <MainApp />
+  if (gate === 'ask')
+    return (
+      <SyncChoice
+        onChoose={async (kind) => {
+          await stopSync()
+          if (kind === 'account') await adoptRemote(userId)
+          else await keepDevice(userId, supabaseRemote)
+          setGate('ready')
+        }}
+      />
+    )
+  if (gate === 'offline')
+    return (
+      <div className="auth">
+        <AuthLogo />
+        <p className="auth-muted">Нужен интернет для первой синхронизации</p>
+        <Button className="auth-submit" onClick={() => {
+            setGate('checking')
+            setAttempt((n) => n + 1)
+          }}>
+          Повторить
+        </Button>
+      </div>
+    )
+  return (
+    <div className="auth auth-splash">
+      <AuthLogo />
+    </div>
+  )
 }
 
 export default function App() {
@@ -113,5 +174,5 @@ export default function App() {
   // Checked before `session`, because verifyOtp creates a session.
   if (recovery !== null) return <NewPassword onRequestNew={() => setStartForgot(true)} />
   if (!session) return <AuthScreen initialMode={startForgot ? 'forgot' : 'login'} />
-  return <MainApp />
+  return <FirstSignInGate key={session.user.id} userId={session.user.id} />
 }

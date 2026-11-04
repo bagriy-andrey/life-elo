@@ -29,7 +29,7 @@ Short, durable, non-obvious lessons. Compress or replace entries; keep this sect
   TabBar, HistoryEntry, Field, Avatar, Dialog are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
   Text inputs go through `Field` (global input styles live in `src/index.css`).
-- Screens have `renderToString` smoke tests (`src/ui/Profile.test.tsx`); add one per new screen, as unit tests don't render JSX.
+- Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).
 - Age/birth use the calendar date `toDayKey(new Date())`, not `dayOf`/`reviewDay` (04:00 boundary).
 
 ## Workflow: plan → build → verify

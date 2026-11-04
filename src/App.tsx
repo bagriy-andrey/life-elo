@@ -110,6 +110,8 @@ function FirstSignInGate({ userId }: { userId: string }) {
     ;(async () => {
       try {
         const mode = await prepareFirstSignIn(userId, supabaseRemote)
+        // A previous account's run may still be in flight when the device is re-claimed.
+        if (mode !== 'none') await stopSync()
         const done = await resolveAutomatic(mode, userId)
         if (alive) setGate(done ? 'ready' : 'ask')
       } catch {

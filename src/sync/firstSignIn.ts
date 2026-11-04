@@ -40,9 +40,12 @@ export async function adoptRemote(userId: string): Promise<void> {
   await setSyncState({ userId, cursor: 0 })
 }
 
-/** Local is empty: just claim the device for this user. */
+/** Local is empty: claim the device; a previous account's pending tombstones must not reach this one. */
 export async function claimEmptyDevice(userId: string): Promise<void> {
-  await setSyncState({ userId, cursor: 0 })
+  await db.transaction('rw', db.outbox, db.syncState, async () => {
+    await db.outbox.clear()
+    await setSyncState({ userId, cursor: 0 })
+  })
 }
 
 export async function keepDevice(userId: string, remote: SyncRemote): Promise<void> {

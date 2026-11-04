@@ -144,7 +144,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   96px (scale with size). Files: `components/Avatar.tsx`, `Avatar.css`, `index.ts`, `.design-sync/config.json`
   (dtsPropsFor + override), preview — verify: `npm run build`, `npm run lint`.
   Note: also `onClick?` + `label?` (aria-label) → renders a dashed-border button for edit mode; size via `--avatar-size`.
-- [ ] 12. [design-sync] `Button` variants — add `danger` (filled `--neg` bg, `--accent-text`-like readable text in
+- [x] 12. [design-sync] `Button` variants — add `danger` (filled `--neg` bg, `--accent-text`-like readable text in
   both themes) and `quiet` (no border/background, accent text). Files: `components/Button.tsx`, `Button.css`,
   `.design-sync/config.json` (`dtsPropsFor.Button` variant union + doc comments), Button preview — verify:
   `npm run build`; visual check both themes.
@@ -170,6 +170,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   save creates profile (view shows today as «С нами с»), edit keeps the date, each validation message in 3 languages,
   invalid save writes nothing.
   Note: Pass `toDayKey(new Date())` (calendar date) to validateProfile/ageOn — NOT dayOf/reviewDay (04:00 boundary would reject today's birth date 00:00–04:00).
+  Note: Avatar in button mode must always get `label` (accessible name; photo img has alt="").
 - [ ] 16. Photo — `src/ui/photo.ts`: pure `fitSize(w, h, max=256)` (never upscales, keeps ratio) + `resizeImage(file)
   → Promise<string>` (createImageBitmap/Image + canvas → JPEG data URL; rejects non-images and decode errors);
   `photo.test.ts` for `fitSize`. Profile edit: dashed avatar button + quiet text button «Добавить фото»/«Сменить
@@ -178,6 +179,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `src/ui/photo.test.ts`, `src/ui/Profile.tsx`, `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts` — verify:
   `npm test`; manual on desktop and (if possible) iPhone: large photo → stored ≤256 px (check data URL size in
   devtools), avatar updates, removing works.
+  Note: Avatar in button mode must always get `label` (accessible name; photo img has alt="").
 - [ ] 17. Settings: language and theme — `Profile.tsx` «Настройки» section: Card with «Язык» SegmentedControl
   (Русский / English / Українська — names always in their own language, not translated) and «Тема» SegmentedControl
   (Системная / Светлая / Тёмная, translated); wired to `setLang` and `applyTheme` + `savePrefs`. Section is visible

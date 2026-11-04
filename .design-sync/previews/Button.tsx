@@ -16,3 +16,14 @@ export const Pair = () => (
     <Button>Вернуть</Button>
   </div>
 )
+
+export const Danger = () => <Button variant="danger">Удалить</Button>
+
+export const Quiet = () => (
+  <div className="stack-sm" style={{ width: 280 }}>
+    <Button variant="quiet">Добавить фото</Button>
+    <Button variant="quiet" className="neg">
+      Очистить все данные
+    </Button>
+  </div>
+)

@@ -136,9 +136,6 @@ export const uk: Dict = {
   'profileError.birthInvalid': 'Некоректна дата',
   'profileError.birthFuture': 'Дата народження не може бути в майбутньому',
   'profileError.birthYear': 'Вік не може бути більшим за {max} років',
-  'profileHint.nick': 'Необовʼязково. 3–20 символів: латиниця, цифри, _',
-  'profileHint.email': 'Необовʼязково. Зберігається лише на цьому пристрої',
-  'profileHint.birth': 'Необовʼязково',
   'profile.edit': 'Змінити',
   'profile.rating': 'Рейтинг',
   'profile.since': 'З нами з',
@@ -156,6 +153,8 @@ export const uk: Dict = {
   'profile.nickHint': "Латиниця, цифри та _, від 3 до 20 символів",
   'profile.addPhoto': "Додати фото",
   'profile.changePhoto': "Змінити фото",
+  'profile.removePhoto': "Прибрати фото",
+  'profile.photoError': "Не вдалося відкрити зображення. Спробуйте інше фото (JPEG або PNG).",
   'profile.photoLabel': "Обрати фото",
   'profile.saveError': "Не вдалося зберегти профіль. Спробуйте ще раз."
 }

@@ -173,7 +173,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   Note: done; `today` (calendar date) is App state refreshed on visibilitychange and passed to Profile; `profile` prop is `Profile | null` (undefined = still loading, tab renders nothing); photo avatar/«Добавить фото» buttons are inert until step 16; removed unused `profile.empty` key, added `profile.name/nick/nickHint/...` keys.
   Note: Pass `toDayKey(new Date())` (calendar date) to validateProfile/ageOn — NOT dayOf/reviewDay (04:00 boundary would reject today's birth date 00:00–04:00).
   Note: Avatar in button mode must always get `label` (accessible name; photo img has alt="").
-- [ ] 16. Photo — `src/ui/photo.ts`: pure `fitSize(w, h, max=256)` (never upscales, keeps ratio) + `resizeImage(file)
+- [x] 16. Photo — `src/ui/photo.ts`: pure `fitSize(w, h, max=256)` (never upscales, keeps ratio) + `resizeImage(file)
   → Promise<string>` (createImageBitmap/Image + canvas → JPEG data URL; rejects non-images and decode errors);
   `photo.test.ts` for `fitSize`. Profile edit: dashed avatar button + quiet text button «Добавить фото»/«Сменить
   фото» (+ optional «Убрать фото» if photo set) opening hidden `<input type=file accept="image/*">`; chosen photo
@@ -181,6 +181,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `src/ui/photo.test.ts`, `src/ui/Profile.tsx`, `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts` — verify:
   `npm test`; manual on desktop and (if possible) iPhone: large photo → stored ≤256 px (check data URL size in
   devtools), avatar updates, removing works.
+  Note: done; removal implemented (draft photo null, «Убрать фото»); removed unused profileHint.* keys; photo decode uses createImageBitmap(from-image) with <img> fallback.
   Note: Avatar in button mode must always get `label` (accessible name; photo img has alt="").
 - [ ] 17. Settings: language and theme — `Profile.tsx` «Настройки» section: Card with «Язык» SegmentedControl
   (Русский / English / Українська — names always in their own language, not translated) and «Тема» SegmentedControl

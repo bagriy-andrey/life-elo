@@ -128,9 +128,6 @@ export const en: Dict = {
   'profileError.birthInvalid': 'Invalid date',
   'profileError.birthFuture': 'Birth date cannot be in the future',
   'profileError.birthYear': 'Age cannot exceed {max} years',
-  'profileHint.nick': 'Optional. 3–20 characters: Latin letters, digits, _',
-  'profileHint.email': 'Optional. Stored only on this device',
-  'profileHint.birth': 'Optional',
   'profile.edit': 'Edit',
   'profile.rating': 'Rating',
   'profile.since': 'Member since',
@@ -146,6 +143,8 @@ export const en: Dict = {
   'profile.nickHint': "Latin letters, digits and _, 3 to 20 characters",
   'profile.addPhoto': "Add photo",
   'profile.changePhoto': "Change photo",
+  'profile.removePhoto': "Remove photo",
+  'profile.photoError': "Could not open the image. Try another photo (JPEG or PNG).",
   'profile.photoLabel': "Choose photo",
   'profile.saveError': "Could not save the profile. Please try again."
 }

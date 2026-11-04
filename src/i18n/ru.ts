@@ -135,9 +135,6 @@ export const ru = {
   'profileError.birthInvalid': 'Некорректная дата',
   'profileError.birthFuture': 'Дата рождения не может быть в будущем',
   'profileError.birthYear': 'Возраст не может быть больше {max} лет',
-  'profileHint.nick': 'Необязательно. 3–20 символов: латиница, цифры, _',
-  'profileHint.email': 'Необязательно. Хранится только на этом устройстве',
-  'profileHint.birth': 'Необязательно',
   'profile.edit': 'Изменить',
   'profile.rating': 'Рейтинг',
   'profile.since': 'С нами с',
@@ -155,6 +152,8 @@ export const ru = {
   'profile.nickHint': "Латиница, цифры и _, от 3 до 20 символов",
   'profile.addPhoto': "Добавить фото",
   'profile.changePhoto': "Сменить фото",
+  'profile.removePhoto': "Убрать фото",
+  'profile.photoError': "Не удалось открыть изображение. Попробуйте другое фото (JPEG или PNG).",
   'profile.photoLabel': "Выбрать фото",
   'profile.saveError': "Не удалось сохранить профиль. Попробуйте ещё раз."
 }

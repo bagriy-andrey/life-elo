@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { saveProfile } from '../db/profile'
 import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
@@ -8,6 +8,7 @@ import { useI18n } from '../i18n'
 import { Avatar, Button, Card, Field } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
+import { resizeImage } from './photo'
 import './Profile.css'
 
 interface Props {
@@ -37,6 +38,24 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
   const [attempted, setAttempted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
+  /** Draft photo: undefined = unchanged, null = removed, string = new data URL. */
+  const [photo, setPhoto] = useState<string | null | undefined>(undefined)
+  const [photoError, setPhotoError] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const shownPhoto = photo === undefined ? profile?.photo : (photo ?? undefined)
+  const pickPhoto = () => fileRef.current?.click()
+  const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target
+    const file = input.files?.[0]
+    input.value = '' // allow re-picking the same file
+    if (!file) return
+    setPhotoError(false)
+    try {
+      setPhoto(await resizeImage(file))
+    } catch {
+      setPhotoError(true)
+    }
+  }
 
   const errors = validateProfile(form, today)
   const errorText = (f: FieldName) => {
@@ -57,7 +76,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
     setSaving(true)
     setFailed(false)
     try {
-      await saveProfile(form, new Date())
+      await saveProfile({ ...form, photo }, new Date())
       onDone()
     } catch {
       setFailed(true)
@@ -73,10 +92,17 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
         {onCancel && <Button type="button" onClick={onCancel}>{t('common.cancel')}</Button>}
       </div>
       <div className="profile-id">
-        <Avatar name={form.name} src={profile?.photo} size={96} onClick={() => {}} label={t('profile.photoLabel')} />
-        <Button type="button" variant="quiet">
-          {profile?.photo ? t('profile.changePhoto') : t('profile.addPhoto')}
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+        <Avatar name={form.name} src={shownPhoto} size={96} onClick={pickPhoto} label={t('profile.photoLabel')} />
+        <Button type="button" variant="quiet" onClick={pickPhoto}>
+          {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
         </Button>
+        {shownPhoto && (
+          <Button type="button" variant="quiet" onClick={() => setPhoto(null)}>
+            {t('profile.removePhoto')}
+          </Button>
+        )}
+        {photoError && <p className="neg" role="alert">{t('profile.photoError')}</p>}
       </div>
       <Card className="profile-form">
         <Field label={t('profile.name')} required error={errorText('name')}>

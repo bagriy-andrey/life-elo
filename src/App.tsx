@@ -15,10 +15,11 @@ import { NewPassword } from './ui/auth/NewPassword'
 import { Button, TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
+import { Profile } from './ui/Profile'
 import { Review } from './ui/Review'
 import { SyncChoice } from './ui/SyncChoice'
 
-type Tab = 'home' | 'review' | 'habits'
+type Tab = 'home' | 'review' | 'habits' | 'profile'
 
 const NO_HABITS: Habit[] = []
 const NO_REVIEWS: DayReview[] = []
@@ -67,6 +68,14 @@ function MainApp() {
             onDone={() => setTab('home')}
           />
         )}
+        {tab === 'profile' && (
+          <Profile
+            engine={syncEngine}
+            onPassword={() => {
+              // TODO(step 14): open the change / set password screen
+            }}
+          />
+        )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
       <TabBar
@@ -76,6 +85,7 @@ function MainApp() {
           { id: 'home', label: 'Главная' },
           { id: 'review', label: 'Обзор дня', badge: !!pendingDay },
           { id: 'habits', label: 'Привычки' },
+          { id: 'profile', label: 'Профиль' },
         ]}
       />
     </div>

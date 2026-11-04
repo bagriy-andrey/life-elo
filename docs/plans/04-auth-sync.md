@@ -211,10 +211,11 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 - [x] 12. First sign-in flow + choice screen — files: `src/sync/firstSignIn.ts`, `src/ui/SyncChoice.tsx`, `src/App.tsx`
   — verify: tests for the flow with a fake remote; manual: existing local data → empty account uploads.
   Note: automated part done; manual check pending.
-- [ ] 13. Profile tab: TabBar 4th item «Профиль», `Profile.tsx` (name, email, sync status, «Синхронизировать заново»,
+- [x] 13. Profile tab: TabBar 4th item «Профиль», `Profile.tsx` (name, email, sync status, «Синхронизировать заново»,
   logout with unsynced-changes confirm; clear Dexie ONLY on explicit logout, never on a `SIGNED_OUT` event — a
   recovery elsewhere signs out globally and unsynced edits must survive until the next sign-in of the same user) — files: `src/ui/Profile.tsx`, `src/App.tsx` — verify: build, lint; manual
   logout leaves IndexedDB empty.
+  Note: automated part done; manual check pending. «Сменить пароль» is a TODO(step 14) no-op.
 - [ ] 14. Change / set password screen per design (current check, `signOut others`, Google-only mode, «Не помню
   текущий пароль») — files: `src/ui/ProfilePassword.tsx`, `src/ui/Profile.tsx` — verify: build; manual both modes.
 - [ ] 15. Vercel: confirm SPA/PWA serve `/?type=recovery…` (no rewrite needed; add `vercel.json` only if required),

@@ -200,4 +200,69 @@ describe('sync engine', () => {
     await e.resync()
     expect((await getSyncState()).cursor).toBe(1)
   })
+
+  it('pushes > 200 items in aligned batches and pulls > 500 records in pages', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    await db.habits.bulkPut(Array.from({ length: 450 }, (_, i) => habit(`h${i}`)))
+    await e.run()
+    expect(remote.rows.size).toBe(450)
+    expect(await db.outbox.count()).toBe(0)
+    for (let i = 0; i < 450; i++) expect(((remote.rows.get(`habits/h${i}`)?.data ?? {}) as Habit).id).toBe(`h${i}`)
+
+    const remote2 = new FakeRemote()
+    for (let i = 0; i < 1100; i++)
+      remote2.rows.set(`habits/p${i}`, {
+        tbl: 'habits', key: `p${i}`, data: habit(`p${i}`), deleted: false, schema: db.verno,
+        client_updated_at: new Date().toISOString(), rev: ++remote2.rev,
+      })
+    await clearLocalData()
+    await engine(remote2).run()
+    expect(await db.habits.count()).toBe(1100)
+    expect((await getSyncState()).cursor).toBe(1100)
+  })
+
+  it('resync during an in-flight run still ends with a full pull', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    await db.habits.put(habit('a'))
+    let release!: () => void
+    remote.beforePush = () => new Promise<void>((r) => (release = r))
+    const first = e.run()
+    await tick()
+    const rs = e.resync()
+    remote.beforePush = undefined
+    release()
+    await Promise.all([first, rs])
+    expect((await getSyncState()).cursor).toBe(1)
+    let afters: number[] = []
+    const orig = remote.pull.bind(remote)
+    remote.pull = async (a, l) => (afters.push(a), orig(a, l))
+    await setSyncState({ cursor: 1 })
+    await e.resync()
+    expect(afters[0]).toBe(0)
+  })
+
+  it('cancel during an in-flight pull writes nothing afterwards', async () => {
+    const remote = new FakeRemote()
+    remote.rows.set('habits/z', {
+      tbl: 'habits', key: 'z', data: habit('z'), deleted: false, schema: db.verno,
+      client_updated_at: new Date().toISOString(), rev: ++remote.rev,
+    })
+    const e = engine(remote)
+    let release!: () => void
+    const orig = remote.pull.bind(remote)
+    remote.pull = async (a, l) => {
+      await new Promise<void>((r) => (release = r))
+      return orig(a, l)
+    }
+    const p = e.run()
+    await tick()
+    e.cancel()
+    release()
+    await e.settled()
+    await p
+    expect(await db.habits.count()).toBe(0)
+    expect((await getSyncState()).cursor).toBe(0)
+  })
 })

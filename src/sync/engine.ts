@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react'
 import { db } from '../db/db'
 import { migrateHabit, migrateReview, type LegacyHabit, type LegacyReview } from '../db/migrate'
 import { applyDecision, schemaGate, toPushItem, type PushItem, type RemoteRecord } from './merge'
-import { applyRemote, getSyncState, setSyncState, SYNCED_TABLES, type SyncedTable } from './outbox'
+import { applyRemote, getSyncState, setSyncState, SYNCED_TABLES, type OutboxEntry, type SyncedTable } from './outbox'
 import type { SyncRemote } from './remote'
 
 export type SyncStatusKind = 'idle' | 'syncing' | 'offline' | 'error' | 'update-required'
@@ -49,13 +49,19 @@ const synced = new Set<string>(SYNCED_TABLES)
 function isNetworkError(e: unknown): boolean {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
   const msg = e instanceof Error ? e.message : String(e)
-  return e instanceof TypeError || /failed to fetch|networkerror|network request|load failed|fetch/i.test(msg)
+  return e instanceof TypeError || /failed to fetch|load failed|networkerror/i.test(msg)
 }
+
+class Cancelled extends Error {}
 
 export interface SyncEngine {
   run(): Promise<void>
   /** Cursor = 0, then a full (idempotent) pull. */
   resync(): Promise<void>
+  /** Aborts the in-flight run (no further local writes); a later run() starts fresh. */
+  cancel(): void
+  /** Resolves when no run is in flight. */
+  settled(): Promise<void>
   status: SyncStatusStore
 }
 
@@ -68,23 +74,27 @@ export function createSyncEngine(opts: {
   const now = opts.now ?? Date.now
   const status = opts.status ?? syncStatusStore
 
-  async function push() {
+  let gen = 0
+  let resetCursor = false
+
+  async function push(g: number) {
     // One read transaction so every row is consistent with its outbox entry.
-    const { entries, items } = await db.transaction('r', [...SYNCED_TABLES.map((t) => db.table(t)), db.outbox], async () => {
-      const entries = await db.outbox.toArray()
-      const items: PushItem[] = []
-      for (const e of entries) {
-        if (!synced.has(e.tbl)) continue
-        const row = await db.table(e.tbl).get(e.key)
-        items.push(toPushItem(e.tbl, e.key, row, e.changedAt, db.verno))
+    const pairs = await db.transaction('r', [...SYNCED_TABLES.map((t) => db.table(t)), db.outbox], async () => {
+      const out: { entry: OutboxEntry; item: PushItem }[] = []
+      for (const entry of await db.outbox.toArray()) {
+        if (!synced.has(entry.tbl)) continue
+        const row = await db.table(entry.tbl).get(entry.key)
+        out.push({ entry, item: toPushItem(entry.tbl, entry.key, row, entry.changedAt, db.verno) })
       }
-      return { entries, items }
+      return out
     })
-    for (let i = 0; i < items.length; i += PUSH_BATCH) {
-      await remote.push(items.slice(i, i + PUSH_BATCH))
-      const batch = entries.slice(i, i + PUSH_BATCH)
+    for (let i = 0; i < pairs.length; i += PUSH_BATCH) {
+      const batch = pairs.slice(i, i + PUSH_BATCH)
+      await remote.push(batch.map((p) => p.item))
+      if (g !== gen) throw new Cancelled()
       await db.transaction('rw', db.outbox, async () => {
-        for (const e of batch) {
+        if (g !== gen) throw new Cancelled()
+        for (const { entry: e } of batch) {
           const cur = await db.outbox.get([e.tbl, e.key] as never)
           if (cur && cur.changedAt === e.changedAt) await db.outbox.delete([e.tbl, e.key] as never)
         }
@@ -99,10 +109,12 @@ export function createSyncEngine(opts: {
   }
 
   /** Returns false when the app is too old for the page (cursor untouched). */
-  async function applyPage(page: RemoteRecord[]): Promise<boolean> {
+  async function applyPage(page: RemoteRecord[], g: number): Promise<boolean> {
     if (page.some((r) => schemaGate(r.schema, db.verno) === 'update-app')) return false
     const maxRev = Math.max(...page.map((r) => r.rev))
+    if (g !== gen) throw new Cancelled()
     await applyRemote(async () => {
+      if (g !== gen) throw new Cancelled()
       for (const rec of page) {
         if (!synced.has(rec.tbl)) continue
         const entry = await db.outbox.get([rec.tbl, rec.key] as never)
@@ -116,29 +128,37 @@ export function createSyncEngine(opts: {
     return true
   }
 
-  async function pull(): Promise<boolean> {
+  async function pull(g: number): Promise<boolean> {
     let cursor = (await getSyncState()).cursor
     for (;;) {
       const page = await remote.pull(cursor, PULL_PAGE)
       if (page.length === 0) return true
-      if (!(await applyPage(page))) return false
+      if (!(await applyPage(page, g))) return false
       cursor = Math.max(...page.map((r) => r.rev))
       if (page.length < PULL_PAGE) return true
     }
   }
 
   async function once() {
+    const g = gen
     status.set({ kind: 'syncing' })
     try {
-      await push()
-      if (!(await pull())) {
+      if (resetCursor) {
+        resetCursor = false
+        await setSyncState({ cursor: 0 })
+      }
+      await push(g)
+      if (!(await pull(g))) {
         status.set({ kind: 'update-required' })
         return
       }
+      if (g !== gen) return
       const t = now()
       await setSyncState({ lastSyncedAt: t })
+      if (g !== gen) return
       status.set({ kind: 'idle', lastSyncedAt: t })
     } catch (e) {
+      if (e instanceof Cancelled || g !== gen) return
       status.set({ kind: isNetworkError(e) ? 'offline' : 'error' })
     }
   }
@@ -165,13 +185,19 @@ export function createSyncEngine(opts: {
     run,
     status,
     async resync() {
-      await setSyncState({ cursor: 0 })
+      resetCursor = true
       await run()
     },
+    cancel() {
+      gen++
+      again = false
+    },
+    settled: () => running ?? Promise.resolve(),
   }
 }
 
-/** Triggers: now, `online`, tab becomes visible, 2 s after local writes. Returns a stop function. */
+/** Triggers: now, `online`, tab becomes visible, 2 s after local writes. Returns a stop function that cancels the in-flight run and resets status to idle;
+ * await `engine.settled()` afterwards before clearing local data. */
 export function startSync(engine: SyncEngine): () => void {
   const run = () => void engine.run()
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -201,5 +227,7 @@ export function startSync(engine: SyncEngine): () => void {
     clearTimeout(timer)
     window.removeEventListener('online', run)
     document.removeEventListener('visibilitychange', onVisible)
+    engine.cancel()
+    engine.status.set({ kind: 'idle' })
   }
 }

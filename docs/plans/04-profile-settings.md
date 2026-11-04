@@ -189,7 +189,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   applies instantly, survives reload, «Системная» follows OS.
 - [ ] 18. Clear all data — `Profile.tsx`: quiet `neg` full-width «Очистить все данные» + muted caption «Удалит
   профиль, привычки, историю и рейтинг»; `Dialog` titled «Удалить все данные?» with the agreed text, `danger`
-  «Удалить» and default «Отмена»; confirm → `clearAllData()`, remove `life-elo:prefs`, `location.reload()`; errors
+  «Удалить» and default «Отмена» (gets `autoFocus`); confirm → `clearAllData()`, remove `life-elo:prefs`, `location.reload()`; errors
   show inline in the dialog. No profile/habits remain, Elo starts at 0 — files: `src/ui/Profile.tsx`,
   `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts` — verify: `npm run build`; manual: with habits, reviews and a
   profile, cancel (overlay, Esc, button) changes nothing; confirm leaves empty Home (0, no history), Habits empty,

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 import './Dialog.css'
 
@@ -12,7 +12,13 @@ interface Props {
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-export function Dialog({ open, title, onClose, children }: Props) {
+export function Dialog({ open, ...rest }: Props) {
+  return open ? <DialogPanel {...rest} /> : null
+}
+
+function DialogPanel({ title, onClose, children }: Omit<Props, 'open'>) {
+  // Lazy initializer runs during render, before any child's autoFocus fires in commit.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null)
   const titleId = useId()
   const contentId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -22,15 +28,13 @@ export function Dialog({ open, title, onClose, children }: Props) {
   })
 
   useEffect(() => {
-    if (!open) return
-    const previous = document.activeElement as HTMLElement | null
     const panel = panelRef.current
     // A child may claim focus itself via autoFocus (e.g. the safe "Cancel" action).
     if (panel && !panel.contains(document.activeElement)) panel.focus()
-    return () => previous?.focus?.()
-  }, [open])
-
-  if (!open) return null
+    return () => {
+      if (opener?.isConnected) opener.focus()
+    }
+  }, [opener])
 
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Escape') {
@@ -54,7 +58,10 @@ export function Dialog({ open, title, onClose, children }: Props) {
   }
 
   return (
-    <div className="dialog-overlay" onClick={onClose} onKeyDown={onKeyDown}>
+    <div className="dialog-overlay" onClick={(e) => {
+        if (e.target === e.currentTarget) onCloseRef.current()
+      }}
+      onKeyDown={onKeyDown}>
       <div
         ref={panelRef}
         className="dialog-panel"
@@ -63,7 +70,6 @@ export function Dialog({ open, title, onClose, children }: Props) {
         aria-labelledby={titleId}
         aria-describedby={contentId}
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
       >
         <strong id={titleId} className="dialog-title">
           {title}

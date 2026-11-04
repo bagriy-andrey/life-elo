@@ -4,10 +4,10 @@ Branch: scoring-ruleset-v1 — PR #3 open (https://github.com/bagriy-andrey/life
 Plan: 01 (ruleset v1.1), 02 (grouping), 03 (rename/direction/delete) — all built + verified, Status: done
 
 ## In progress
-Nothing. Since plan 02: tier colors (tokens --tier-strong/-medium/-weak), commit c562acd.
+Nothing. Claude Design synced (grouping + tier colors).
 
 ## Next step
-User: `/design-sync` (HistoryEntry grouping + tier colors + new tokens), manual check in `npm run dev`
+User: manual check in `npm run dev`
 (v1.1: 3 Nov S = 50; grouping/colors; rename, direction flip, delete), merge PR #3, tick ROADMAP.
 
 ## Broken / open questions

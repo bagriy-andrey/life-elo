@@ -76,13 +76,14 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   prefs parse tolerates garbage), `src/main.tsx` (wrap `<App/>` in the provider). Tests may exercise pure functions
   (`translate(dict, key, params)`) instead of rendering. — verify: `npm test`, `npm run lint`, `npm run build`.
   Note: split into `types.ts`, `translate.ts`, `prefs.ts` (lang only; merges so step 7 can add theme), `index.tsx`.
-- [ ] 2. Translate `labels.ts` — convert all constants to dictionary keys / functions taking `t` + locale:
+- [x] 2. Translate `labels.ts` — convert all constants to dictionary keys / functions taking `t` + locale:
   `TIER_*`, `DIRECTION_*`, `ZONE_LABEL`, `UNIT_LABEL` (+ suffix), `BOOLEAN_OPTIONS`, `NOT_APPLICABLE_LABEL`,
   `RULE_CHOICE_LABEL`, `BETTER_LABEL`, `ruleSummary`, `quotaSummary`, `formatDay(day, locale)`; `formatSigned` and
   `TIER_COLOR` unchanged. Add keys to ru/en/uk; update every importer just enough to compile (pass `t`/locale; no
   other string moves yet) — files: `src/ui/labels.ts`, `src/ui/labels.test.ts` (new: formatDay per locale,
   ruleSummary/quotaSummary per language), `src/i18n/{ru,en,uk}.ts`, importers (`Home.tsx`, `Review.tsx`, `Habits.tsx`,
   `HistoryEntry.tsx`) — verify: `npm test`, `npm run build`.
+  Note: labels became functions of `t` (`tierLabels(t)`, `booleanOptions(t)`, ...). New keys also `history.unknown`, `rule.zoneValue`, `quota.*`. Unit suffix en/uk not pluralized («1 times»); Review's literal 'раз' left for step 4.
 - [ ] 3. [design-sync] Translate Home, App shell and components with built-in strings — `Home.tsx`, `App.tsx` (tab
   labels), `components/EloScore.tsx` («Life Elo» stays; «Чистых дней подряд: N» → plural-aware key),
   `components/HistoryEntry.tsx` (all lines, zone/extra labels), ru/en/uk keys. Components call `useI18n()` (works

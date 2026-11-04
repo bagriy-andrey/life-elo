@@ -1,6 +1,6 @@
 import type { LedgerEntry } from '../../engine/rating'
 import { groupByDirectionAndTier } from '../grouping'
-import { DIRECTION_GROUP_LABEL, formatDay, formatSigned, TIER_GROUP_LABEL, ZONE_LABEL } from '../labels'
+import { DIRECTION_GROUP_LABEL, formatDay, formatSigned, TIER_COLOR, TIER_GROUP_LABEL, ZONE_LABEL } from '../labels'
 import './Card.css'
 import './HistoryEntry.css'
 
@@ -30,15 +30,21 @@ function entryLabel(c: Contribution, names: Map<string, string>) {
 /** One reviewed day: total delta, expandable into score, usual-day comparison and grouped lines. */
 export function HistoryEntry({ entry, habits }: Props) {
   const names = new Map([...habits].map(([id, h]) => [id, h.name]))
-  const line = (c: Contribution, i: number) => (
-    <li key={i} className="row">
-      <span>
-        {entryLabel(c, names)}
-        {c.multiplier > 1 && <span className="muted"> · ×{c.multiplier.toFixed(2)}</span>}
-      </span>
-      <span>{formatSigned(c.points)}</span>
-    </li>
-  )
+  const tierOf = (c: Contribution) =>
+    c.source.kind === 'habit' || c.source.kind === 'streak_bonus' ? habits.get(c.source.habitId)?.tier : undefined
+  const line = (c: Contribution, i: number) => {
+    const tier = tierOf(c)
+    return (
+      <li key={i} className="row">
+        <span>
+          {tier && <span style={{ color: TIER_COLOR[tier] }}>● </span>}
+          {entryLabel(c, names)}
+          {c.multiplier > 1 && <span className="muted"> · ×{c.multiplier.toFixed(2)}</span>}
+        </span>
+        <span>{formatSigned(c.points)}</span>
+      </li>
+    )
+  }
   const indexed = entry.contributions.map((c, i) => ({ c, i }))
   const habitLines = indexed.filter(({ c }) => c.source.kind === 'habit')
   const otherLines = indexed.filter(({ c }) => c.source.kind !== 'habit')
@@ -62,7 +68,9 @@ export function HistoryEntry({ entry, habits }: Props) {
         {groups.map((g) => [
           <li key={g.direction}><strong>{DIRECTION_GROUP_LABEL[g.direction]}</strong></li>,
           ...g.tiers.flatMap((t) => [
-            <li key={`${g.direction}-${t.tier}`} className="muted">{TIER_GROUP_LABEL[t.tier]}</li>,
+            <li key={`${g.direction}-${t.tier}`} className="muted">
+              <span style={{ color: TIER_COLOR[t.tier] }}>●</span> {TIER_GROUP_LABEL[t.tier]}
+            </li>,
             ...t.items.map(({ c, i }) => line(c, i)),
           ]),
         ])}

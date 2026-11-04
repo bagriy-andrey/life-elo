@@ -13,6 +13,7 @@ import {
   DIRECTION_GROUP_LABEL,
   formatDay,
   NOT_APPLICABLE_LABEL,
+  TIER_COLOR,
   TIER_GROUP_LABEL,
   UNIT_LABEL,
   ZONE_LABEL,
@@ -162,11 +163,13 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
           <h2>{DIRECTION_GROUP_LABEL[g.direction]}</h2>
           {g.tiers.map((t) => (
             <div key={t.tier} className="stack">
-              <span className="muted">{TIER_GROUP_LABEL[t.tier]}</span>
+              <span className="muted">
+                <span style={{ color: TIER_COLOR[t.tier] }}>●</span> {TIER_GROUP_LABEL[t.tier]}
+              </span>
               {t.items.map((h) => {
                 const zone = zoneOf(h)
                 return (
-                  <Card key={h.id} className="stack-sm">
+                  <Card key={h.id} className="stack-sm" style={{ borderLeft: `4px solid ${TIER_COLOR[t.tier]}` }}>
                     <div className="row">
                       <strong>{h.name}</strong>
                       {zone && zone !== 'tolerable' && <Pill tone={toneOfZone(zone)}>{ZONE_LABEL[zone]}</Pill>}

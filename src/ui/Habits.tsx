@@ -22,6 +22,7 @@ import {
   quotaSummary,
   RULE_CHOICE_LABEL,
   ruleSummary,
+  TIER_COLOR,
   TIER_GROUP_LABEL,
   TIER_LABEL,
 } from './labels'
@@ -217,7 +218,7 @@ export function Habits({ habits, effectiveFrom }: Props) {
       )
     }
     return (
-      <Card key={h.id} className="row" inactive={!h.active}>
+      <Card key={h.id} className="row" inactive={!h.active} style={{ borderLeft: `4px solid ${TIER_COLOR[cur.tier]}` }}>
         <div className="stack-sm">
           <strong>{h.name}</strong>
           <span className="muted">{ruleSummary(cur.rule)}</span>
@@ -258,7 +259,9 @@ export function Habits({ habits, effectiveFrom }: Props) {
           <h2>{DIRECTION_GROUP_LABEL[g.direction]}</h2>
           {g.tiers.map((t) => (
             <div key={t.tier} className="stack">
-              <span className="muted">{TIER_GROUP_LABEL[t.tier]}</span>
+              <span className="muted">
+                <span style={{ color: TIER_COLOR[t.tier] }}>●</span> {TIER_GROUP_LABEL[t.tier]}
+              </span>
               {t.items.map(renderHabit)}
             </div>
           ))}

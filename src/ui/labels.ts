@@ -13,8 +13,15 @@ export const DIRECTION_LABEL: Record<HabitDirection, string> = {
 }
 
 export const DIRECTION_GROUP_LABEL: Record<HabitDirection, string> = {
-  constructive: 'Полезные',
-  destructive: 'Вредные',
+  constructive: '＋ Полезные',
+  destructive: '− Вредные',
+}
+
+/** Tier color (weight, not good/bad): green/red stay reserved for results (points, zones). */
+export const TIER_COLOR: Record<ImpactTier, string> = {
+  strong: 'var(--tier-strong)',
+  medium: 'var(--tier-medium)',
+  weak: 'var(--tier-weak)',
 }
 
 export const TIER_GROUP_LABEL: Record<ImpactTier, string> = {

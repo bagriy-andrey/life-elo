@@ -11,7 +11,7 @@ User: manual check in `npm run dev` (review inputs/zones, habit setup + quota, h
 then merge PR #3, then tick «Рейтинг v1» in docs/ROADMAP.md.
 
 ## Broken / open questions
-- Pending `/design-sync`: HistoryEntry preview numbers updated to v1.1.
+- Pending `/design-sync`: HistoryEntry grouped by direction/tier (plan 02) + v1.1 preview numbers.
 - Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — product context §13 Open.
 - Hardening (optional): settingsOn / r.entries assume v2 shape with no runtime guard; a v3 upgrade re-running
   the idempotent migrations would cover habits written by intermediate builds.

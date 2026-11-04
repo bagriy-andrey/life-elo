@@ -220,9 +220,6 @@ export function Habits({ habits, effectiveFrom }: Props) {
       <Card key={h.id} className="row" inactive={!h.active}>
         <div className="stack-sm">
           <strong>{h.name}</strong>
-          <span className="muted">
-            {DIRECTION_LABEL[h.direction]} · {TIER_LABEL[cur.tier]}
-          </span>
           <span className="muted">{ruleSummary(cur.rule)}</span>
           {cur.quota && <span className="muted">{quotaSummary(cur.quota, nameOf)}</span>}
         </div>

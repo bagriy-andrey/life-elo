@@ -12,7 +12,7 @@
   overflow: hidden;
   background: color-mix(in srgb, var(--accent) 15%, var(--card));
   color: var(--accent);
-  font-size: calc(var(--avatar-size, 96px) / 48 * 1rem);
+  font-size: calc(var(--avatar-size, 96px) / 3);
   font-weight: 700;
   line-height: 1;
   user-select: none;

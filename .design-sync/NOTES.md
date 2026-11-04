@@ -18,6 +18,7 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
   SegmentedControl, TabBar (generic `T extends string` → `string`), and HistoryEntry (LedgerEntry inlined).
 - TabBar is `position: fixed`: its preview wraps it in a `transform: translateZ(0)` frame, and the card is
   `cardMode: single`. HistoryEntry previews open `<details>` via a ref callback.
+  Dialog uses the same `translateZ(0)` frame (390×380) so its fixed overlay stays inside the card; without it the panel's top is clipped.
 
 - Components read strings via `useI18n()`; without a provider it falls back to ru, so previews render in Russian.
 
@@ -34,3 +35,4 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - Toolchain at first sync: TypeScript 7.0.2 (tsgo), node 24, esbuild 0.28.
 - Tokens now have forced-theme selectors (`:root[data-theme='dark'|'light']`) besides the `prefers-color-scheme` media block; dark values are duplicated and must stay in sync.
 - New components Field, Avatar, Dialog (previews authored); Dialog previews use `open`. Theme: `data-theme` on `:root` forces light/dark, no attribute = system.
+- Avatar's initials size is `calc(var(--avatar-size) / 3)`. `calc(px / n * 1rem)` is invalid CSS (px×rem) and silently falls back to the inherited size; the render check doesn't flag it, only the sheet does.

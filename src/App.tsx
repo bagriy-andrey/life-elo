@@ -80,6 +80,8 @@ function MainApp() {
 export default function App() {
   const { configured, loading, recovery, session } = useAuth()
   const [startForgot, setStartForgot] = useState(false)
+  // The forgot hand-off is one-shot: a later sign-out opens login again.
+  if (session && startForgot) setStartForgot(false)
   if (!configured)
     return (
       <div className="auth-message">

@@ -122,7 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         run(async () => {
           const { error } = await supabase!.auth.updateUser({ password })
           if (error) return fail(error)
-          await supabase!.auth.signOut({ scope: 'global' }).catch(() => {})
+          const out = await supabase!.auth.signOut({ scope: 'global' }).catch(() => ({ error: true }))
+          // Global sign-out failed (e.g. offline): at least end this browser's session.
+          if (out.error) await supabase!.auth.signOut({ scope: 'local' }).catch(() => {})
           setRecovery('done')
           return {}
         }),

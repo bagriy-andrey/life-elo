@@ -31,7 +31,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
 - `src/ui/components/` is mirrored in Claude Design: prop types for Button, Card, SegmentedControl,
-  TabBar, HistoryEntry are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+  TabBar, HistoryEntry, TextField, Notice are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
   Prefer `TextField` for labelled inputs; Habits/Review still use raw `<input>` styled globally in `src/index.css`.
 

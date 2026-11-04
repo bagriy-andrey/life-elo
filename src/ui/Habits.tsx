@@ -37,6 +37,8 @@ interface FieldsProps {
   onChange: (form: HabitForm) => void
   /** Habits that can serve as a quota reducer (never the one being edited). */
   reducers: Habit[]
+  /** Decides what an empty «Терпимо» means (constructive: never bad). */
+  direction: HabitDirection
 }
 
 const UNIT_HINT: Record<Exclude<RuleChoice, 'boolean'>, string> = {
@@ -46,21 +48,26 @@ const UNIT_HINT: Record<Exclude<RuleChoice, 'boolean'>, string> = {
   time: 'ЧЧ:ММ',
 }
 
-function RuleFields({ form, onChange, reducers }: FieldsProps) {
+function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
   const set = (patch: Partial<HabitForm>) => onChange({ ...form, ...patch })
   const measured = form.kind !== 'boolean'
   const isTime = form.kind === 'time'
-  const field = (key: 'excellent' | 'ok' | 'tolerable', label: string) => (
-    <input
-      type={isTime ? 'time' : 'number'}
-      inputMode={isTime ? undefined : 'decimal'}
-      min={isTime ? undefined : 0}
-      aria-label={label}
-      placeholder={label}
-      value={form[key]}
-      onChange={(e) => set({ [key]: e.target.value })}
-    />
+  // Visible caption above each threshold: the placeholder disappears once a value is entered.
+  const field = (key: 'excellent' | 'ok' | 'tolerable', label: string, placeholder: string) => (
+    <label className="stack-sm">
+      <span className="muted">{label}</span>
+      <input
+        type={isTime ? 'time' : 'number'}
+        inputMode={isTime ? undefined : 'decimal'}
+        min={isTime ? undefined : 0}
+        placeholder={placeholder}
+        value={form[key]}
+        onChange={(e) => set({ [key]: e.target.value })}
+      />
+    </label>
   )
+  const emptyTolerable =
+    direction === 'constructive' ? 'Пусто — хуже порога будет «Терпимо», 0 очков' : 'Пусто — хуже порога будет «Плохо»'
   return (
     <>
       <SegmentedControl
@@ -76,9 +83,9 @@ function RuleFields({ form, onChange, reducers }: FieldsProps) {
             options={options(BETTER_LABEL)}
           />
           <span className="muted">Пороги включительно, {UNIT_HINT[form.kind as Exclude<RuleChoice, 'boolean'>]}</span>
-          {field('excellent', 'Отлично')}
-          {field('ok', 'В рамках (необяз.)')}
-          {field('tolerable', 'Терпимо (необяз.)')}
+          {field('excellent', 'Отлично', 'Порог')}
+          {field('ok', 'В рамках (необяз.)', 'Порог')}
+          {field('tolerable', 'Терпимо (необяз.)', emptyTolerable)}
         </>
       )}
       {form.kind === 'count' && (
@@ -194,7 +201,7 @@ export function Habits({ habits, effectiveFrom }: Props) {
         />
         <SegmentedControl value={direction} onChange={setDirection} options={options(DIRECTION_LABEL)} />
         <SegmentedControl value={tier} onChange={setTier} options={options(TIER_LABEL)} />
-        <RuleFields form={form} onChange={setForm} reducers={habits} />
+        <RuleFields form={form} onChange={setForm} reducers={habits} direction={direction} />
         {error && <span className="neg">{error}</span>}
         <Button variant="primary" onClick={add} disabled={!name.trim()}>
           Добавить
@@ -213,6 +220,7 @@ export function Habits({ habits, effectiveFrom }: Props) {
                 form={editForm}
                 onChange={setEditForm}
                 reducers={habits.filter((x) => x.id !== h.id)}
+                direction={h.direction}
               />
               {editError && <span className="neg">{editError}</span>}
               <Button variant="primary" onClick={() => saveEdit(h)}>

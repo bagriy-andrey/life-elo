@@ -1,8 +1,8 @@
 import type { ImpactTier, Zone } from '../domain/types'
 
 /**
- * Versioned ruleset (every ledger entry records its version). v1 shape. Numbers of `RULESET_V1` come literally from
- * LIFE_ELO_PRODUCT_CONTEXT.md §6.5 (agreed 2026-11-03).
+ * Versioned ruleset (every ledger entry records its version). Numbers of `RULESET_V1` come literally from
+ * LIFE_ELO_PRODUCT_CONTEXT.md §6.5 (agreed 2026-11-03; v1.1 tier streak start agreed 2026-11-04, applied to all history).
  */
 export interface RulesetConfig {
   version: string
@@ -13,6 +13,8 @@ export interface RulesetConfig {
   zoneShare: Record<Zone, number>
   /** Streak length at which the streak bonus is full. */
   streakFullDays: number
+  /** First streak day that earns a bonus, per tier; it then grows in equal steps up to `streakFullDays`. */
+  streakStartDay: Record<ImpactTier, number>
   /** Positive streak is multiplied by this (then floored) on a tolerable day. */
   softDecayFactor: number
   /** Consecutive bad days needed before the first ok day counts as recovery (full weight). */
@@ -29,11 +31,12 @@ export interface RulesetConfig {
 }
 
 export const RULESET_V1: RulesetConfig = {
-  version: 'v1',
+  version: 'v1.1',
   tierWeight: { weak: 1, medium: 2, strong: 3 },
   budget: { habitBase: 60, cleanDay: 20, streak: 20 },
   zoneShare: { excellent: 1, ok: 0.5, tolerable: 0, bad: -1 },
   streakFullDays: 7,
+  streakStartDay: { strong: 3, medium: 5, weak: 7 },
   softDecayFactor: 0.5,
   recoveryMinBadDays: 2,
   negativeMultipliers: [1, 1.25, 1.5],

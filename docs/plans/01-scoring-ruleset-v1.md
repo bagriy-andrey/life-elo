@@ -79,6 +79,8 @@ No coefficient outside §6.5 may be invented; anything unclear is under "Open qu
 14. Habit settings are versioned by date: changing tier, rule thresholds or quota applies from the change day on;
     earlier days keep scoring with the settings that were in effect (see design decision "Habit versions").
 15. One reducer level only; a reducer habit must not itself have `reducedByDaysOf`.
+16. *v1.1, 2026-11-04 (all history):* streak bonus starts on day 3 / 5 / 7 for strong / medium / weak, full on day 7
+    (`streakStartDay`, `streakFraction`); constructive measured habit without a tolerable bound is never `bad` (below → tolerable).
 
 ## Steps
 - [x] 1. Domain types (additive): add `Zone`, `HabitEntry`, `ZonedRule` (`boolean` | `measured`), `Quota`, optional `Habit.quota`, optional `DayReview.entries`; keep old `HabitRule`/`outcomes` as legacy-optional. add optional `Habit.versions` + pure `settingsOn(habit, day)` (falls back to top-level tier/rule while legacy). Add pure `entriesOf(review)` + `normalizeRule(rule)` in a new file — files: `src/domain/types.ts`, `src/domain/legacy.ts`, `src/domain/legacy.test.ts` — verify: `npm test` (every legacy outcome maps to the right entry; legacy rules -> boolean; `settingsOn` picks the version in effect on edge days), `npm run lint`.

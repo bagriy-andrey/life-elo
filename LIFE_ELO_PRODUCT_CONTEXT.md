@@ -156,7 +156,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 
 - **60 — habit base.** `unit = 60 / Σ tierWeight(active habits)`, tier weights weak 1 / medium 2 / strong 3. So 100 is reached only when every habit is in its *excellent* zone.
 - **20 — clean-day bonus.** Granted when no applicable habit landed in the *bad* zone. Constructive habits do not affect it; any `unknown` on a destructive/limit habit means not clean.
-- **20 — streak bonuses.** Per habit: `20 × (weight / Σ weights) × min(streak, 7) / 7` (full at 7 consecutive days).
+- **20 — streak bonuses.** Per habit: `20 × (weight / Σ weights) × f(streak)`. *v1.1 (2026-11-04, applies to all history):* the bonus starts on streak day 3 for strong, day 5 for medium, day 7 for weak habits, then grows in equal steps to full on day 7 (strong: 1/5…5/5; medium: 1/3, 2/3, 1; weak: full on day 7); 0 before the start day.
 - Final day score is clamped to ±100.
 
 **Zoned habits (single outcome per habit per day).** Every habit maps its measured value (yes/no, time, count, minutes, steps) to one zone; zone thresholds are configured per habit. Plain yes/no habits are a special case.
@@ -171,6 +171,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 - Constructive done = *excellent*; constructive not done = *tolerable*.
 - Destructive complied = *ok* (50%, anti-farming). **Recovery:** the first non-bad day after ≥2 consecutive bad days scores the full weight instead of 50%.
 - Negative-streak multiplier: ×1 → ×1.25 → ×1.5 (cap from the 3rd consecutive bad day).
+- *v1.1 (2026-11-04):* when a constructive measured habit has no *tolerable* threshold, anything below its lowest threshold is *tolerable* (0, neutral), never *bad*; *bad* for a constructive habit needs an explicit tolerable bound (like steps <5 000). Destructive habits keep "beyond ok is bad".
 - Examples: bedtime ≤23:00 excellent / 23:00–01:00 tolerable / after 01:00 bad; steps ≥10 000 excellent / 5 000–9 999 tolerable / <5 000 bad; social media 0 min excellent / ≤20 min ok / >20 min bad (entered manually at review).
 
 **Period quotas.** A habit may have a limit per calendar week (Mon–Sun) and per day. Example: masturbation ≤1/day and ≤2/week; the weekly limit is reduced by 1 for each day with sex so far this week (not below 0). Sex is a constructive habit with no limit. A day is *bad* if the cumulative count so far this week exceeds the limit as of that day (no retroactive changes to earlier days); otherwise *ok*.

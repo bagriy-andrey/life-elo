@@ -15,7 +15,7 @@ function toNumber(unit: Measured['unit'], v: number | string): number | null {
   return typeof v === 'number' ? v : null
 }
 
-function classifyMeasured(rule: Measured, raw: boolean | number | string): Zone | null {
+function classifyMeasured(rule: Measured, raw: boolean | number | string, direction: Habit['direction']): Zone | null {
   const value = toNumber(rule.unit, raw as number | string)
   const excellent = toNumber(rule.unit, rule.excellent)
   if (value === null || excellent === null) return null
@@ -28,6 +28,8 @@ function classifyMeasured(rule: Measured, raw: boolean | number | string): Zone 
   if (within(excellent)) return 'excellent'
   if (within(ok)) return 'ok'
   if (within(tolerable)) return 'tolerable'
+  // v1.1: without an explicit tolerable bound a constructive habit is never bad ("not done" stays neutral).
+  if (tolerable === undefined && direction === 'constructive') return 'tolerable'
   return 'bad'
 }
 
@@ -43,5 +45,5 @@ export function classifyZone(habit: ZonedHabit, entry: HabitEntry): Zone | null 
     if (habit.direction === 'constructive') return entry.value ? 'excellent' : 'tolerable'
     return entry.value ? 'ok' : 'bad'
   }
-  return classifyMeasured(rule, entry.value)
+  return classifyMeasured(rule, entry.value, habit.direction)
 }

@@ -35,10 +35,21 @@ describe('classifyZone measured', () => {
     expect(classifyZone(h(steps), v(5000))).toBe('tolerable')
     expect(classifyZone(h(steps), v(4999))).toBe('bad')
   })
-  it('social media: tolerable omitted, beyond ok is bad', () => {
-    expect(classifyZone(h(social), v(0))).toBe('excellent')
-    expect(classifyZone(h(social), v(20))).toBe('ok')
-    expect(classifyZone(h(social), v(21))).toBe('bad')
+  it('social media (destructive): tolerable omitted, beyond ok is bad', () => {
+    const d = { direction: 'destructive' as const, rule: social }
+    expect(classifyZone(d, v(0))).toBe('excellent')
+    expect(classifyZone(d, v(20))).toBe('ok')
+    expect(classifyZone(d, v(21))).toBe('bad')
+  })
+  it('v1.1: constructive with tolerable omitted is never bad', () => {
+    const reading: ZonedRule = { kind: 'measured', unit: 'minutes', better: 'higher', excellent: 30, ok: 15 }
+    const c = { direction: 'constructive' as const, rule: reading }
+    expect(classifyZone(c, v(30))).toBe('excellent')
+    expect(classifyZone(c, v(15))).toBe('ok')
+    expect(classifyZone(c, v(14))).toBe('tolerable')
+    expect(classifyZone(c, v(0))).toBe('tolerable')
+    // an explicit tolerable bound still allows bad (steps < 5000)
+    expect(classifyZone({ direction: 'constructive', rule: steps }, v(4999))).toBe('bad')
   })
   it('ok zone is skipped when absent', () => {
     const r: ZonedRule = { kind: 'measured', unit: 'count', better: 'lower', excellent: 1, tolerable: 3 }

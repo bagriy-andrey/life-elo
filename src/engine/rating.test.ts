@@ -66,8 +66,8 @@ describe('replay', () => {
   it('first perfect day moves R to S (R += 0.1 x (10S - 0))', () => {
     const r = rp([sugar], perfectDays(1))
     const e = r.ledger[0]
-    // 60 base + 20 clean day + 20 x 1/7 streak bonus
-    expect(e.dayScore).toBeCloseTo(60 + 20 + 20 / 7, 10)
+    // 60 base + 20 clean day; no streak bonus on day 1 (v1.1)
+    expect(e.dayScore).toBeCloseTo(60 + 20, 10)
     expect(r.rating).toBeCloseTo(e.dayScore, 10)
     expect(e.status).toBe('reviewed')
   })

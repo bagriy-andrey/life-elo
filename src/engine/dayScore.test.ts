@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { RULESET_V1 as cfg } from './config'
-import { scoreDay } from './dayScore'
+import { scoreDay, streakFraction } from './dayScore'
 import type { DayHabit, DayZone } from './dayScore'
 
 const strong: DayHabit = { id: 's', tier: 'strong', canBeBad: true }
@@ -25,11 +25,11 @@ describe('scoreDay', () => {
 
   it('two habits, mixed zones (hand computed)', () => {
     // sum=3, unit=20. medium excellent: 40; weak ok (no recovery): 10.
-    // clean 20. streaks: medium 1 -> 20*(2/3)/7, weak 1 -> 20*(1/3)/7.
+    // clean 20. streaks on day 1: no bonus yet (v1.1: medium starts on day 5, weak on day 7).
     const r = run([medium, weak], { m: 'excellent', w: 'ok' })
     expect(pts(r, 'habit', 'm')).toBeCloseTo(40)
     expect(pts(r, 'habit', 'w')).toBeCloseTo(10)
-    expect(r.S).toBeCloseTo(40 + 10 + 20 + 20 / 7)
+    expect(r.S).toBeCloseTo(40 + 10 + 20)
   })
 
   it('bad habit on day 3 of a bad run = -unit*w*1.5', () => {
@@ -56,8 +56,15 @@ describe('scoreDay', () => {
   it('tolerable scores 0, halves streak; bonus uses the halved streak', () => {
     const r = run([strong], { s: 'tolerable' }, { s: { pos: 7, neg: 0 } })
     expect(pts(r, 'habit')).toBe(0)
-    expect(pts(r, 'streak_bonus')).toBeCloseTo(20 * 3 / 7)
+    // strong, streak halved 7 -> 3: first bonus day of 5 -> 20 x 1/5
+    expect(pts(r, 'streak_bonus')).toBeCloseTo(20 / 5)
     expect(r.clean).toBe(true)
+  })
+
+  it('v1.1 streak start per tier: strong day 3, medium day 5, weak day 7; full on day 7', () => {
+    expect([1, 2, 3, 4, 5, 6, 7, 9].map((d) => streakFraction(d, 'strong', cfg))).toEqual([0, 0, 1 / 5, 2 / 5, 3 / 5, 4 / 5, 1, 1])
+    expect([4, 5, 6, 7].map((d) => streakFraction(d, 'medium', cfg))).toEqual([0, 1 / 3, 2 / 3, 1])
+    expect([6, 7, 8].map((d) => streakFraction(d, 'weak', cfg))).toEqual([0, 1, 1])
   })
 
   it('unknown destructive blocks clean day', () => {

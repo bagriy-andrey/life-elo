@@ -45,6 +45,17 @@ export interface DayScoreResult {
   streaks: Record<string, StreakState>
 }
 
+/**
+ * Share of the habit's streak bonus: 0 before the tier's start day, then equal steps up to full at `streakFullDays`
+ * (strong: day 3 = 1/5 … day 7 = full; medium: day 5 = 1/3; weak: full on day 7).
+ */
+export function streakFraction(pos: number, tier: ImpactTier, cfg: RulesetConfig): number {
+  const start = Math.min(cfg.streakStartDay[tier], cfg.streakFullDays)
+  const n = Math.min(pos, cfg.streakFullDays)
+  if (n < start) return 0
+  return (n - start + 1) / (cfg.streakFullDays - start + 1)
+}
+
 /** Day score per LIFE_ELO_PRODUCT_CONTEXT.md §6.5: 60 habit base + 20 clean day + 20 streak bonuses. */
 export function scoreDay({ habits, zones, streaks, cfg }: DayScoreInput): DayScoreResult {
   const contributions: DayContribution[] = []
@@ -93,9 +104,9 @@ export function scoreDay({ habits, zones, streaks, cfg }: DayScoreInput): DaySco
 
   if (sumWeights > 0) {
     for (const h of applicable) {
-      const n = Math.min(after[h.id].pos, cfg.streakFullDays)
-      if (n <= 0) continue
-      const points = cfg.budget.streak * (cfg.tierWeight[h.tier] / sumWeights) * (n / cfg.streakFullDays)
+      const fraction = streakFraction(after[h.id].pos, h.tier, cfg)
+      if (fraction <= 0) continue
+      const points = cfg.budget.streak * (cfg.tierWeight[h.tier] / sumWeights) * fraction
       push({ source: 'streak_bonus', habitId: h.id, points, multiplier: 1 })
     }
   }

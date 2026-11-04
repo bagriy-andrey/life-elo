@@ -12,7 +12,8 @@
     "SegmentedControl": "/** Equal-width buttons, left to right. tone colors the selected segment (pos = green, neg = red), accent when omitted. */\n  options: { value: string; label: string; tone?: \"pos\" | \"neg\" }[];\n  /** Selected option value. Nothing is selected when undefined. */\n  value?: string;\n  onChange: (value: string) => void;",
     "TabBar": "/** Tabs. badge shows a red attention dot after the label. */\n  items: { id: string; label: string; badge?: boolean }[];\n  /** id of the selected tab (accent color, bold). */\n  active: string;\n  onSelect: (id: string) => void;",
     "HistoryEntry": "/** One reviewed day from the rating ledger: day is \"YYYY-MM-DD\", delta is the signed day total, contributions explain it line by line (rendered when the entry is expanded). */\n  entry: {\n    day: string; rulesetVersion: string; reviewRevision: number;\n    status: \"reviewed\" | \"unknown\"; ratingBefore: number; delta: number; ratingAfter: number;\n    dayScore: number; expected: number; clamped: boolean;\n    contributions: {\n      source: { kind: \"habit\"; habitId: string } | { kind: \"clean_day\" } | { kind: \"streak_bonus\"; habitId: string } | { kind: \"unknown_day\" };\n      zone?: \"excellent\" | \"ok\" | \"tolerable\" | \"bad\" | \"unknown\" | \"not_applicable\";\n      points: number; multiplier: number;\n    }[];\n  };\n  /** habitId -> name and the direction/tier in effect on the entry's day, used to group habit lines. */\n  habits: Map<string, { name: string; direction: 'constructive' | 'destructive'; tier: 'weak' | 'medium' | 'strong' }>;",
-    "Field": "/** Label text above the control. */\n  label: string;\n  /** Shows a red asterisk after the label. */\n  required?: boolean;\n  /** Short muted text inside the left edge of the control, e.g. \"@\". */\n  prefix?: string;\n  /** Muted helper text under the control; hidden while error is shown. */\n  hint?: string;\n  /** Red error text under the control. The input gets aria-invalid automatically. */\n  error?: string;\n  className?: string;\n  /** A single native control, e.g. <input>. */\n  children: React.ReactNode;"
+    "Field": "/** Label text above the control. */\n  label: string;\n  /** Shows a red asterisk after the label. */\n  required?: boolean;\n  /** Short muted text inside the left edge of the control, e.g. \"@\". */\n  prefix?: string;\n  /** Muted helper text under the control; hidden while error is shown. */\n  hint?: string;\n  /** Red error text under the control. The input gets aria-invalid automatically. */\n  error?: string;\n  className?: string;\n  /** A single native control, e.g. <input>. */\n  children: React.ReactNode;",
+    "Avatar": "/** Photo URL or data URL. Initials of name are shown when absent. */\n  src?: string;\n  /** Used for the initials fallback. */\n  name: string;\n  /** Diameter in px (default 96). */\n  size?: number;\n  /** Makes the avatar a button (edit mode) with a dashed border. */\n  onClick?: () => void;\n  /** Accessible name of the button, e.g. \"Выбрать фото\". Only used with onClick. */\n  label?: string;\n  className?: string;"
   },
   "overrides": {
     "TabBar": {
@@ -42,6 +43,9 @@
       "cardMode": "column"
     },
     "Field": {
+      "cardMode": "column"
+    },
+    "Avatar": {
       "cardMode": "column"
     }
   },

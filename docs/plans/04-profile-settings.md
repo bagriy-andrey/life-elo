@@ -139,10 +139,11 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `npm run build`, `npm run lint`; check the emitted `.d.ts`.
   Note: Field reuses the global input style (`src/index.css`), adding only min-height 44 / width 100% / prefix padding;
   it clones its single child to add `aria-describedby`.
-- [ ] 11. [design-sync] `Avatar` component — props `src?`, `name`, `size?` (default 96): round photo or initials
+- [x] 11. [design-sync] `Avatar` component — props `src?`, `name`, `size?` (default 96): round photo or initials
   (`initials()` from domain) on `color-mix(in srgb, var(--accent) 15%, var(--card))` with accent text, 2rem bold at
   96px (scale with size). Files: `components/Avatar.tsx`, `Avatar.css`, `index.ts`, `.design-sync/config.json`
   (dtsPropsFor + override), preview — verify: `npm run build`, `npm run lint`.
+  Note: also `onClick?` + `label?` (aria-label) → renders a dashed-border button for edit mode; size via `--avatar-size`.
 - [ ] 12. [design-sync] `Button` variants — add `danger` (filled `--neg` bg, `--accent-text`-like readable text in
   both themes) and `quiet` (no border/background, accent text). Files: `components/Button.tsx`, `Button.css`,
   `.design-sync/config.json` (`dtsPropsFor.Button` variant union + doc comments), Button preview — verify:

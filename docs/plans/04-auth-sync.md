@@ -152,7 +152,10 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 - [ ] 1. Docs & config: AGENTS.md (stack: Supabase; layout `src/auth/`, `src/sync/`, `supabase/`; rule «rating is
   never stored on the server»; remove «No backend»), product context §13 decision entry (2026-11-04 decisions from
   «Why»), `.env.example`, `.gitignore` has `.env*` except example, `docs/setup/backend.md` — the user's manual
-  checklist: create Supabase project; Auth settings (email confirmation OFF, OTP expiry 3600 s, min password 8 +
+  checklist, written for someone creating every account from scratch (the user has none yet), in this order:
+  0) buy a domain (Cloudflare Registrar or Porkbun; it is only needed for the email sender — the app runs on
+  `*.vercel.app`; until Resend is ready, Supabase's built-in mailer reaches the project owner's own email, enough
+  for testing); create Supabase project; Auth settings (email confirmation OFF, OTP expiry 3600 s, min password 8 +
   letters & digits, Site URL = Vercel URL, redirect allowlist: Vercel URL + `http://localhost:5173`); Google Cloud
   OAuth client (consent screen, authorized redirect = Supabase callback) → Supabase Google provider; Resend domain
   + DNS records → Supabase custom SMTP (sender `Life Elo <no-reply@DOMAIN>`); paste recovery template from

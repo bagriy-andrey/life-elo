@@ -131,12 +131,14 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   (`buildProfile(existing, input, now)`) unit-tested — files: `src/db/db.ts`, `src/db/profile.ts`,
   `src/db/profile.test.ts` — verify: `npm test`, `npm run build`; manual: reload keeps v1→v3 upgrade working with
   existing habits/reviews intact.
-- [ ] 10. [design-sync] `Field` component — label (text-sm, 600) + optional `required` asterisk + wrapped control
+- [x] 10. [design-sync] `Field` component — label (text-sm, 600) + optional `required` asterisk + wrapped control
   (children, native input) + optional `prefix` (absolute-positioned, e.g. «@») + `hint` (muted xs) + `error` (`--neg`
   xs, `role="alert"`-free, linked by `aria-describedby` via `useId`; the screen sets `aria-invalid` on the input).
   Files: `components/Field.tsx`, `Field.css`, export in `components/index.ts`, `dtsPropsFor.Field` in
   `.design-sync/config.json` + a `cardMode: column` override, preview per `.design-sync/NOTES.md` — verify:
   `npm run build`, `npm run lint`; check the emitted `.d.ts`.
+  Note: Field reuses the global input style (`src/index.css`), adding only min-height 44 / width 100% / prefix padding;
+  it clones its single child to add `aria-describedby`.
 - [ ] 11. [design-sync] `Avatar` component — props `src?`, `name`, `size?` (default 96): round photo or initials
   (`initials()` from domain) on `color-mix(in srgb, var(--accent) 15%, var(--card))` with accent text, 2rem bold at
   96px (scale with size). Files: `components/Avatar.tsx`, `Avatar.css`, `index.ts`, `.design-sync/config.json`
@@ -189,6 +191,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts` — verify: `npm run build`; manual: with habits, reviews and a
   profile, cancel (overlay, Esc, button) changes nothing; confirm leaves empty Home (0, no history), Habits empty,
   Profile in edit mode, language ru, theme system.
+  Note: clearAllData: derive the table list once (e.g. `db.tables`) instead of duplicating it in the transaction scope and the map.
 - [ ] 19. Docs and sync notes — `AGENTS.md` (UI language: ru/en/uk via `src/i18n`, ru is the key source of truth;
   update the `src/ui/components/` gotcha list to include Field/Avatar/Dialog if their props are in `dtsPropsFor`;
   keep Gotchas ≤10 lines), `docs/ROADMAP.md` (check «Профиль и настройки»), `.design-sync/NOTES.md` (new

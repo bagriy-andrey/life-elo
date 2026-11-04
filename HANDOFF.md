@@ -12,7 +12,7 @@ User: `/design-sync` (HistoryEntry grouping + tier colors + new tokens), manual 
 
 ## Broken / open questions
 - Open in product context §13: weekly minimum goals (sport ≥5/week; interim daily + N/A rest days);
-  quota overrun rule (zero-count days bad for the rest of the week).
+  quota overrun rule (incl. sex reducer making the current day bad); overall scoring review before v2.
 - Optional hardening: runtime guard / v3 upgrade re-running idempotent migrations (habits without `versions`).
 - `HistoryEntry` clamp note hardcodes «±100»; `App.tsx` `today` may go stale past the day boundary.
 - Deploy to Vercel postponed by the user. Stray iOS note at end of LIFE_ELO_PRODUCT_CONTEXT.md still there.

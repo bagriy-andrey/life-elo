@@ -12,6 +12,17 @@ export const DIRECTION_LABEL: Record<HabitDirection, string> = {
   destructive: 'Нежелательная',
 }
 
+export const DIRECTION_GROUP_LABEL: Record<HabitDirection, string> = {
+  constructive: 'Полезные',
+  destructive: 'Вредные',
+}
+
+export const TIER_GROUP_LABEL: Record<ImpactTier, string> = {
+  strong: 'Сильные',
+  medium: 'Средние',
+  weak: 'Слабые',
+}
+
 export const ZONE_LABEL: Record<Zone, string> = {
   excellent: 'Отлично',
   ok: 'В рамках',

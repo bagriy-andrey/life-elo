@@ -152,5 +152,10 @@ export const en: Dict = {
   'settings.theme': "Theme",
   'settings.theme.system': "System",
   'settings.theme.light': "Light",
-  'settings.theme.dark': "Dark"
+  'settings.theme.dark': "Dark",
+  'settings.clear': "Clear all data",
+  'settings.clearHint': "Deletes your profile, habits, history and rating",
+  'settings.clearTitle': "Delete all data?",
+  'settings.clearBody': "Your profile, habits, day history and rating will be removed from this device. This cannot be undone.",
+  'settings.clearError': "Could not delete data. Nothing was changed."
 }

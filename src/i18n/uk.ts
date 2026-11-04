@@ -162,5 +162,10 @@ export const uk: Dict = {
   'settings.theme': "Тема",
   'settings.theme.system': "Системна",
   'settings.theme.light': "Світла",
-  'settings.theme.dark': "Темна"
+  'settings.theme.dark': "Темна",
+  'settings.clear': "Очистити всі дані",
+  'settings.clearHint': "Видалить профіль, звички, історію та рейтинг",
+  'settings.clearTitle': "Видалити всі дані?",
+  'settings.clearBody': "Профіль, звички, історія днів і рейтинг будуть видалені з пристрою. Цю дію не можна скасувати.",
+  'settings.clearError': "Не вдалося видалити дані. Нічого не змінено."
 }

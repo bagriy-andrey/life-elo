@@ -191,7 +191,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `npm run build`; manual: switching language retranslates all tabs instantly and survives reload; theme switch
   applies instantly, survives reload, «Системная» follows OS.
   Note: done; theme state is local to Settings (init from loadPrefs, single writer); Settings renders in both modes via a wrapper in Profile.
-- [ ] 18. Clear all data — `Profile.tsx`: quiet `neg` full-width «Очистить все данные» + muted caption «Удалит
+- [x] 18. Clear all data — `Profile.tsx`: quiet `neg` full-width «Очистить все данные» + muted caption «Удалит
   профиль, привычки, историю и рейтинг»; `Dialog` titled «Удалить все данные?» with the agreed text, `danger`
   «Удалить» and default «Отмена» (gets `autoFocus`); confirm → `clearAllData()`, remove `life-elo:prefs`, `location.reload()`; errors
   show inline in the dialog. No profile/habits remain, Elo starts at 0 — files: `src/ui/Profile.tsx`,

@@ -39,15 +39,8 @@ export async function saveProfile(input: SaveProfileInput, now: Date): Promise<v
 
 /** Wipes every table in one transaction. Prefs (localStorage) are cleared by the caller. */
 export async function clearAllData(): Promise<void> {
-  await db.transaction(
-    'rw',
-    [db.habits, db.events, db.reviews, db.wellbeing, db.rewards, db.profile],
-    async () => {
-      await Promise.all(
-        [db.habits, db.events, db.reviews, db.wellbeing, db.rewards, db.profile].map((t) =>
-          t.clear(),
-        ),
-      )
-    },
-  )
+  const tables = db.tables
+  await db.transaction('rw', tables, async () => {
+    await Promise.all(tables.map((t) => t.clear()))
+  })
 }

@@ -26,14 +26,16 @@ describe('Profile smoke render', () => {
     const html = render(profile)
     expect(html).toContain('Профиль')
     expect(html).toContain('Изменить')
-    expect(html).toContain('Настройки')
+    expect(html.split('Настройки')).toHaveLength(2)
+    expect(html).toContain('Очистить все данные')
     expect(html).toContain('Анна')
   })
 
   it('renders edit form without profile, plus settings', () => {
     const html = render(null)
     expect(html).toContain('Профиль')
-    expect(html).toContain('Настройки')
+    expect(html.split('Настройки')).toHaveLength(2)
+    expect(html).toContain('Очистить все данные')
   })
 
   it('renders in English when the stored lang is en', () => {

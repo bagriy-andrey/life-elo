@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { saveProfile } from '../db/profile'
+import { clearAllData, saveProfile } from '../db/profile'
 import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
 import type { DayKey } from '../domain/types'
 import { useI18n } from '../i18n'
-import { loadPrefs, savePrefs, THEMES } from '../i18n/prefs'
+import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
-import { Avatar, Button, Card, Field, SegmentedControl } from './components'
+import { Avatar, Button, Card, Dialog, Field, SegmentedControl } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
@@ -173,6 +173,56 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
 
 const LANG_NAMES = { ru: 'Русский', en: 'English', uk: 'Українська' } as const
 
+function ClearData() {
+  const { t } = useI18n()
+  const [open, setOpen] = useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const close = () => {
+    if (clearing) return
+    setOpen(false)
+    setFailed(false)
+  }
+  const confirm = async () => {
+    if (clearing) return
+    setClearing(true)
+    setFailed(false)
+    try {
+      await clearAllData()
+    } catch {
+      setFailed(true)
+      setClearing(false)
+      return
+    }
+    try {
+      localStorage.removeItem(PREFS_KEY)
+    } catch {
+      /* storage unavailable: nothing to remove */
+    }
+    location.reload()
+  }
+  return (
+    <div className="clear-data">
+      <Button variant="quiet" className="neg clear-btn" onClick={() => setOpen(true)}>
+        {t('settings.clear')}
+      </Button>
+      <span className="muted clear-hint">{t('settings.clearHint')}</span>
+      <Dialog open={open} title={t('settings.clearTitle')} onClose={close}>
+        <p className="dialog-body">{t('settings.clearBody')}</p>
+        {failed && <p className="neg" role="alert">{t('settings.clearError')}</p>}
+        <div className="dialog-actions">
+          <Button variant="danger" className="clear-btn" onClick={confirm} disabled={clearing}>
+            {t('common.delete')}
+          </Button>
+          <Button className="clear-btn" onClick={close} disabled={clearing} autoFocus>
+            {t('common.cancel')}
+          </Button>
+        </div>
+      </Dialog>
+    </div>
+  )
+}
+
 function Settings() {
   const { t, lang, setLang } = useI18n()
   // localStorage prefs are the single source of truth; this is the only place theme changes.
@@ -203,6 +253,7 @@ function Settings() {
           />
         </div>
       </Card>
+      <ClearData />
     </section>
   )
 }

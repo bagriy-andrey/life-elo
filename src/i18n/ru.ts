@@ -161,5 +161,10 @@ export const ru = {
   'settings.theme': "Тема",
   'settings.theme.system': "Системная",
   'settings.theme.light': "Светлая",
-  'settings.theme.dark': "Тёмная"
+  'settings.theme.dark': "Тёмная",
+  'settings.clear': "Очистить все данные",
+  'settings.clearHint': "Удалит профиль, привычки, историю и рейтинг",
+  'settings.clearTitle': "Удалить все данные?",
+  'settings.clearBody': "Профиль, привычки, история дней и рейтинг будут удалены с устройства. Это действие нельзя отменить.",
+  'settings.clearError': "Не удалось удалить данные. Ничего не изменено."
 }

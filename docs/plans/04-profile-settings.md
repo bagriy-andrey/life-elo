@@ -67,7 +67,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
 (none)
 
 ## Steps
-- [ ] 1. i18n core — `src/i18n/types.ts` (`Lang = 'ru'|'en'|'uk'`, `Dict`, `PluralForms`), `ru.ts`, `en.ts`, `uk.ts`
+- [x] 1. i18n core — `src/i18n/types.ts` (`Lang = 'ru'|'en'|'uk'`, `Dict`, `PluralForms`), `ru.ts`, `en.ts`, `uk.ts`
   (start with tab names + common words: Главная/Обзор дня/Привычки/Профиль, Отмена, Сохранить, Удалить, month/day
   names are NOT dictionary entries — use `Intl` with locale `ru-RU|en-GB|uk-UA`), `src/i18n/index.tsx`
   (`I18nProvider`, `useI18n() → { t, plural-aware t, lang, locale, setLang }`, ru fallback without provider,
@@ -75,6 +75,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   (interpolation, plural per language incl. ru one/few/many, key-set and placeholder parity of the 3 dictionaries,
   prefs parse tolerates garbage), `src/main.tsx` (wrap `<App/>` in the provider). Tests may exercise pure functions
   (`translate(dict, key, params)`) instead of rendering. — verify: `npm test`, `npm run lint`, `npm run build`.
+  Note: split into `types.ts`, `translate.ts`, `prefs.ts` (lang only; merges so step 7 can add theme), `index.tsx`.
 - [ ] 2. Translate `labels.ts` — convert all constants to dictionary keys / functions taking `t` + locale:
   `TIER_*`, `DIRECTION_*`, `ZONE_LABEL`, `UNIT_LABEL` (+ suffix), `BOOLEAN_OPTIONS`, `NOT_APPLICABLE_LABEL`,
   `RULE_CHOICE_LABEL`, `BETTER_LABEL`, `ruleSummary`, `quotaSummary`, `formatDay(day, locale)`; `formatSigned` and

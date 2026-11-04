@@ -183,7 +183,6 @@ function Settings() {
     savePrefs({ theme: next })
   }
   return (
-    <div className="stack">
     <section className="stack">
       <h2 className="settings-title">{t('settings.title')}</h2>
       <Card className="settings-card">
@@ -205,8 +204,6 @@ function Settings() {
         </div>
       </Card>
     </section>
-    <Settings />
-    </div>
   )
 }
 
@@ -234,40 +231,40 @@ export function Profile({ profile, rating, today }: Props) {
   })
   return (
     <div className="stack">
-    <section className="stack">
-      <div className="profile-head">
-        <h2>{t('tab.profile')}</h2>
-        <Button onClick={() => setEditing(true)}>{t('profile.edit')}</Button>
-      </div>
-      <div className="profile-id">
-        <Avatar src={profile.photo} name={profile.name} size={96} />
-        <strong className="profile-name">{profile.name}</strong>
-        {profile.nick && <span className="muted">@{profile.nick}</span>}
-      </div>
-      <div className="profile-grid">
-        <Card className="profile-stat">
-          <span className="muted">{t('profile.rating')}</span>
-          <strong className={cx('profile-stat-value', sign)}>{formatSigned(rating, 1)}</strong>
-        </Card>
-        <Card className="profile-stat">
-          <span className="muted">{t('profile.since')}</span>
-          <strong className="profile-stat-date">{since}</strong>
-        </Card>
-      </div>
-      <Card className="profile-rows">
-        <div className="profile-row">
-          <span className="muted">{t('profile.email')}</span>
-          <span className="profile-row-value">{profile.email || '—'}</span>
+      <section className="stack">
+        <div className="profile-head">
+          <h2>{t('tab.profile')}</h2>
+          <Button onClick={() => setEditing(true)}>{t('profile.edit')}</Button>
         </div>
-        <div className="profile-row">
-          <span className="muted">{t('profile.birth')}</span>
-          <span className="profile-row-value">
-            {profile.birth ? formatBirth(profile.birth, today, t, locale) : '—'}
-          </span>
+        <div className="profile-id">
+          <Avatar src={profile.photo} name={profile.name} size={96} />
+          <strong className="profile-name">{profile.name}</strong>
+          {profile.nick && <span className="muted">@{profile.nick}</span>}
         </div>
-      </Card>
-    </section>
-    <Settings />
+        <div className="profile-grid">
+          <Card className="profile-stat">
+            <span className="muted">{t('profile.rating')}</span>
+            <strong className={cx('profile-stat-value', sign)}>{formatSigned(rating, 1)}</strong>
+          </Card>
+          <Card className="profile-stat">
+            <span className="muted">{t('profile.since')}</span>
+            <strong className="profile-stat-date">{since}</strong>
+          </Card>
+        </div>
+        <Card className="profile-rows">
+          <div className="profile-row">
+            <span className="muted">{t('profile.email')}</span>
+            <span className="profile-row-value">{profile.email || '—'}</span>
+          </div>
+          <div className="profile-row">
+            <span className="muted">{t('profile.birth')}</span>
+            <span className="profile-row-value">
+              {profile.birth ? formatBirth(profile.birth, today, t, locale) : '—'}
+            </span>
+          </div>
+        </Card>
+      </section>
+      <Settings />
     </div>
   )
 }

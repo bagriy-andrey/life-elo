@@ -11,6 +11,7 @@ User: manual check in `npm run dev` (review inputs/zones, habit setup + quota, h
 then merge PR #3, then tick «Рейтинг v1» in docs/ROADMAP.md.
 
 ## Broken / open questions
+- Open (user, 2026-11-04): weekly minimum goals (e.g. sport ≥5/week) — product context §13 Open; interim = daily + N/A rest days.
 - Pending `/design-sync`: HistoryEntry grouping + tier colors, new tokens --tier-strong/-medium/-weak in tokens.css.
 - Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — product context §13 Open.
 - Hardening (optional): settingsOn / r.entries assume v2 shape with no runtime guard; a v3 upgrade re-running

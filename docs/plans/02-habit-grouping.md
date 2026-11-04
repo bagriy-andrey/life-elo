@@ -1,6 +1,6 @@
 # 02 — Group habits by direction and tier
 
-Status: approved
+Status: done
 Design input: none (layout chosen by the user on 2026-11-04, see below)
 
 ## Why
@@ -50,7 +50,7 @@ Chosen layout (sections + tier subsections, empty groups hidden):
   muted small subheading per tier; use existing classes (`stack`, `stack-sm`, `muted`) — no new global
   CSS unless unavoidable (then mark design-sync) — files: `src/ui/Habits.tsx`, `src/ui/Review.tsx` —
   verify: `npm run build`, `npm run lint`; manual in `npm run dev`: both screens show the groups.
-- [ ] 3. [design-sync] HistoryEntry groups its lines: replace prop `habitNames: Map<string, string>` with
+- [x] 3. [design-sync] HistoryEntry groups its lines: replace prop `habitNames: Map<string, string>` with
   `habits: Map<string, { name: string; direction: 'constructive' | 'destructive'; tier: 'weak' | 'medium' | 'strong' }>`
   (caller builds it per entry day via `settingsOn`); habit lines grouped per the helper, everything else
   under «Бонусы»; update `Home.tsx`, `.design-sync/config.json` `dtsPropsFor.HistoryEntry` (exactly the new

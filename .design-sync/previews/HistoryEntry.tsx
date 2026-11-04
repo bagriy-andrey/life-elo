@@ -4,10 +4,10 @@ import { HistoryEntry } from 'life-elo'
 // Habits: run = strong (3), sweets = medium (2, destructive), sleep = weak (1); Σw = 6, unit = 10.
 // Streak bonus starts on day 3 (strong) / 5 (medium) / 7 (weak), full on day 7.
 // R ← R + 0.1 × (10·S − R); "usual day" = R / 10.
-const habitNames = new Map([
-  ['h1', 'Пробежка 5 км'],
-  ['h2', 'Без сладкого'],
-  ['h3', 'Сон до 23:30'],
+const habits = new Map([
+  ['h1', { name: 'Пробежка 5 км', direction: 'constructive' as const, tier: 'strong' as const }],
+  ['h2', { name: 'Без сладкого', direction: 'destructive' as const, tier: 'medium' as const }],
+  ['h3', { name: 'Сон до 23:30', direction: 'constructive' as const, tier: 'weak' as const }],
 ])
 
 const goodDay = {
@@ -44,25 +44,25 @@ const openDetails = (el: HTMLDivElement | null) => el?.querySelector('details')?
 
 export const Expanded = () => (
   <div ref={openDetails} style={{ width: 360 }}>
-    <HistoryEntry entry={goodDay} habitNames={habitNames} />
+    <HistoryEntry entry={goodDay} habits={habits} />
   </div>
 )
 
 export const Collapsed = () => (
   <div className="stack" style={{ width: 360 }}>
-    <HistoryEntry entry={goodDay} habitNames={habitNames} />
-    <HistoryEntry entry={badDay} habitNames={habitNames} />
+    <HistoryEntry entry={goodDay} habits={habits} />
+    <HistoryEntry entry={badDay} habits={habits} />
   </div>
 )
 
 export const NegativeExpanded = () => (
   <div ref={openDetails} style={{ width: 360 }}>
-    <HistoryEntry entry={badDay} habitNames={habitNames} />
+    <HistoryEntry entry={badDay} habits={habits} />
   </div>
 )
 
 export const NoChange = () => (
   <div ref={openDetails} style={{ width: 360 }}>
-    <HistoryEntry entry={unknownDay} habitNames={habitNames} />
+    <HistoryEntry entry={unknownDay} habits={habits} />
   </div>
 )

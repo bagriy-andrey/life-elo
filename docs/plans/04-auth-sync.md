@@ -203,7 +203,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 - [x] 10. Pure sync rules: `applyDecision(remote, outboxEntry)`, `firstSignInMode(localCount, remoteCount,
   syncedUserId, userId)`, schema gate; test that `replay` ignores entries of unknown habits (fix if not, without
   changing scoring) — files: `src/sync/merge.ts`, `src/sync/merge.test.ts`, `src/engine/rating.test.ts` — verify: `npm test`.
-- [ ] 11. Sync engine: `remote.ts` (push RPC, paged pull, count, reset), `engine.ts` (single-flight push→pull,
+- [x] 11. Sync engine: `remote.ts` (push RPC, paged pull, count, reset), `engine.ts` (single-flight push→pull,
   triggers, debounce, status store + `useSyncStatus`) — files: `src/sync/remote.ts`, `src/sync/engine.ts`,
   `src/sync/engine.test.ts` (with a fake remote), `src/App.tsx` — verify: `npm test`; manual: two browsers, edit in one,
   see it in the other.

@@ -140,7 +140,7 @@ describe('sync engine', () => {
     remote.beforePush = undefined
     await e.run()
     expect(await db.outbox.count()).toBe(0)
-    expect((remote.rows.get('habits/a')?.data as Habit).name).toBe('v2')
+    expect(((remote.rows.get('habits/a')?.data ?? {}) as Habit).name).toBe('v2')
   })
 
   it('single-flight: concurrent calls schedule exactly one follow-up', async () => {

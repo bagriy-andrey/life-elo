@@ -10,6 +10,7 @@ import {
   formOf,
   hasAnswers,
   validateReducer,
+  type SetupError,
   type HabitForm,
   type RuleChoice,
 } from '../domain/habitSetup'
@@ -153,12 +154,13 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
   const [direction, setDirection] = useState<HabitDirection>('destructive')
   const [tier, setTier] = useState<ImpactTier>('medium')
   const [form, setForm] = useState<HabitForm>(EMPTY_FORM)
-  const [error, setError] = useState<string>()
+  const [error, setError] = useState<SetupError>()
 
   const [editingId, setEditingId] = useState<string>()
   const [editTier, setEditTier] = useState<ImpactTier>('medium')
   const [editForm, setEditForm] = useState<HabitForm>(EMPTY_FORM)
-  const [editError, setEditError] = useState<string>()
+  // string: literal messages not yet translated (plan 04 step 6)
+  const [editError, setEditError] = useState<SetupError | string>()
   const [editName, setEditName] = useState('')
   const [editDirection, setEditDirection] = useState<HabitDirection>('destructive')
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -223,7 +225,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
   const saveEdit = async (h: Habit) => {
     const day = today()
     const newName = editName.trim()
-    if (!newName) return setEditError('Название не может быть пустым')
+    if (!newName) return setEditError({ key: 'habitError.nameEmpty' })
     const s = settingsFrom(editForm, h.id, day)
     if ('error' in s) return setEditError(s.error)
     const versions = editedVersions(h, { tier: editTier, rule: s.rule, quota: s.quota }, day)
@@ -268,7 +270,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
             reducers={habits.filter((x) => x.id !== h.id)}
             direction={locked ? h.direction : editDirection}
           />
-          {editError && <span className="neg">{editError}</span>}
+          {editError && <span className="neg">{typeof editError === 'string' ? editError : t(editError.key, editError.params)}</span>}
           <Button variant="primary" onClick={() => saveEdit(h)}>
             Сохранить
           </Button>
@@ -313,7 +315,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
         <SegmentedControl value={direction} onChange={setDirection} options={options(DIRECTION_LABEL)} />
         <SegmentedControl value={tier} onChange={setTier} options={options(TIER_LABEL)} />
         <RuleFields form={form} onChange={setForm} reducers={habits} direction={direction} />
-        {error && <span className="neg">{error}</span>}
+        {error && <span className="neg">{t(error.key, error.params)}</span>}
         <Button variant="primary" onClick={add} disabled={!name.trim()}>
           Добавить
         </Button>

@@ -28,8 +28,26 @@ export const EMPTY_FORM: HabitForm = {
   reducedByDaysOf: '',
 }
 
-type Result<T> = { ok: true; value: T } | { ok: false; error: string }
-const fail = (error: string): { ok: false; error: string } => ({ ok: false, error })
+/** Validation error keys; the UI translates them (they exist in every i18n dictionary). */
+export type SetupErrorKey =
+  | 'habitError.excellentRequired'
+  | 'habitError.badThreshold'
+  | 'habitError.thresholdOrder'
+  | 'habitError.limitsInteger'
+  | 'habitError.reducerNeedsLimit'
+  | 'habitError.reducerSelf'
+  | 'habitError.reducerMissing'
+  | 'habitError.reducerReduced'
+  | 'habitError.alreadyReducer'
+  | 'habitError.nameEmpty'
+
+export interface SetupError {
+  key: SetupErrorKey
+  params?: Record<string, string | number>
+}
+
+type Result<T> = { ok: true; value: T } | { ok: false; error: SetupError }
+const fail = (key: SetupErrorKey): { ok: false; error: SetupError } => ({ ok: false, error: { key } })
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/
 
@@ -48,13 +66,13 @@ export function buildRule(form: HabitForm): Result<ZonedRule> {
   const excellent = threshold(kind, form.excellent)
   const ok = threshold(kind, form.ok)
   const tolerable = threshold(kind, form.tolerable)
-  if (excellent === undefined) return fail('Укажите порог «Отлично»')
-  if (excellent === null || ok === null || tolerable === null) return fail('Некорректное значение порога')
+  if (excellent === undefined) return fail('habitError.excellentRequired')
+  if (excellent === null || ok === null || tolerable === null) return fail('habitError.badThreshold')
   const num = (v: number | string) => (kind === 'time' ? timeToMinutes(v as string) : (v as number))
   const sign = form.better === 'lower' ? 1 : -1
   const chain = [excellent, ok, tolerable].filter((v): v is number | string => v !== undefined)
   for (let i = 1; i < chain.length; i++) {
-    if (sign * num(chain[i]) < sign * num(chain[i - 1])) return fail('Пороги должны идти от лучшего к худшему')
+    if (sign * num(chain[i]) < sign * num(chain[i - 1])) return fail('habitError.thresholdOrder')
   }
   const rule: ZonedRule = { kind: 'measured', unit: kind, better: form.better, excellent }
   if (ok !== undefined) rule.ok = ok
@@ -74,12 +92,12 @@ export function buildQuota(form: HabitForm): Result<Quota | undefined> {
   if (form.kind !== 'count') return { ok: true, value: undefined }
   const perDay = limit(form.perDay)
   const perWeek = limit(form.perWeek)
-  if (perDay === null || perWeek === null) return fail('Лимиты — целые числа от 0')
+  if (perDay === null || perWeek === null) return fail('habitError.limitsInteger')
   const quota: Quota = {}
   if (perDay !== undefined) quota.perDay = perDay
   if (perWeek !== undefined) quota.perWeek = perWeek
   if (form.reducedByDaysOf) {
-    if (perDay === undefined && perWeek === undefined) return fail('Укажите лимит, который уменьшается')
+    if (perDay === undefined && perWeek === undefined) return fail('habitError.reducerNeedsLimit')
     quota.reducedByDaysOf = form.reducedByDaysOf
   }
   return { ok: true, value: Object.keys(quota).length > 0 ? quota : undefined }
@@ -95,18 +113,18 @@ export function validateReducer(
   quota: Quota | undefined,
   habits: Habit[],
   day: DayKey,
-): string | undefined {
+): SetupError | undefined {
   const reducerId = quota?.reducedByDaysOf
   if (!reducerId) return undefined
-  if (reducerId === habitId) return 'Привычка не может уменьшаться сама собой'
+  if (reducerId === habitId) return { key: 'habitError.reducerSelf' }
   const reducer = habits.find((h) => h.id === reducerId)
-  if (!reducer) return 'Привычка-уменьшитель не найдена'
-  if (settingsOn(reducer, day).quota?.reducedByDaysOf) return 'Уменьшитель сам не может уменьшаться (один уровень)'
+  if (!reducer) return { key: 'habitError.reducerMissing' }
+  if (settingsOn(reducer, day).quota?.reducedByDaysOf) return { key: 'habitError.reducerReduced' }
   if (
     habitId &&
     habits.some((h) => h.id !== habitId && settingsOn(h, day).quota?.reducedByDaysOf === habitId)
   ) {
-    return 'Эта привычка уже служит уменьшителем для другой (один уровень)'
+    return { key: 'habitError.alreadyReducer' }
   }
   return undefined
 }

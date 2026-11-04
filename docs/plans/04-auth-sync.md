@@ -187,10 +187,11 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 - [x] 6. [design-sync] `PasswordField` (TextField + «Показать/Скрыть» toggle, optional 3-segment strength meter with
   labels «Слабый/Нормальный/Надёжный пароль») — files: `src/ui/components/PasswordField.{tsx,css}`, `index.ts`,
   preview, `.design-sync/config.json` — verify: `npm run build`, `npm run lint`.
-- [ ] 7. Auth screen (login / register / forgot + resend) per design and Spec texts, busy state «Подождите…»,
+- [x] 7. Auth screen (login / register / forgot + resend) per design and Spec texts, busy state «Подождите…»,
   email kept when switching screens; gate in `App.tsx` (splash / auth / app) with `AuthProvider` in `main.tsx` —
   files: `src/ui/auth/AuthScreen.{tsx,css}`, `src/App.tsx`, `src/main.tsx` — verify: `npm run build`; manual in
   `npm run dev` against the configured project: register, logout via devtools, login, wrong password, forgot.
+  Note: manual check against a real project pending (user). Gate: `recovery !== null` returns null until step 8. `AuthLogo` exported from AuthScreen.tsx.
 - [ ] 8. «Новый пароль» recovery screen (auth layout, expired-link state, clears URL) — files:
   `src/ui/auth/NewPassword.tsx`, `src/App.tsx` (gate checks `recovery !== null` BEFORE `session`, since verifyOtp
   creates a session; `dismissRecovery` in state `ready` signs out) — verify: build; manual: real email link from Resend → set password → login.

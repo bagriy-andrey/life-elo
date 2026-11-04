@@ -5,6 +5,8 @@ import { addDays, reviewDay } from './domain/day'
 import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
+import { useAuth } from './auth/AuthProvider'
+import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
@@ -15,7 +17,7 @@ type Tab = 'home' | 'review' | 'habits'
 const NO_HABITS: Habit[] = []
 const NO_REVIEWS: DayReview[] = []
 
-export default function App() {
+function MainApp() {
   const [tab, setTab] = useState<Tab>('home')
   const [yesterday, setYesterday] = useState(() => reviewDay(new Date()))
   const [reviewing, setReviewing] = useState(yesterday)
@@ -72,4 +74,24 @@ export default function App() {
       />
     </div>
   )
+}
+
+export default function App() {
+  const { configured, loading, recovery, session } = useAuth()
+  if (!configured)
+    return (
+      <div className="auth-message">
+        Вход не настроен: добавьте ключи Supabase в .env (см. docs/setup/backend.md)
+      </div>
+    )
+  if (loading)
+    return (
+      <div className="auth auth-splash">
+        <AuthLogo />
+      </div>
+    )
+  // Step 8: the recovery screen goes here. Checked before `session`, because verifyOtp creates a session.
+  if (recovery !== null) return null
+  if (!session) return <AuthScreen />
+  return <MainApp />
 }

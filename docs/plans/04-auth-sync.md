@@ -171,6 +171,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 - [x] 3. Pure auth helpers from the design: `EMAIL_RE`, `strength`, `newPasswordError`, `validateAuthForm(screen, f,
   googleOnly)`, `authErrorText(error)` (Supabase error code/status → Russian texts in the Spec) — files:
   `src/auth/validation.ts`, `src/auth/validation.test.ts`, `src/auth/errors.ts`, `src/auth/errors.test.ts` — verify: `npm test`.
+  Note: exported as `validate`/`newPwErr` (design names) plus aliases `validateAuthForm`/`newPasswordError`; screen `recovery` added.
 - [ ] 4. Supabase client + `AuthProvider`/`useAuth` (session, loading, `googleOnly`, recovery-token handling from URL,
   actions: signIn, signUp, google, resetPassword, setNewPassword, changePassword, signOut) — files:
   `src/auth/supabase.ts`, `src/auth/AuthProvider.tsx`, `src/auth/recoveryUrl.ts` (+ test for URL parsing),

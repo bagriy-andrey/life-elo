@@ -13,15 +13,17 @@ interface Props {
   onClick?: () => void
   /** Accessible name of the button, e.g. "Выбрать фото". Only used with onClick. */
   label?: string
+  /** Disables the button. Only used with onClick. */
+  disabled?: boolean
   className?: string
 }
 
-export function Avatar({ src, name, size = 96, onClick, label, className }: Props) {
+export function Avatar({ src, name, size = 96, onClick, label, disabled, className }: Props) {
   const style = { '--avatar-size': `${size}px` } as CSSProperties
   const content = src ? <img src={src} alt="" /> : initials(name)
   if (onClick) {
     return (
-      <button type="button" className={cx('avatar avatar-button', className)} style={style} onClick={onClick} aria-label={label}>
+      <button type="button" className={cx('avatar avatar-button', className)} style={style} onClick={onClick} aria-label={label} disabled={disabled}>
         {content}
       </button>
     )

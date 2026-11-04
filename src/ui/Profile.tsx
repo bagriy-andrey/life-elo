@@ -37,6 +37,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
   const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({})
   const [attempted, setAttempted] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [processing, setProcessing] = useState(false)
   const [failed, setFailed] = useState(false)
   /** Draft photo: undefined = unchanged, null = removed, string = new data URL. */
   const [photo, setPhoto] = useState<string | null | undefined>(undefined)
@@ -50,10 +51,13 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
     input.value = '' // allow re-picking the same file
     if (!file) return
     setPhotoError(false)
+    setProcessing(true)
     try {
       setPhoto(await resizeImage(file))
     } catch {
       setPhotoError(true)
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -68,7 +72,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (saving) return
+    if (saving || processing) return
     if (Object.keys(errors).length > 0) {
       setAttempted(true)
       return
@@ -93,12 +97,12 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
       </div>
       <div className="profile-id">
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
-        <Avatar name={form.name} src={shownPhoto} size={96} onClick={pickPhoto} label={t('profile.photoLabel')} />
-        <Button type="button" variant="quiet" onClick={pickPhoto}>
+        <Avatar name={form.name} src={shownPhoto} size={96} onClick={pickPhoto} label={t('profile.photoLabel')} disabled={processing} />
+        <Button type="button" variant="quiet" onClick={pickPhoto} disabled={processing}>
           {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
         </Button>
         {shownPhoto && (
-          <Button type="button" variant="quiet" onClick={() => setPhoto(null)}>
+          <Button type="button" variant="quiet" onClick={() => setPhoto(null)} disabled={processing}>
             {t('profile.removePhoto')}
           </Button>
         )}
@@ -156,7 +160,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
         </Field>
       </Card>
       {failed && <p className="neg">{t('profile.saveError')}</p>}
-      <Button type="submit" variant="primary" className="profile-save" disabled={saving}>
+      <Button type="submit" variant="primary" className="profile-save" disabled={saving || processing}>
         {t('common.save')}
       </Button>
     </form>

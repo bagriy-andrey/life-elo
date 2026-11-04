@@ -30,6 +30,7 @@ import {
   TIER_COLOR,
   tierGroupLabels,
   tierLabels,
+  unitLabels,
 } from './labels'
 
 const options = <T extends string>(labels: Record<T, string>) =>
@@ -52,17 +53,13 @@ interface FieldsProps {
   direction: HabitDirection
 }
 
-const UNIT_HINT: Record<Exclude<RuleChoice, 'boolean'>, string> = {
-  count: 'раз',
-  minutes: 'мин',
-  steps: 'шагов',
-  time: 'ЧЧ:ММ',
-}
-
 function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
   const { t } = useI18n()
   const RULE_CHOICE_LABEL = ruleChoiceLabels(t)
   const BETTER_LABEL = betterLabels(t)
+  const units = unitLabels(t, 5)
+  const unitHint = (kind: Exclude<RuleChoice, 'boolean'>) =>
+    kind === 'time' ? t('habits.timeHint') : units[kind]
   const set = (patch: Partial<HabitForm>) => onChange({ ...form, ...patch })
   const measured = form.kind !== 'boolean'
   const isTime = form.kind === 'time'
@@ -81,7 +78,7 @@ function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
     </label>
   )
   const emptyTolerable =
-    direction === 'constructive' ? 'Пусто — хуже порога будет «Терпимо», 0 очков' : 'Пусто — хуже порога будет «Плохо»'
+    direction === 'constructive' ? t('habits.emptyTolerableConstructive') : t('habits.emptyTolerableDestructive')
   return (
     <>
       <SegmentedControl
@@ -96,21 +93,21 @@ function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
             onChange={(better) => set({ better })}
             options={options(BETTER_LABEL)}
           />
-          <span className="muted">Пороги включительно, {UNIT_HINT[form.kind as Exclude<RuleChoice, 'boolean'>]}</span>
-          {field('excellent', 'Отлично', 'Порог')}
-          {field('ok', 'В рамках (необяз.)', 'Порог')}
-          {field('tolerable', 'Терпимо (необяз.)', emptyTolerable)}
+          <span className="muted">{t('habits.thresholdsHint', { unit: unitHint(form.kind as Exclude<RuleChoice, 'boolean'>) })}</span>
+          {field('excellent', t('habits.excellent'), t('habits.threshold'))}
+          {field('ok', t('habits.ok'), t('habits.threshold'))}
+          {field('tolerable', t('habits.tolerable'), emptyTolerable)}
         </>
       )}
       {form.kind === 'count' && (
         <>
-          <span className="muted">Лимит (необязательно)</span>
+          <span className="muted">{t('habits.limitOptional')}</span>
           <input
             type="number"
             inputMode="numeric"
             min={0}
-            placeholder="В день"
-            aria-label="Лимит в день"
+            placeholder={t('habits.perDay')}
+            aria-label={t('habits.perDayAria')}
             value={form.perDay}
             onChange={(e) => set({ perDay: e.target.value })}
           />
@@ -118,20 +115,20 @@ function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
             type="number"
             inputMode="numeric"
             min={0}
-            placeholder="В неделю"
-            aria-label="Лимит в неделю"
+            placeholder={t('habits.perWeek')}
+            aria-label={t('habits.perWeekAria')}
             value={form.perWeek}
             onChange={(e) => set({ perWeek: e.target.value })}
           />
           <select
-            aria-label="Уменьшается днями привычки"
+            aria-label={t('habits.reducedByAria')}
             value={form.reducedByDaysOf}
             onChange={(e) => set({ reducedByDaysOf: e.target.value })}
           >
-            <option value="">Лимит не уменьшается</option>
+            <option value="">{t('habits.notReduced')}</option>
             {reducers.map((h) => (
               <option key={h.id} value={h.id}>
-                Уменьшается днями «{h.name}»
+                {t('habits.reducedBy', { name: h.name })}
               </option>
             ))}
           </select>
@@ -159,8 +156,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
   const [editingId, setEditingId] = useState<string>()
   const [editTier, setEditTier] = useState<ImpactTier>('medium')
   const [editForm, setEditForm] = useState<HabitForm>(EMPTY_FORM)
-  // string: literal messages not yet translated (plan 04 step 6)
-  const [editError, setEditError] = useState<SetupError | string>()
+  const [editError, setEditError] = useState<SetupError>()
   const [editName, setEditName] = useState('')
   const [editDirection, setEditDirection] = useState<HabitDirection>('destructive')
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -216,7 +212,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
     } catch (e) {
       if (e instanceof ReducerInUseError) {
         const names = e.users.map((u) => `«${u.name}»`).join(', ')
-        setEditError(`Нельзя удалить: привычка уменьшает лимит у ${names}`)
+        setEditError({ key: 'habitError.deleteInUse', params: { names } })
         setConfirmingDelete(false)
       } else throw e
     }
@@ -245,15 +241,15 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
       return (
         <Card key={h.id} className="stack-sm">
           <input
-            aria-label="Название привычки"
-            placeholder="Название привычки"
+            aria-label={t('habits.namePlaceholder')}
+            placeholder={t('habits.namePlaceholder')}
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
           />
           {locked ? (
             <>
-              <span className="muted">Направление: {DIRECTION_EDIT_LABEL[h.direction]}</span>
-              <span className="muted">Направление нельзя поменять: по привычке уже есть ответы</span>
+              <span className="muted">{t('habits.directionLabel', { direction: DIRECTION_EDIT_LABEL[h.direction] })}</span>
+              <span className="muted">{t('habits.directionLocked')}</span>
             </>
           ) : (
             <SegmentedControl
@@ -262,7 +258,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
               options={options(DIRECTION_EDIT_LABEL)}
             />
           )}
-          <span className="muted">Изменения действуют с сегодняшнего дня</span>
+          <span className="muted">{t('habits.changesFromToday')}</span>
           <SegmentedControl value={editTier} onChange={setEditTier} options={options(TIER_LABEL)} />
           <RuleFields
             form={editForm}
@@ -270,19 +266,19 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
             reducers={habits.filter((x) => x.id !== h.id)}
             direction={locked ? h.direction : editDirection}
           />
-          {editError && <span className="neg">{typeof editError === 'string' ? editError : t(editError.key, editError.params)}</span>}
+          {editError && <span className="neg">{t(editError.key, editError.params)}</span>}
           <Button variant="primary" onClick={() => saveEdit(h)}>
-            Сохранить
+            {t('common.save')}
           </Button>
-          <Button onClick={() => setEditingId(undefined)}>Отмена</Button>
+          <Button onClick={() => setEditingId(undefined)}>{t('common.cancel')}</Button>
           {confirmingDelete ? (
             <>
-              <span className="neg">Удалить привычку и все её ответы? Рейтинг пересчитается.</span>
-              <Button onClick={() => remove(h)}>Удалить</Button>
-              <Button onClick={() => setConfirmingDelete(false)}>Отмена</Button>
+              <span className="neg">{t('habits.deleteConfirm')}</span>
+              <Button onClick={() => remove(h)}>{t('common.delete')}</Button>
+              <Button onClick={() => setConfirmingDelete(false)}>{t('common.cancel')}</Button>
             </>
           ) : (
-            <Button onClick={() => setConfirmingDelete(true)}>Удалить</Button>
+            <Button onClick={() => setConfirmingDelete(true)}>{t('common.delete')}</Button>
           )}
         </Card>
       )
@@ -295,9 +291,9 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
           {cur.quota && <span className="muted">{quotaSummary(t, cur.quota, nameOf)}</span>}
         </div>
         <div className="stack-sm">
-          <Button onClick={() => startEdit(h)}>Изменить</Button>
+          <Button onClick={() => startEdit(h)}>{t('common.edit')}</Button>
           <Button onClick={() => db.habits.update(h.id, { active: !h.active })}>
-            {h.active ? 'Пауза' : 'Вернуть'}
+            {h.active ? t('habits.pause') : t('habits.resume')}
           </Button>
         </div>
       </Card>
@@ -308,7 +304,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
     <section className="stack">
       <Card className="stack-sm">
         <input
-          placeholder="Название привычки"
+          placeholder={t('habits.namePlaceholder')}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -317,7 +313,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
         <RuleFields form={form} onChange={setForm} reducers={habits} direction={direction} />
         {error && <span className="neg">{t(error.key, error.params)}</span>}
         <Button variant="primary" onClick={add} disabled={!name.trim()}>
-          Добавить
+          {t('common.add')}
         </Button>
       </Card>
 

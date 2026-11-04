@@ -40,6 +40,7 @@ export type SetupErrorKey =
   | 'habitError.reducerReduced'
   | 'habitError.alreadyReducer'
   | 'habitError.nameEmpty'
+  | 'habitError.deleteInUse'
 
 export interface SetupError {
   key: SetupErrorKey

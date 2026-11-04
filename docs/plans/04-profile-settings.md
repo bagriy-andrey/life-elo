@@ -94,14 +94,15 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
 - [x] 4. Translate Review — `src/ui/Review.tsx` (all strings, error messages, `aria-label`s), ru/en/uk keys — verify:
   `npm run build`; manual: review a day in en and uk, unit suffixes and buttons translated.
   Note: `unitLabels(t, count)` now takes the displayed value for plural units; Review passes the entry value (quota uses `unit.count`).
-- [x] 5. Domain errors as keys — `src/domain/habitSetup.ts`: validators return `{ ok:false, error: ErrorKey, params? }`
+- [x] 5. Domain errors as keys — `src/domain/habitSetup.ts`: validators return `{ ok:false, error: { key, params? } }`
   instead of Russian text (keys live in the dictionaries), keep behavior identical; update `habitSetup.test.ts`
   (assert keys) and the `Habits.tsx` call sites minimally (`t(error.key, error.params)`) — files:
   `src/domain/habitSetup.ts`, `src/domain/habitSetup.test.ts`, `src/ui/Habits.tsx`, `src/i18n/{ru,en,uk}.ts` —
   verify: `npm test`, `npm run build`.
   Note: keys are `habitError.*` (typed `SetupErrorKey`, checked against `Key` by tsc at the call site); added `habitError.nameEmpty` for Habits' empty-name edit error.
-- [ ] 6. Translate Habits — `src/ui/Habits.tsx` (all remaining strings, delete confirmation, locked-direction note,
+- [x] 6. Translate Habits — `src/ui/Habits.tsx` (all remaining strings, delete confirmation, locked-direction note,
   placeholders), ru/en/uk keys — verify: `npm run build`, `npm run lint`; manual: create/edit/delete a habit in en/uk.
+  Note: unit hints reuse plural `unit.*` keys (count 5); delete-in-use is `habitError.deleteInUse` with `{names}`, so `editError` is `SetupError` again.
 - [ ] 7. [design-sync] Theme tokens — `src/ui/tokens.css`: keep light defaults in `:root`; dark values in
   `:root[data-theme='dark']` and in `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { … } }`
   (identical values, comment that they must stay in sync); `color-scheme` per theme (`light dark` default,

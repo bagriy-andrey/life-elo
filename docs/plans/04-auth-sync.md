@@ -168,7 +168,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   (devDep `supabase`) — verify: if Docker is available `npx supabase start && npx supabase db reset` applies cleanly;
   otherwise SQL review + user runs `db push`; note which in the step.
   Note: Docker unavailable, SQL reviewed only (not applied); user runs `db push`. `rev` has a column default from the sequence too.
-- [ ] 3. Pure auth helpers from the design: `EMAIL_RE`, `strength`, `newPasswordError`, `validateAuthForm(screen, f,
+- [x] 3. Pure auth helpers from the design: `EMAIL_RE`, `strength`, `newPasswordError`, `validateAuthForm(screen, f,
   googleOnly)`, `authErrorText(error)` (Supabase error code/status → Russian texts in the Spec) — files:
   `src/auth/validation.ts`, `src/auth/validation.test.ts`, `src/auth/errors.ts`, `src/auth/errors.test.ts` — verify: `npm test`.
 - [ ] 4. Supabase client + `AuthProvider`/`useAuth` (session, loading, `googleOnly`, recovery-token handling from URL,

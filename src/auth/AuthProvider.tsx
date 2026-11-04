@@ -151,7 +151,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const { error } = await supabase!.auth.signOut()
           return error ? fail(error) : {}
         }),
-      dismissRecovery: () => setRecovery(null),
+      dismissRecovery: () => {
+        // 'ready' holds a live recovery session: end it so leaving does not land in the app.
+        if (recovery === 'ready' && supabase)
+          void supabase.auth
+            .signOut()
+            .catch(() => {})
+            .finally(() => setRecovery(null))
+        else setRecovery(null)
+      },
     }
   }, [loading, session, recovery, run])
 

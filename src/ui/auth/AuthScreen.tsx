@@ -42,9 +42,9 @@ export function AuthLogo() {
   )
 }
 
-export function AuthScreen() {
+export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
   const auth = useAuth()
-  const [mode, setMode] = useState<Mode>('login')
+  const [mode, setMode] = useState<Mode>(initialMode)
   const [form, setForm] = useState<AuthForm>({})
   const [touched, setTouched] = useState<Partial<Record<AuthField, boolean>>>({})
   const [submitted, setSubmitted] = useState(false)

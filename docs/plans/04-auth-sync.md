@@ -192,9 +192,10 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   files: `src/ui/auth/AuthScreen.{tsx,css}`, `src/App.tsx`, `src/main.tsx` — verify: `npm run build`; manual in
   `npm run dev` against the configured project: register, logout via devtools, login, wrong password, forgot.
   Note: manual check against a real project pending (user). Gate: `recovery !== null` returns null until step 8. `AuthLogo` exported from AuthScreen.tsx.
-- [ ] 8. «Новый пароль» recovery screen (auth layout, expired-link state, clears URL) — files:
+- [x] 8. «Новый пароль» recovery screen (auth layout, expired-link state, clears URL) — files:
   `src/ui/auth/NewPassword.tsx`, `src/App.tsx` (gate checks `recovery !== null` BEFORE `session`, since verifyOtp
   creates a session; `dismissRecovery` in state `ready` signs out) — verify: build; manual: real email link from Resend → set password → login.
+  Note: manual email check pending (user). `dismissRecovery` now signs out in `ready`; `AuthScreen` got `initialMode` prop; `.auth-link` padding enlarged.
 - [ ] 9. Dexie v3: `outbox`, `syncState`, hooks enqueueing changes with remote-apply bypass, `clearLocalData()` —
   files: `src/db/db.ts`, `src/sync/outbox.ts`, `src/sync/outbox.test.ts`, `package.json` (devDep `fake-indexeddb`)
   — verify: tests: create/update/delete/`deleteHabit` enqueue; remote-applied writes do not; v2→v3 upgrade keeps data.

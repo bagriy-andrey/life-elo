@@ -63,11 +63,11 @@
 .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .auth-form { display: flex; flex-direction: column; gap: var(--space-16); }
 .auth-pw { position: relative; }
-.auth-forgot { position: absolute; top: 0; right: 0; }
+.auth-forgot { position: absolute; top: calc(var(--space-10) * -1); right: calc(var(--space-4) * -1); }
 .auth-link {
   background: none;
   border: 0;
-  padding: 0;
+  padding: var(--space-10) var(--space-4);
   font: inherit;
   font-size: var(--text-sm);
   color: var(--accent);
@@ -84,3 +84,5 @@
 }
 .auth-footer .auth-link { font-weight: 700; }
 .auth-message { text-align: center; color: var(--muted); padding: var(--space-28) var(--space-16); }
+
+.auth-muted { color: var(--muted); font-size: var(--text-sm); text-align: center; margin: 0; }

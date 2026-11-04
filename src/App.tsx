@@ -7,6 +7,7 @@ import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/AuthProvider'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
+import { NewPassword } from './ui/auth/NewPassword'
 import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
@@ -78,6 +79,7 @@ function MainApp() {
 
 export default function App() {
   const { configured, loading, recovery, session } = useAuth()
+  const [startForgot, setStartForgot] = useState(false)
   if (!configured)
     return (
       <div className="auth-message">
@@ -90,8 +92,8 @@ export default function App() {
         <AuthLogo />
       </div>
     )
-  // Step 8: the recovery screen goes here. Checked before `session`, because verifyOtp creates a session.
-  if (recovery !== null) return null
-  if (!session) return <AuthScreen />
+  // Checked before `session`, because verifyOtp creates a session.
+  if (recovery !== null) return <NewPassword onRequestNew={() => setStartForgot(true)} />
+  if (!session) return <AuthScreen initialMode={startForgot ? 'forgot' : 'login'} />
   return <MainApp />
 }

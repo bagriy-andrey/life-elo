@@ -5,10 +5,14 @@ import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
 import type { DayKey } from '../domain/types'
 import { useI18n } from '../i18n'
-import { Avatar, Button, Card, Field } from './components'
+import { loadPrefs, savePrefs, THEMES } from '../i18n/prefs'
+import type { Theme } from '../i18n/prefs'
+import { LANGS } from '../i18n/types'
+import { Avatar, Button, Card, Field, SegmentedControl } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
+import { applyTheme } from './prefs'
 import './Profile.css'
 
 interface Props {
@@ -167,17 +171,59 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
   )
 }
 
+const LANG_NAMES = { ru: 'Русский', en: 'English', uk: 'Українська' } as const
+
+function Settings() {
+  const { t, lang, setLang } = useI18n()
+  // localStorage prefs are the single source of truth; this is the only place theme changes.
+  const [theme, setThemeState] = useState<Theme>(() => loadPrefs().theme)
+  const setTheme = (next: Theme) => {
+    setThemeState(next)
+    applyTheme(next)
+    savePrefs({ theme: next })
+  }
+  return (
+    <div className="stack">
+    <section className="stack">
+      <h2 className="settings-title">{t('settings.title')}</h2>
+      <Card className="settings-card">
+        <div className="settings-group">
+          <span className="settings-label">{t('settings.language')}</span>
+          <SegmentedControl
+            options={LANGS.map((l) => ({ value: l, label: LANG_NAMES[l] }))}
+            value={lang}
+            onChange={setLang}
+          />
+        </div>
+        <div className="settings-group">
+          <span className="settings-label">{t('settings.theme')}</span>
+          <SegmentedControl
+            options={THEMES.map((v) => ({ value: v, label: t(`settings.theme.${v}`) }))}
+            value={theme}
+            onChange={setTheme}
+          />
+        </div>
+      </Card>
+    </section>
+    <Settings />
+    </div>
+  )
+}
+
 export function Profile({ profile, rating, today }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
     return (
-      <ProfileEdit
-        profile={profile}
-        today={today}
-        onDone={() => setEditing(false)}
-        onCancel={profile ? () => setEditing(false) : undefined}
-      />
+      <div className="stack">
+        <ProfileEdit
+          profile={profile}
+          today={today}
+          onDone={() => setEditing(false)}
+          onCancel={profile ? () => setEditing(false) : undefined}
+        />
+        <Settings />
+      </div>
     )
   }
   const sign = rating > 0 ? 'pos' : rating < 0 ? 'neg' : 'zero'
@@ -187,6 +233,7 @@ export function Profile({ profile, rating, today }: Props) {
     year: 'numeric',
   })
   return (
+    <div className="stack">
     <section className="stack">
       <div className="profile-head">
         <h2>{t('tab.profile')}</h2>
@@ -220,5 +267,7 @@ export function Profile({ profile, rating, today }: Props) {
         </div>
       </Card>
     </section>
+    <Settings />
+    </div>
   )
 }

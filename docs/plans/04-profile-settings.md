@@ -183,13 +183,14 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   devtools), avatar updates, removing works.
   Note: done; removal implemented (draft photo null, «Убрать фото»); removed unused profileHint.* keys; photo decode uses createImageBitmap(from-image) with <img> fallback.
   Note: Avatar in button mode must always get `label` (accessible name; photo img has alt="").
-- [ ] 17. Settings: language and theme — `Profile.tsx` «Настройки» section: Card with «Язык» SegmentedControl
+- [x] 17. Settings: language and theme — `Profile.tsx` «Настройки» section: Card with «Язык» SegmentedControl
   (Русский / English / Українська — names always in their own language, not translated) and «Тема» SegmentedControl
   (Системная / Светлая / Тёмная, translated); wired to `setLang` and `applyTheme` + `savePrefs`. Section is visible
   in both view and edit mode and independent of profile existence — files: `src/ui/Profile.tsx`,
   `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts`, `src/ui/prefs.ts` (small persist helper if missing) — verify:
   `npm run build`; manual: switching language retranslates all tabs instantly and survives reload; theme switch
   applies instantly, survives reload, «Системная» follows OS.
+  Note: done; theme state is local to Settings (init from loadPrefs, single writer); Settings renders in both modes via a wrapper in Profile.
 - [ ] 18. Clear all data — `Profile.tsx`: quiet `neg` full-width «Очистить все данные» + muted caption «Удалит
   профиль, привычки, историю и рейтинг»; `Dialog` titled «Удалить все данные?» with the agreed text, `danger`
   «Удалить» and default «Отмена» (gets `autoFocus`); confirm → `clearAllData()`, remove `life-elo:prefs`, `location.reload()`; errors

@@ -146,5 +146,11 @@ export const en: Dict = {
   'profile.removePhoto': "Remove photo",
   'profile.photoError': "Could not open the image. Try another photo (JPEG or PNG).",
   'profile.photoLabel': "Choose photo",
-  'profile.saveError': "Could not save the profile. Please try again."
+  'profile.saveError': "Could not save the profile. Please try again.",
+  'settings.title': "Settings",
+  'settings.language': "Language",
+  'settings.theme': "Theme",
+  'settings.theme.system': "System",
+  'settings.theme.light': "Light",
+  'settings.theme.dark': "Dark"
 }

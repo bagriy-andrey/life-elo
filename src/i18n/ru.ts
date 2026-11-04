@@ -155,5 +155,11 @@ export const ru = {
   'profile.removePhoto': "Убрать фото",
   'profile.photoError': "Не удалось открыть изображение. Попробуйте другое фото (JPEG или PNG).",
   'profile.photoLabel': "Выбрать фото",
-  'profile.saveError': "Не удалось сохранить профиль. Попробуйте ещё раз."
+  'profile.saveError': "Не удалось сохранить профиль. Попробуйте ещё раз.",
+  'settings.title': "Настройки",
+  'settings.language': "Язык",
+  'settings.theme': "Тема",
+  'settings.theme.system': "Системная",
+  'settings.theme.light': "Светлая",
+  'settings.theme.dark': "Тёмная"
 }

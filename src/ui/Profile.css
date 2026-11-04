@@ -43,3 +43,16 @@
   padding: 14px 16px;
 }
 .profile-save { width: 100%; min-height: 48px; }
+.settings-title { margin-top: var(--space-16); }
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.settings-label { font-size: var(--text-sm); font-weight: 600; }

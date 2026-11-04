@@ -156,5 +156,11 @@ export const uk: Dict = {
   'profile.removePhoto': "Прибрати фото",
   'profile.photoError': "Не вдалося відкрити зображення. Спробуйте інше фото (JPEG або PNG).",
   'profile.photoLabel': "Обрати фото",
-  'profile.saveError': "Не вдалося зберегти профіль. Спробуйте ще раз."
+  'profile.saveError': "Не вдалося зберегти профіль. Спробуйте ще раз.",
+  'settings.title': "Налаштування",
+  'settings.language': "Мова",
+  'settings.theme': "Тема",
+  'settings.theme.system': "Системна",
+  'settings.theme.light': "Світла",
+  'settings.theme.dark': "Темна"
 }

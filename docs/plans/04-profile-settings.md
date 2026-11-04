@@ -91,8 +91,9 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `npm run build`, `npm test`; manual `npm run dev` with `localStorage['life-elo:prefs']='{"lang":"en"}'`: Home and
   History expand fully in English.
   Note: also fixed step 2's unit suffix: `unit.count/steps/minutes` are plural forms, rendered with the value's count (tests ru/en/uk for 1, 2, 5, 21). Review.tsx/Habits.tsx still use own literals until steps 4/6.
-- [ ] 4. Translate Review — `src/ui/Review.tsx` (all strings, error messages, `aria-label`s), ru/en/uk keys — verify:
+- [x] 4. Translate Review — `src/ui/Review.tsx` (all strings, error messages, `aria-label`s), ru/en/uk keys — verify:
   `npm run build`; manual: review a day in en and uk, unit suffixes and buttons translated.
+  Note: `unitLabels(t, count)` now takes the displayed value for plural units; Review passes the entry value (quota uses `unit.count`).
 - [ ] 5. Domain errors as keys — `src/domain/habitSetup.ts`: validators return `{ ok:false, error: ErrorKey, params? }`
   instead of Russian text (keys live in the dictionaries), keep behavior identical; update `habitSetup.test.ts`
   (assert keys) and the `Habits.tsx` call sites minimally (`t(error.key, error.params)`) — files:

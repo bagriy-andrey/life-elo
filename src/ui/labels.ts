@@ -21,7 +21,8 @@ export const directionLabels = (t: T) => mapOf(DIRECTIONS, (k) => t(`direction.$
 export const directionEditLabels = (t: T) => mapOf(DIRECTIONS, (k) => t(`directionEdit.${k}`))
 export const directionGroupLabels = (t: T) => mapOf(DIRECTIONS, (k) => t(`directionGroup.${k}`))
 export const zoneLabels = (t: T) => mapOf(ZONES, (k) => t(`zone.${k}`))
-export const unitLabels = (t: T) => mapOf(UNITS, (k) => t(`unit.${k}`))
+/** Plural-aware: pass the displayed value as `count`. */
+export const unitLabels = (t: T, count = 0) => mapOf(UNITS, (k) => t(`unit.${k}`, { count }))
 export const ruleChoiceLabels = (t: T) => mapOf(RULE_CHOICES, (k) => t(`ruleChoice.${k}`))
 export const betterLabels = (t: T) => ({ lower: t('better.lower'), higher: t('better.higher') })
 export const notApplicableLabel = (t: T) => t('answer.na')

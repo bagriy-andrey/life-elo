@@ -56,7 +56,6 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
   const NOT_APPLICABLE_LABEL = notApplicableLabel(t)
   const TIER_GROUP_LABEL = tierGroupLabels(t)
-  const UNIT_LABEL = unitLabels(t)
   const ZONE_LABEL = zoneLabels(t)
   const applicable = habits.filter((h) => h.active && h.effectiveFrom <= day)
   // Remounted per day (key), so initial state is the saved review, if any.
@@ -91,8 +90,8 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
     } catch (e) {
       setError(
         e instanceof DayLockedError
-          ? 'День закрыт: исправить его уже нельзя.'
-          : 'Не удалось сохранить день. Попробуйте ещё раз.',
+          ? t('review.dayClosedError')
+          : t('review.saveError'),
       )
     }
   }
@@ -111,14 +110,16 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
             options={BOOLEAN_OPTIONS[h.direction]}
           />
           {entry && entry.kind !== 'unknown' && (
-            <Button onClick={() => set(h.id, UNKNOWN)}>Сбросить ответ</Button>
+            <Button onClick={() => set(h.id, UNKNOWN)}>{t('review.reset')}</Button>
           )}
         </div>
       )
     }
-    const unit = s.quota ? 'раз' : s.rule.kind === 'measured' ? UNIT_LABEL[s.rule.unit] : ''
     const na = entry?.kind === 'not_applicable'
     const value = entry?.kind === 'value' ? String(entry.value) : ''
+    const count = entry?.kind === 'value' ? Number(entry.value) || 0 : 0
+    const units = unitLabels(t, count)
+    const unit = s.quota ? units.count : s.rule.kind === 'measured' ? units[s.rule.unit] : ''
     return (
       <div className="row">
         <input
@@ -138,7 +139,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
         />
         <span className="muted">{unit}</span>
         <Button onClick={() => set(h.id, na ? UNKNOWN : NOT_APPLICABLE)}>
-          {na ? 'Указать значение' : NOT_APPLICABLE_LABEL}
+          {na ? t('review.setValue') : NOT_APPLICABLE_LABEL}
         </Button>
       </div>
     )
@@ -156,12 +157,12 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
           onChange={(e) => e.target.value && onDayChange(e.target.value)}
         />
       </div>
-      {locked && <p className="muted">День закрыт. Его можно только посмотреть.</p>}
+      {locked && <p className="muted">{t('review.lockedNote')}</p>}
       {!locked && existing && (
-        <p className="muted">День уже подтверждён. Изменения пересчитают рейтинг.</p>
+        <p className="muted">{t('review.confirmedNote')}</p>
       )}
       {applicable.length === 0 && (
-        <p className="muted">Нет привычек для этого дня. Добавьте их во вкладке «Привычки».</p>
+        <p className="muted">{t('review.noHabits')}</p>
       )}
       {groupByDirectionAndTier(applicable, (h) => ({
         direction: h.direction,
@@ -194,10 +195,10 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
       ))}
       {applicable.length > 0 && !locked && (
         <>
-          <p className="muted">Без ответа — «не помню», это не влияет на рейтинг.</p>
+          <p className="muted">{t('review.unknownNote')}</p>
           {error && <p className="neg" role="alert">{error}</p>}
           <Button variant="primary" onClick={confirm}>
-            {existing ? 'Сохранить исправление' : 'Подтвердить день'}
+            {existing ? t('review.saveFix') : t('review.confirmDay')}
           </Button>
         </>
       )}

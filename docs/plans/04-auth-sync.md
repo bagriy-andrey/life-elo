@@ -196,9 +196,10 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   `src/ui/auth/NewPassword.tsx`, `src/App.tsx` (gate checks `recovery !== null` BEFORE `session`, since verifyOtp
   creates a session; `dismissRecovery` in state `ready` signs out) — verify: build; manual: real email link from Resend → set password → login.
   Note: manual email check pending (user). `dismissRecovery` now signs out in `ready`; `AuthScreen` got `initialMode` prop; `.auth-link` padding enlarged.
-- [ ] 9. Dexie v3: `outbox`, `syncState`, hooks enqueueing changes with remote-apply bypass, `clearLocalData()` —
+- [x] 9. Dexie v3: `outbox`, `syncState`, hooks enqueueing changes with remote-apply bypass, `clearLocalData()` —
   files: `src/db/db.ts`, `src/sync/outbox.ts`, `src/sync/outbox.test.ts`, `package.json` (devDep `fake-indexeddb`)
   — verify: tests: create/update/delete/`deleteHabit` enqueue; remote-applied writes do not; v2→v3 upgrade keeps data.
+  Note: DBCore middleware instead of hooks (adds `outbox` to every rw transaction); `changedAt` stored in ms; `applyRemote` flags the IDB transaction.
 - [ ] 10. Pure sync rules: `applyDecision(remote, outboxEntry)`, `firstSignInMode(localCount, remoteCount,
   syncedUserId, userId)`, schema gate; test that `replay` ignores entries of unknown habits (fix if not, without
   changing scoring) — files: `src/sync/merge.ts`, `src/sync/merge.test.ts`, `src/engine/rating.test.ts` — verify: `npm test`.

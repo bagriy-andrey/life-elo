@@ -200,7 +200,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   files: `src/db/db.ts`, `src/sync/outbox.ts`, `src/sync/outbox.test.ts`, `package.json` (devDep `fake-indexeddb`)
   — verify: tests: create/update/delete/`deleteHabit` enqueue; remote-applied writes do not; v2→v3 upgrade keeps data.
   Note: DBCore middleware instead of hooks (adds `outbox` to every rw transaction); `changedAt` stored in ms; `applyRemote` flags the IDB transaction.
-- [ ] 10. Pure sync rules: `applyDecision(remote, outboxEntry)`, `firstSignInMode(localCount, remoteCount,
+- [x] 10. Pure sync rules: `applyDecision(remote, outboxEntry)`, `firstSignInMode(localCount, remoteCount,
   syncedUserId, userId)`, schema gate; test that `replay` ignores entries of unknown habits (fix if not, without
   changing scoring) — files: `src/sync/merge.ts`, `src/sync/merge.test.ts`, `src/engine/rating.test.ts` — verify: `npm test`.
 - [ ] 11. Sync engine: `remote.ts` (push RPC, paged pull, count, reset), `engine.ts` (single-flight push→pull,

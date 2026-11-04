@@ -19,6 +19,8 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - TabBar is `position: fixed`: its preview wraps it in a `transform: translateZ(0)` frame, and the card is
   `cardMode: single`. HistoryEntry previews open `<details>` via a ref callback.
 
+- Components read strings via `useI18n()`; without a provider it falls back to ru, so previews render in Russian.
+
 ## Known render warns
 - none
 

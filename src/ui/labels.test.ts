@@ -23,8 +23,22 @@ describe('ruleSummary', () => {
   const rule = { kind: 'measured', unit: 'count', better: 'lower', excellent: 0, ok: 1 } as const
   it('per language', () => {
     expect(ruleSummary(tFor('ru'), rule)).toBe('Отлично ≤ 0 раз · В рамках ≤ 1 раз')
-    expect(ruleSummary(tFor('en'), rule)).toBe('Excellent ≤ 0 times · Within limits ≤ 1 times')
-    expect(ruleSummary(tFor('uk'), rule)).toBe('Відмінно ≤ 0 разів · У межах ≤ 1 разів')
+    expect(ruleSummary(tFor('en'), rule)).toBe('Excellent ≤ 0 times · Within limits ≤ 1 time')
+    expect(ruleSummary(tFor('uk'), rule)).toBe('Відмінно ≤ 0 разів · У межах ≤ 1 раз')
+  })
+  it('unit suffix is plural-aware', () => {
+    const r = (unit: 'count' | 'steps' | 'minutes', n: number) =>
+      ({ kind: 'measured', unit, better: 'higher', excellent: n }) as const
+    const out = (lang: Lang, unit: 'count' | 'steps' | 'minutes') =>
+      [1, 2, 5, 21].map((n) => ruleSummary(tFor(lang), r(unit, n)).replace(/^.*≥ /, ''))
+    expect(out('ru', 'count')).toEqual(['1 раз', '2 раза', '5 раз', '21 раз'])
+    expect(out('ru', 'steps')).toEqual(['1 шаг', '2 шага', '5 шагов', '21 шаг'])
+    expect(out('en', 'count')).toEqual(['1 time', '2 times', '5 times', '21 times'])
+    expect(out('en', 'steps')).toEqual(['1 step', '2 steps', '5 steps', '21 steps'])
+    expect(out('en', 'minutes')).toEqual(['1 min', '2 min', '5 min', '21 min'])
+    expect(out('uk', 'count')).toEqual(['1 раз', '2 рази', '5 разів', '21 раз'])
+    expect(out('uk', 'steps')).toEqual(['1 крок', '2 кроки', '5 кроків', '21 крок'])
+    expect(out('ru', 'minutes')).toEqual(['1 мин', '2 мин', '5 мин', '21 мин'])
   })
   it('time has no suffix, boolean is yes/no', () => {
     const time = { kind: 'measured', unit: 'time', better: 'higher', excellent: '07:00' } as const

@@ -5,6 +5,7 @@ import { addDays, reviewDay } from './domain/day'
 import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
+import { useI18n } from './i18n'
 import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
@@ -16,6 +17,7 @@ const NO_HABITS: Habit[] = []
 const NO_REVIEWS: DayReview[] = []
 
 export default function App() {
+  const { t } = useI18n()
   const [tab, setTab] = useState<Tab>('home')
   const [yesterday, setYesterday] = useState(() => reviewDay(new Date()))
   const [reviewing, setReviewing] = useState(yesterday)
@@ -65,9 +67,9 @@ export default function App() {
         active={tab}
         onSelect={(id) => (id === 'review' ? openReview() : setTab(id))}
         items={[
-          { id: 'home', label: 'Главная' },
-          { id: 'review', label: 'Обзор дня', badge: !!pendingDay },
-          { id: 'habits', label: 'Привычки' },
+          { id: 'home', label: t('tab.home') },
+          { id: 'review', label: t('tab.review'), badge: !!pendingDay },
+          { id: 'habits', label: t('tab.habits') },
         ]}
       />
     </div>

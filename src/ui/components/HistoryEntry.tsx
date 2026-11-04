@@ -1,6 +1,6 @@
 import type { LedgerEntry } from '../../engine/rating'
 import { groupByDirectionAndTier } from '../grouping'
-import { useI18n } from '../../i18n'
+import { useI18n, type I18n } from '../../i18n'
 import { directionGroupLabels, formatDay, formatSigned, TIER_COLOR, tierGroupLabels, zoneLabels } from '../labels'
 import './Card.css'
 import './HistoryEntry.css'
@@ -13,12 +13,16 @@ interface Props {
 
 type Contribution = LedgerEntry['contributions'][number]
 
-function entryLabel(c: Contribution, names: Map<string, string>, zoneLabel: (zone: NonNullable<Contribution['zone']>) => string) {
+function entryLabel(
+  t: I18n['t'],
+  c: Contribution,
+  names: Map<string, string>,
+  zoneLabel: (zone: NonNullable<Contribution['zone']>) => string) {
   const { source } = c
-  if (source.kind === 'clean_day') return 'Чистый день'
-  if (source.kind === 'unknown_day') return 'День без отметки'
+  if (source.kind === 'clean_day') return t('history.cleanDay')
+  if (source.kind === 'unknown_day') return t('history.unknownDay')
   const name = names.get(source.habitId) ?? '—'
-  if (source.kind === 'streak_bonus') return `${name} · бонус за серию`
+  if (source.kind === 'streak_bonus') return t('history.streakBonus', { name })
   return c.zone ? `${name} · ${zoneLabel(c.zone)}` : name
 }
 
@@ -39,7 +43,7 @@ export function HistoryEntry({ entry, habits }: Props) {
       <li key={i} className="row">
         <span>
           {tier && <span style={{ color: TIER_COLOR[tier] }}>● </span>}
-          {entryLabel(c, names, zoneLabel)}
+          {entryLabel(t, c, names, zoneLabel)}
           {c.multiplier > 1 && <span className="muted"> · ×{c.multiplier.toFixed(2)}</span>}
         </span>
         <span>{formatSigned(c.points)}</span>
@@ -62,22 +66,22 @@ export function HistoryEntry({ entry, habits }: Props) {
         <span className={entry.delta >= 0 ? 'pos' : 'neg'}>{formatSigned(entry.delta)}</span>
       </summary>
       <ul className="explain">
-        <li className="row"><span>Оценка дня S</span><span>{formatSigned(entry.dayScore)}</span></li>
+        <li className="row"><span>{t('history.dayScore')}</span><span>{formatSigned(entry.dayScore)}</span></li>
         <li className="muted">
-          Обычный день: {formatSigned(entry.expected)}, сегодня: {formatSigned(entry.dayScore)}
+          {t('history.usual', { expected: formatSigned(entry.expected), today: formatSigned(entry.dayScore) })}
         </li>
         {groups.map((g) => [
           <li key={g.direction}><strong>{DIRECTION_GROUP_LABEL[g.direction]}</strong></li>,
-          ...g.tiers.flatMap((t) => [
-            <li key={`${g.direction}-${t.tier}`} className="muted">
-              <span style={{ color: TIER_COLOR[t.tier] }}>●</span> {TIER_GROUP_LABEL[t.tier]}
+          ...g.tiers.flatMap((tg) => [
+            <li key={`${g.direction}-${tg.tier}`} className="muted">
+              <span style={{ color: TIER_COLOR[tg.tier] }}>●</span> {TIER_GROUP_LABEL[tg.tier]}
             </li>,
-            ...t.items.map(({ c, i }) => line(c, i)),
+            ...tg.items.map(({ c, i }) => line(c, i)),
           ]),
         ])}
-        {otherLines.length > 0 && !onlyUnknownDay && <li><strong>Бонусы</strong></li>}
+        {otherLines.length > 0 && !onlyUnknownDay && <li><strong>{t('history.bonuses')}</strong></li>}
         {otherLines.map(({ c, i }) => line(c, i))}
-        {entry.clamped && <li className="muted">День ограничен пределом ±100</li>}
+        {entry.clamped && <li className="muted">{t('history.clamped')}</li>}
       </ul>
     </details>
   )

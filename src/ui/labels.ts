@@ -68,9 +68,10 @@ export const formatDay = (day: string, locale: string) =>
 export function ruleSummary(t: T, rule: ZonedRule): string {
   if (rule.kind === 'boolean') return t('ruleChoice.boolean')
   const sign = rule.better === 'lower' ? '≤' : '≥'
-  const suffix = rule.unit === 'time' ? '' : ` ${t(`unit.${rule.unit}`)}`
+  const unit = rule.unit
+  const withUnit = (v: number | string) => (unit === 'time' ? `${v}` : `${v} ${t(`unit.${unit}`, { count: Number(v) })}`)
   const part = (zone: 'excellent' | 'ok' | 'tolerable', v: number | string) =>
-    t('rule.zoneValue', { zone: t(`zone.${zone}`), value: `${sign} ${v}${suffix}` })
+    t('rule.zoneValue', { zone: t(`zone.${zone}`), value: `${sign} ${withUnit(v)}` })
   const parts = [part('excellent', rule.excellent)]
   if (rule.ok !== undefined) parts.push(part('ok', rule.ok))
   if (rule.tolerable !== undefined) parts.push(part('tolerable', rule.tolerable))

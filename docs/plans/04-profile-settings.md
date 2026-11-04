@@ -84,12 +84,13 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   ruleSummary/quotaSummary per language), `src/i18n/{ru,en,uk}.ts`, importers (`Home.tsx`, `Review.tsx`, `Habits.tsx`,
   `HistoryEntry.tsx`) — verify: `npm test`, `npm run build`.
   Note: labels became functions of `t` (`tierLabels(t)`, `booleanOptions(t)`, ...). New keys also `history.unknown`, `rule.zoneValue`, `quota.*`. Unit suffix en/uk not pluralized («1 times»); Review's literal 'раз' left for step 4.
-- [ ] 3. [design-sync] Translate Home, App shell and components with built-in strings — `Home.tsx`, `App.tsx` (tab
+- [x] 3. [design-sync] Translate Home, App shell and components with built-in strings — `Home.tsx`, `App.tsx` (tab
   labels), `components/EloScore.tsx` («Life Elo» stays; «Чистых дней подряд: N» → plural-aware key),
   `components/HistoryEntry.tsx` (all lines, zone/extra labels), ru/en/uk keys. Components call `useI18n()` (works
   without provider = ru). Note in `.design-sync/NOTES.md` that previews render in ru by default — verify:
   `npm run build`, `npm test`; manual `npm run dev` with `localStorage['life-elo:prefs']='{"lang":"en"}'`: Home and
   History expand fully in English.
+  Note: also fixed step 2's unit suffix: `unit.count/steps/minutes` are plural forms, rendered with the value's count (tests ru/en/uk for 1, 2, 5, 21). Review.tsx/Habits.tsx still use own literals until steps 4/6.
 - [ ] 4. Translate Review — `src/ui/Review.tsx` (all strings, error messages, `aria-label`s), ru/en/uk keys — verify:
   `npm run build`; manual: review a day in en and uk, unit suffixes and buttons translated.
 - [ ] 5. Domain errors as keys — `src/domain/habitSetup.ts`: validators return `{ ok:false, error: ErrorKey, params? }`

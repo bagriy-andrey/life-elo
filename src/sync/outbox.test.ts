@@ -95,6 +95,14 @@ describe("outbox", () => {
     expect(await outbox()).toEqual([]);
   });
 
+  it("applyRemote refuses to nest inside another transaction", async () => {
+    await expect(
+      db.transaction("rw", [db.habits, db.outbox, db.syncState], () =>
+        applyRemote(async () => {}),
+      ),
+    ).rejects.toThrow("applyRemote must not run inside");
+  });
+
   it("clearLocalData wipes everything without enqueueing", async () => {
     await db.habits.put(habit("c"));
     await setSyncState({ userId: "u", cursor: 5 });

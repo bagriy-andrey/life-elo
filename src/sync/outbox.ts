@@ -100,8 +100,13 @@ export function installOutbox(target: Dexie): void {
   });
 }
 
-/** Runs `fn` in a readwrite transaction over the synced tables whose writes are NOT enqueued (pulled data). */
+/**
+ * Runs `fn` in a readwrite transaction over the synced tables whose writes are NOT enqueued (pulled data).
+ * Top-level only: the flag lives on the IDB transaction, so nesting would hide later local writes.
+ */
 export function applyRemote<T>(fn: () => Promise<T>): Promise<T> {
+  if (Dexie.currentTransaction)
+    return Promise.reject(new Error("applyRemote must not run inside another transaction"));
   return db.transaction(
     "rw",
     [

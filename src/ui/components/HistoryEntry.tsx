@@ -1,6 +1,7 @@
 import type { LedgerEntry } from '../../engine/rating'
 import { groupByDirectionAndTier } from '../grouping'
-import { DIRECTION_GROUP_LABEL, formatDay, formatSigned, TIER_COLOR, TIER_GROUP_LABEL, ZONE_LABEL } from '../labels'
+import { useI18n } from '../../i18n'
+import { directionGroupLabels, formatDay, formatSigned, TIER_COLOR, tierGroupLabels, zoneLabels } from '../labels'
 import './Card.css'
 import './HistoryEntry.css'
 
@@ -12,13 +13,7 @@ interface Props {
 
 type Contribution = LedgerEntry['contributions'][number]
 
-const EXTRA_ZONE_LABEL = { unknown: 'Не помню', not_applicable: 'Не актуально' } as const
-
-function zoneLabel(zone: NonNullable<Contribution['zone']>) {
-  return zone in ZONE_LABEL ? ZONE_LABEL[zone as keyof typeof ZONE_LABEL] : EXTRA_ZONE_LABEL[zone as keyof typeof EXTRA_ZONE_LABEL]
-}
-
-function entryLabel(c: Contribution, names: Map<string, string>) {
+function entryLabel(c: Contribution, names: Map<string, string>, zoneLabel: (zone: NonNullable<Contribution['zone']>) => string) {
   const { source } = c
   if (source.kind === 'clean_day') return 'Чистый день'
   if (source.kind === 'unknown_day') return 'День без отметки'
@@ -29,6 +24,12 @@ function entryLabel(c: Contribution, names: Map<string, string>) {
 
 /** One reviewed day: total delta, expandable into score, usual-day comparison and grouped lines. */
 export function HistoryEntry({ entry, habits }: Props) {
+  const { t, locale } = useI18n()
+  const ZONE_LABEL = zoneLabels(t)
+  const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
+  const TIER_GROUP_LABEL = tierGroupLabels(t)
+  const zoneLabel = (zone: NonNullable<Contribution['zone']>) =>
+    zone === 'unknown' ? t('history.unknown') : zone === 'not_applicable' ? t('answer.na') : ZONE_LABEL[zone]
   const names = new Map([...habits].map(([id, h]) => [id, h.name]))
   const tierOf = (c: Contribution) =>
     c.source.kind === 'habit' || c.source.kind === 'streak_bonus' ? habits.get(c.source.habitId)?.tier : undefined
@@ -38,7 +39,7 @@ export function HistoryEntry({ entry, habits }: Props) {
       <li key={i} className="row">
         <span>
           {tier && <span style={{ color: TIER_COLOR[tier] }}>● </span>}
-          {entryLabel(c, names)}
+          {entryLabel(c, names, zoneLabel)}
           {c.multiplier > 1 && <span className="muted"> · ×{c.multiplier.toFixed(2)}</span>}
         </span>
         <span>{formatSigned(c.points)}</span>
@@ -57,7 +58,7 @@ export function HistoryEntry({ entry, habits }: Props) {
   return (
     <details className="card history-entry">
       <summary className="row">
-        <span>{formatDay(entry.day)}</span>
+        <span>{formatDay(entry.day, locale)}</span>
         <span className={entry.delta >= 0 ? 'pos' : 'neg'}>{formatSigned(entry.delta)}</span>
       </summary>
       <ul className="explain">

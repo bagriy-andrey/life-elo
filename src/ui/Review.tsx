@@ -8,15 +8,16 @@ import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
 import { Button, Card, Pill, SegmentedControl } from './components'
 import { groupByDirectionAndTier } from './grouping'
+import { useI18n } from '../i18n'
 import {
-  BOOLEAN_OPTIONS,
-  DIRECTION_GROUP_LABEL,
+  booleanOptions,
+  directionGroupLabels,
   formatDay,
-  NOT_APPLICABLE_LABEL,
+  notApplicableLabel,
   TIER_COLOR,
-  TIER_GROUP_LABEL,
-  UNIT_LABEL,
-  ZONE_LABEL,
+  tierGroupLabels,
+  unitLabels,
+  zoneLabels,
   type BooleanAnswer,
 } from './labels'
 
@@ -50,6 +51,13 @@ const currentTime = () => new Date()
 const toneOfZone = (z: Zone) => (z === 'excellent' || z === 'ok' ? 'pos' : 'neg')
 
 export function Review({ day, maxDay, habits, reviews, existing, onDayChange, onDone }: Props) {
+  const { t, locale } = useI18n()
+  const BOOLEAN_OPTIONS = booleanOptions(t)
+  const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
+  const NOT_APPLICABLE_LABEL = notApplicableLabel(t)
+  const TIER_GROUP_LABEL = tierGroupLabels(t)
+  const UNIT_LABEL = unitLabels(t)
+  const ZONE_LABEL = zoneLabels(t)
   const applicable = habits.filter((h) => h.active && h.effectiveFrom <= day)
   // Remounted per day (key), so initial state is the saved review, if any.
   const [entries, setEntries] = useState<Entries>(() => (existing ? { ...existing.entries } : {}))
@@ -139,7 +147,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   return (
     <section className="stack">
       <div className="row">
-        <h2>{formatDay(day)}</h2>
+        <h2>{formatDay(day, locale)}</h2>
         <input
           type="date"
           value={day}

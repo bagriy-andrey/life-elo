@@ -2,6 +2,7 @@ import type { Habit } from '../domain/types'
 import type { ReplayResult } from '../engine/rating'
 import { Banner, EloScore, HistoryEntry } from './components'
 import { settingsOn } from '../domain/settings'
+import { useI18n } from '../i18n'
 import { formatDay, formatSigned } from './labels'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function Home({ result, habits, pendingDay, onReview }: Props) {
+  const { locale } = useI18n()
   const habitsOn = (day: string) =>
     new Map(
       habits.map((h) => {
@@ -28,7 +30,7 @@ export function Home({ result, habits, pendingDay, onReview }: Props) {
         streak={result.cleanDayStreak}
         caption={
           last
-            ? `${formatSigned(last.delta, 1)} за ${formatDay(last.day)}`
+            ? `${formatSigned(last.delta, 1)} за ${formatDay(last.day, locale)}`
             : 'Старт с нуля — подтвердите первый день'
         }
       />
@@ -36,7 +38,7 @@ export function Home({ result, habits, pendingDay, onReview }: Props) {
       {pendingDay && (
         <Banner
           title="Как прошёл вчерашний день?"
-          subtitle={`${formatDay(pendingDay)} ждёт подтверждения →`}
+          subtitle={`${formatDay(pendingDay, locale)} ждёт подтверждения →`}
           onClick={onReview}
         />
       )}

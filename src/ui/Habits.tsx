@@ -17,17 +17,18 @@ import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { Button, Card, SegmentedControl } from './components'
 import { groupByDirectionAndTier } from './grouping'
+import { useI18n } from '../i18n'
 import {
-  BETTER_LABEL,
-  DIRECTION_GROUP_LABEL,
-  DIRECTION_EDIT_LABEL,
-  DIRECTION_LABEL,
+  betterLabels,
+  directionEditLabels,
+  directionGroupLabels,
+  directionLabels,
   quotaSummary,
-  RULE_CHOICE_LABEL,
+  ruleChoiceLabels,
   ruleSummary,
   TIER_COLOR,
-  TIER_GROUP_LABEL,
-  TIER_LABEL,
+  tierGroupLabels,
+  tierLabels,
 } from './labels'
 
 const options = <T extends string>(labels: Record<T, string>) =>
@@ -58,6 +59,9 @@ const UNIT_HINT: Record<Exclude<RuleChoice, 'boolean'>, string> = {
 }
 
 function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
+  const { t } = useI18n()
+  const RULE_CHOICE_LABEL = ruleChoiceLabels(t)
+  const BETTER_LABEL = betterLabels(t)
   const set = (patch: Partial<HabitForm>) => onChange({ ...form, ...patch })
   const measured = form.kind !== 'boolean'
   const isTime = form.kind === 'time'
@@ -139,6 +143,12 @@ function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
 const today = () => dayOf(new Date())
 
 export function Habits({ habits, reviews, effectiveFrom }: Props) {
+  const { t } = useI18n()
+  const DIRECTION_EDIT_LABEL = directionEditLabels(t)
+  const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
+  const DIRECTION_LABEL = directionLabels(t)
+  const TIER_GROUP_LABEL = tierGroupLabels(t)
+  const TIER_LABEL = tierLabels(t)
   const [name, setName] = useState('')
   const [direction, setDirection] = useState<HabitDirection>('destructive')
   const [tier, setTier] = useState<ImpactTier>('medium')
@@ -279,8 +289,8 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
       <Card key={h.id} className="row" inactive={!h.active} style={{ borderLeft: `4px solid ${TIER_COLOR[cur.tier]}` }}>
         <div className="stack-sm">
           <strong>{h.name}</strong>
-          <span className="muted">{ruleSummary(cur.rule)}</span>
-          {cur.quota && <span className="muted">{quotaSummary(cur.quota, nameOf)}</span>}
+          <span className="muted">{ruleSummary(t, cur.rule)}</span>
+          {cur.quota && <span className="muted">{quotaSummary(t, cur.quota, nameOf)}</span>}
         </div>
         <div className="stack-sm">
           <Button onClick={() => startEdit(h)}>Изменить</Button>

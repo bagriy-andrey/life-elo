@@ -21,7 +21,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - Days are finalized by next-morning review of yesterday; editing a past day = save + replay (no double credit).
 - Wellbeing check-in is optional and never modifies Elo directly.
 - Reward Coins (future) are separate from Elo; spending never lowers Elo.
-- Numbers in `PLACEHOLDER_RULESET` are placeholders, not agreed. Ask the user before choosing coefficients or declaring a final formula.
+- `RULESET_V1` numbers are agreed (product context §6.5); tuning goes through a new ruleset version. Ask the user before choosing any coefficient not in §6.5.
 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.

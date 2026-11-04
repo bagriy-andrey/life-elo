@@ -23,8 +23,10 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - none
 
 ## Re-sync risks
+- `previews/HistoryEntry.tsx` sample ledgers are hand-computed from RULESET_V1 (Σw=6, clean day 20, R ← R + 0.1·(10S − R)).
+  A new ruleset version makes them stale — recompute, don't let numbers drift (an earlier draft showed clean day +2).
 - `dtsPropsFor` duplicates prop types: if Button/Card/SegmentedControl/TabBar/HistoryEntry props
-  or `LedgerEntry`/`Contribution`/`HabitOutcome` change, update the config by hand, or the agent codes against stale types.
+  or `LedgerEntry`/`Contribution` change, update the config by hand, or the agent codes against stale types.
 - Adding a component: export it from `src/ui/components/index.ts`; check its emitted `.d.ts` and author a preview.
 - Global CSS (`src/index.css`) ships with the bundle, including app-shell rules for `main` and `.app`.
 - Toolchain at first sync: TypeScript 7.0.2 (tsgo), node 24, esbuild 0.28.

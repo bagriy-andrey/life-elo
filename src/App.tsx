@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { db } from './db/db'
-import { reviewDay } from './domain/day'
+import { addDays, reviewDay } from './domain/day'
 import type { DayReview, Habit } from './domain/types'
-import { PLACEHOLDER_RULESET } from './engine/config'
+import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
 import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
@@ -30,7 +30,7 @@ export default function App() {
   const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
 
-  const result = useMemo(() => replay(habits, reviews, PLACEHOLDER_RULESET), [habits, reviews])
+  const result = useMemo(() => replay(habits, reviews, RULESET_V1, addDays(yesterday, 1)), [habits, reviews, yesterday])
   const sortedHabits = [...habits].sort((a, b) => a.createdAt - b.createdAt)
   const hasYesterdayHabits = habits.some((h) => h.active && h.effectiveFrom <= yesterday)
   const pendingDay =
@@ -53,12 +53,13 @@ export default function App() {
             day={reviewing}
             maxDay={yesterday}
             habits={sortedHabits}
+            reviews={reviews}
             existing={reviews.find((r) => r.day === reviewing)}
             onDayChange={setReviewing}
             onDone={() => setTab('home')}
           />
         )}
-        {tab === 'habits' && <Habits habits={sortedHabits} effectiveFrom={yesterday} />}
+        {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
       <TabBar
         active={tab}

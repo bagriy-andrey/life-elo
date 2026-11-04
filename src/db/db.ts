@@ -2,10 +2,13 @@ import Dexie, { type EntityTable } from 'dexie'
 import type {
   DayReview,
   Habit,
+  HabitEntry,
   HabitEvent,
   Reward,
   WellbeingCheckIn,
 } from '../domain/types'
+import { buildReview } from './confirm'
+import { migrateHabit, migrateReview, type LegacyHabit, type LegacyReview } from './migrate'
 
 /**
  * Local-only storage (IndexedDB) on the device.
@@ -28,17 +31,28 @@ db.version(1).stores({
   rewards: 'id, kind, status',
 })
 
+// v2: reviews store measured `entries` (legacy per-habit answers rewritten); habits get `versions[0]`.
+db.version(2)
+  .stores({})
+  .upgrade(async (tx) => {
+    await tx.table('reviews').toCollection().modify((r: LegacyReview, ref) => {
+      ref.value = migrateReview(r)
+    })
+    await tx.table('habits').toCollection().modify((h: LegacyHabit, ref) => {
+      ref.value = migrateHabit(h)
+    })
+  })
+
 export const newId = () => crypto.randomUUID()
 
-/** Saves (or corrects) a day's review; bumps revision on corrections. */
-export async function confirmDay(day: string, outcomes: DayReview['outcomes']) {
+/** Saves (or corrects) a day's review; rejects locked days, bumps revision on corrections. */
+export async function confirmDay(
+  day: string,
+  entries: Record<string, HabitEntry>,
+  now: Date,
+) {
   await db.transaction('rw', db.reviews, async () => {
     const existing = await db.reviews.get(day)
-    await db.reviews.put({
-      day,
-      outcomes,
-      confirmedAt: Date.now(),
-      revision: (existing?.revision ?? 0) + 1,
-    })
+    await db.reviews.put(buildReview(day, entries, now, existing))
   })
 }

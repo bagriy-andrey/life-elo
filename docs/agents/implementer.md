@@ -9,7 +9,7 @@ otherwise. Works in the current working tree; does not touch other steps.
 - Write or update tests for engine/domain logic in the same step (`*.test.ts` next to the code).
 - UI: build from `src/ui/components/` and tokens in `src/ui/tokens.css`; no inline colors/sizes.
   A new component: own folder + CSS, exported from `components/index.ts`.
-- If component props or `LedgerEntry` / `Contribution` / `HabitOutcome` types change, update
+- If component props or `LedgerEntry` / `Contribution` types change, update
   the matching `dtsPropsFor` entry in `.design-sync/config.json` in the same step.
 - Stop and report instead of guessing if the step is ambiguous, needs a scoring decision,
   or needs files outside its list.

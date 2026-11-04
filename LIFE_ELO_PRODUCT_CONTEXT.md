@@ -156,7 +156,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 
 - **60 — habit base.** `unit = 60 / Σ tierWeight(active habits)`, tier weights weak 1 / medium 2 / strong 3. So 100 is reached only when every habit is in its *excellent* zone.
 - **20 — clean-day bonus.** Granted when no applicable habit landed in the *bad* zone. Constructive habits do not affect it; any `unknown` on a destructive/limit habit means not clean.
-- **20 — streak bonuses.** Per habit: `20 × (weight / Σ weights) × min(streak, 7) / 7` (full at 7 consecutive days).
+- **20 — streak bonuses.** Per habit: `20 × (weight / Σ weights) × f(streak)`. *v1.1 (2026-11-04, applies to all history):* the bonus starts on streak day 3 for strong, day 5 for medium, day 7 for weak habits, then grows in equal steps to full on day 7 (strong: 1/5…5/5; medium: 1/3, 2/3, 1; weak: full on day 7); 0 before the start day.
 - Final day score is clamped to ±100.
 
 **Zoned habits (single outcome per habit per day).** Every habit maps its measured value (yes/no, time, count, minutes, steps) to one zone; zone thresholds are configured per habit. Plain yes/no habits are a special case.
@@ -171,6 +171,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 - Constructive done = *excellent*; constructive not done = *tolerable*.
 - Destructive complied = *ok* (50%, anti-farming). **Recovery:** the first non-bad day after ≥2 consecutive bad days scores the full weight instead of 50%.
 - Negative-streak multiplier: ×1 → ×1.25 → ×1.5 (cap from the 3rd consecutive bad day).
+- *v1.1 (2026-11-04):* when a constructive measured habit has no *tolerable* threshold, anything below its lowest threshold is *tolerable* (0, neutral), never *bad*; *bad* for a constructive habit needs an explicit tolerable bound (like steps <5 000). Destructive habits keep "beyond ok is bad".
 - Examples: bedtime ≤23:00 excellent / 23:00–01:00 tolerable / after 01:00 bad; steps ≥10 000 excellent / 5 000–9 999 tolerable / <5 000 bad; social media 0 min excellent / ≤20 min ok / >20 min bad (entered manually at review).
 
 **Period quotas.** A habit may have a limit per calendar week (Mon–Sun) and per day. Example: masturbation ≤1/day and ≤2/week; the weekly limit is reduced by 1 for each day with sex so far this week (not below 0). Sex is a constructive habit with no limit. A day is *bad* if the cumulative count so far this week exceeds the limit as of that day (no retroactive changes to earlier days); otherwise *ok*.
@@ -180,7 +181,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 **Clarifications (2026-11-03).**
 
 - Bad-day multipliers: ×1 on the 1st consecutive bad day, ×1.25 on the 2nd, ×1.5 from the 3rd. A bad day resets that habit's positive streak to 0. Soft decay halves with floor.
-- Recovery (full weight) applies only to the *ok* zone. A quota habit with zero count is *ok*.
+- Recovery (full weight) applies only to the *ok* zone. A quota habit with zero count is *ok*, unless the cumulative weekly count already exceeds the limit as of that day (e.g. after a reducer day): then it is *bad* even with zero.
 - `not applicable` removes the habit from Σ weights for that day and pauses its streak. A per-habit `unknown` inside a reviewed day stays in Σ, scores 0 and breaks that habit's streak.
 - Clean-day bonus requires at least one applicable habit that can be *bad*.
 - Habit settings (tier, thresholds, quota) are versioned by date: a change applies from that day on; past days keep their old settings.
@@ -339,7 +340,11 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 ### Open / requires discussion
 
 - Habit categories, default tier assignment, and final catalog.
+- Quota habit after a weekly overrun (deferred 2026-11-03, rule kept as is for now): once the cumulative weekly count exceeds the (reduced) limit, every later day that week is *bad* even with zero, with growing ×1.25/×1.5 multipliers and no clean-day bonus. Worked example: masturbation 1 on Thu after sex on Wed → Fri–Sun bad with 0. Alternative: *bad* only on days with count > 0 that push the total over. Revisit after real use.
+  - Second case (2026-11-04, deferred again): a reducer day makes the *current* day bad. Mon masturbation 1, Tue 1 (limit 2, ok), Wed sex + 0 → limit 1 < total 2 → Wed–Sun *bad*. A good action (sex, meant to "replace" masturbation) triggers bad days, against the user's intent: sex unlimited and "more is better", masturbation up to 2/week when there is no sex, each sex day replaces one. Also open: whether several sex times in one day should count more (now: per day only).
+- Overall algorithm fit (user, 2026-11-04): the user feels v1.1 does not yet capture habit-specific nuances (weekly minimum goals, reducer/quota interplay, per-day vs per-occurrence counting). Plan a dedicated review of the scoring model with real usage data before v2.
 - Habits scheduled on specific days / "N times per week" goals (v1 treats all habits as daily).
+  - Concrete case (2026-11-04): "Спорт ≥5 times per week (Mon–Sun)". Interim: daily yes/no habit, planned rest days marked *not applicable*. To decide for a real weekly target: points per workout day vs at week end; what is *bad* (week below target vs target no longer reachable); streak counted in days or weeks.
 - Reward Coins earning rates, redemption prices, unlock conditions and surprise mechanics.
 - Whether wellbeing directly modifies Elo or is only used for calibration/validation (recommend latter initially).
 - How to treat missing/unknown data and very long gaps.

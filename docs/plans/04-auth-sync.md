@@ -184,7 +184,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   `dtsPropsFor` entries; update the AGENTS.md gotcha about TextInput — files: `src/ui/components/TextField.{tsx,css}`,
   `Notice.{tsx,css}`, `index.ts`, `src/ui/tokens.css`, `.design-sync/…` — verify: `npm run build`, `npm run lint`.
   Note: global `input` styles stay in `src/index.css` (Habits/Review still use raw inputs); TextField.css only adds sizing/error/trailing.
-- [ ] 6. [design-sync] `PasswordField` (TextField + «Показать/Скрыть» toggle, optional 3-segment strength meter with
+- [x] 6. [design-sync] `PasswordField` (TextField + «Показать/Скрыть» toggle, optional 3-segment strength meter with
   labels «Слабый/Нормальный/Надёжный пароль») — files: `src/ui/components/PasswordField.{tsx,css}`, `index.ts`,
   preview, `.design-sync/config.json` — verify: `npm run build`, `npm run lint`.
 - [ ] 7. Auth screen (login / register / forgot + resend) per design and Spec texts, busy state «Подождите…»,

@@ -31,7 +31,7 @@ silently reinterpret past days. Rating is never stored, so deleting data = save 
   version's quota has `reducedByDaysOf === habitId`), `withoutHabit(review, habitId)` (returns review with the
   entry key removed, other fields untouched) — files: `src/domain/habitSetup.ts`, `src/domain/habitSetup.test.ts`
   — verify: `npm test`.
-- [ ] 2. Data op: `deleteHabit(habitId)` in the db layer — one `rw` transaction over `habits`, `reviews`,
+- [x] 2. Data op: `deleteHabit(habitId)` in the db layer — one `rw` transaction over `habits`, `reviews`,
   `events`; uses `reducerUsers` guard (throws a typed error) and `withoutHabit` — files: `src/db/db.ts` (or a
   new `src/db/habits.ts`), tests for the pure parts only — verify: `npm test`, `npm run lint`.
 - [ ] 3. UI in `Habits.tsx` edit form: name input (prefilled), direction SegmentedControl enabled only when

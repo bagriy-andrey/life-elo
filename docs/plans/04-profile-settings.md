@@ -153,7 +153,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `aria-modal`, `aria-labelledby`, focus moves into the dialog on open and returns on close; card-styled panel.
   Files: `components/Dialog.tsx`, `Dialog.css`, `index.ts`, `.design-sync/config.json`, preview — verify:
   `npm run build`, `npm run lint`; manual keyboard check (Esc, Tab stays inside is nice-to-have, not required).
-- [ ] 14. Profile screen (view mode) + tab wiring — new `src/ui/Profile.tsx` + `Profile.css` (view layout only:
+- [x] 14. Profile screen (view mode) + tab wiring — new `src/ui/Profile.tsx` + `Profile.css` (view layout only:
   avatar, name, `@nick`, 2-col cards «Рейтинг» / «С нами с» via `toLocaleDateString(locale, {day:'numeric',
   month:'long', year:'numeric'})`, rows Почта / Дата рождения with `—` fallback and age plural), `App.tsx`: `Tab`
   gets `'profile'`, 4th TabBar item «Профиль», `useLiveQuery(() => db.profile.get('me'))`, pass `result.rating`.
@@ -161,6 +161,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   files: `src/ui/Profile.tsx`, `src/ui/Profile.css`, `src/App.tsx`, `src/i18n/{ru,en,uk}.ts`, shared age-text helper
   with test if added — verify: `npm run build`, `npm run lint`; manual: with a profile saved via devtools/Dexie
   the view renders in 3 languages, rating matches Home. TabBar `dtsPropsFor` unchanged (items generic).
+  Note: age text helper is `formatBirth` in `labels.ts` (tested); `onEdit` is a no-op and the no-profile state a plain empty message until step 15.
 - [ ] 15. Profile edit mode — `Profile.tsx`: header «Изменить»/«Отмена»; no profile → starts in edit mode without
   «Отмена»; form with `Field`s (Имя*, Ник with «@» prefix + hint when empty, Почта type=email, Дата рождения
   type=date `max=today` + age hint), `validateProfile` wiring (touched-on-blur, attempted-save, nick live),

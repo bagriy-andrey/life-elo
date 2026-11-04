@@ -1,4 +1,5 @@
 import type { HabitDirection, ImpactTier, Quota, Zone, ZonedRule } from '../domain/types'
+import { ageOn } from '../domain/profile'
 import type { RuleChoice } from '../domain/habitSetup'
 import type { I18n } from '../i18n'
 
@@ -89,3 +90,7 @@ export function quotaSummary(t: T, quota: Quota, nameOf: (id: string) => string 
     ? t('quota.summaryReduced', { parts: joined, name: nameOf(quota.reducedByDaysOf) ?? '?' })
     : t('quota.summary', { parts: joined })
 }
+
+/** «14 мая 1996 · 30 лет». `today` is a calendar date (toDayKey), not a review day. */
+export const formatBirth = (birth: string, today: string, t: T, locale: string) =>
+  `${new Date(`${birth}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} · ${t('profile.age', { count: ageOn(birth, today) })}`

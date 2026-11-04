@@ -1,0 +1,38 @@
+.profile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile-head .btn { min-height: 44px; }
+.profile-id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+.profile-name { font-size: 1.35rem; }
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.profile-stat-value {
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.profile-stat-date { font-size: var(--text-lg); margin-top: auto; }
+.profile-rows { padding-block: 0; }
+.profile-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-12) 0;
+}
+.profile-row + .profile-row { border-top: 1px solid var(--border); }
+.profile-row-value { overflow-wrap: anywhere; }

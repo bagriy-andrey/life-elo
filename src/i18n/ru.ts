@@ -137,5 +137,17 @@ export const ru = {
   'profileError.birthYear': 'Возраст не может быть больше {max} лет',
   'profileHint.nick': 'Необязательно. 3–20 символов: латиница, цифры, _',
   'profileHint.email': 'Необязательно. Хранится только на этом устройстве',
-  'profileHint.birth': 'Необязательно'
+  'profileHint.birth': 'Необязательно',
+  'profile.edit': 'Изменить',
+  'profile.rating': 'Рейтинг',
+  'profile.since': 'С нами с',
+  'profile.email': 'Почта',
+  'profile.birth': 'Дата рождения',
+  'profile.age': {
+    one: '{count} год',
+    few: '{count} года',
+    many: '{count} лет',
+    other: '{count} года',
+  },
+  'profile.empty': 'Профиль пока не создан'
 }

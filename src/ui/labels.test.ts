@@ -4,7 +4,7 @@ import { ru } from '../i18n/ru'
 import { translate } from '../i18n/translate'
 import { LOCALE, type Dict, type Key, type Lang, type Params } from '../i18n/types'
 import { uk } from '../i18n/uk'
-import { booleanOptions, formatDay, quotaSummary, ruleSummary, zoneLabels } from './labels'
+import { booleanOptions, formatBirth, formatDay, quotaSummary, ruleSummary, zoneLabels } from './labels'
 
 const tFor = (lang: Lang) => {
   const dict: Dict = { ru, en, uk }[lang]
@@ -60,5 +60,17 @@ describe('label maps', () => {
   it('translate zones and boolean answers', () => {
     expect(zoneLabels(tFor('en')).ok).toBe('Within limits')
     expect(booleanOptions(tFor('uk')).destructive.map((o) => o.label)).toEqual(['Дотримувався', 'Порушив', 'Неактуально'])
+  })
+})
+
+describe('formatBirth', () => {
+  it('formats date and plural age per language', () => {
+    expect(formatBirth('1996-05-14', '2026-05-14', tFor('ru'), LOCALE.ru)).toMatch(/^14 мая 1996 г?\.? · 30 лет$/)
+    expect(formatBirth('1996-05-15', '2026-05-14', tFor('ru'), LOCALE.ru)).toContain('· 29 лет')
+    expect(formatBirth('2025-01-01', '2026-05-14', tFor('ru'), LOCALE.ru)).toContain('· 1 год')
+    expect(formatBirth('2022-01-01', '2026-05-14', tFor('ru'), LOCALE.ru)).toContain('· 4 года')
+    expect(formatBirth('1996-05-14', '2026-05-14', tFor('en'), LOCALE.en)).toContain('May 1996 · 30 years old')
+    expect(formatBirth('1996-05-14', '2026-05-14', tFor('uk'), LOCALE.uk)).toContain('травня 1996')
+    expect(formatBirth('1996-05-14', '2026-05-14', tFor('uk'), LOCALE.uk)).toContain('· 30 років')
   })
 })

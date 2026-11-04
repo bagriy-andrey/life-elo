@@ -130,5 +130,15 @@ export const en: Dict = {
   'profileError.birthYear': 'Age cannot exceed {max} years',
   'profileHint.nick': 'Optional. 3–20 characters: Latin letters, digits, _',
   'profileHint.email': 'Optional. Stored only on this device',
-  'profileHint.birth': 'Optional'
+  'profileHint.birth': 'Optional',
+  'profile.edit': 'Edit',
+  'profile.rating': 'Rating',
+  'profile.since': 'Member since',
+  'profile.email': 'Email',
+  'profile.birth': 'Date of birth',
+  'profile.age': {
+    one: '{count} year old',
+    other: '{count} years old',
+  },
+  'profile.empty': 'No profile yet'
 }

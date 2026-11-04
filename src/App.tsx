@@ -9,9 +9,10 @@ import { useI18n } from './i18n'
 import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
+import { Profile } from './ui/Profile'
 import { Review } from './ui/Review'
 
-type Tab = 'home' | 'review' | 'habits'
+type Tab = 'home' | 'review' | 'habits' | 'profile'
 
 const NO_HABITS: Habit[] = []
 const NO_REVIEWS: DayReview[] = []
@@ -31,6 +32,8 @@ export default function App() {
 
   const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
+
+  const profile = useLiveQuery(() => db.profile.get('me'), [])
 
   const result = useMemo(() => replay(habits, reviews, RULESET_V1, addDays(yesterday, 1)), [habits, reviews, yesterday])
   const sortedHabits = [...habits].sort((a, b) => a.createdAt - b.createdAt)
@@ -62,6 +65,7 @@ export default function App() {
           />
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
+        {tab === 'profile' && <Profile profile={profile} rating={result.rating} onEdit={() => {}} />}
       </main>
       <TabBar
         active={tab}
@@ -70,6 +74,7 @@ export default function App() {
           { id: 'home', label: t('tab.home') },
           { id: 'review', label: t('tab.review'), badge: !!pendingDay },
           { id: 'habits', label: t('tab.habits') },
+          { id: 'profile', label: t('tab.profile') },
         ]}
       />
     </div>

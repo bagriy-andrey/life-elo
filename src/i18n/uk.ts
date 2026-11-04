@@ -138,5 +138,17 @@ export const uk: Dict = {
   'profileError.birthYear': 'Вік не може бути більшим за {max} років',
   'profileHint.nick': 'Необовʼязково. 3–20 символів: латиниця, цифри, _',
   'profileHint.email': 'Необовʼязково. Зберігається лише на цьому пристрої',
-  'profileHint.birth': 'Необовʼязково'
+  'profileHint.birth': 'Необовʼязково',
+  'profile.edit': 'Змінити',
+  'profile.rating': 'Рейтинг',
+  'profile.since': 'З нами з',
+  'profile.email': 'Пошта',
+  'profile.birth': 'Дата народження',
+  'profile.age': {
+    one: '{count} рік',
+    few: '{count} роки',
+    many: '{count} років',
+    other: '{count} року',
+  },
+  'profile.empty': 'Профіль ще не створено'
 }

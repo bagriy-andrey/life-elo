@@ -1,21 +1,18 @@
 # Handoff
-Updated: 2026-11-03 by Claude Code
+Updated: 2026-11-04 by Claude Code
 Branch: scoring-ruleset-v1 — PR #3 open (https://github.com/bagriy-andrey/life-elo/pull/3)
-Plan: docs/plans/01-scoring-ruleset-v1.md — all 13 steps built + verified PASS, Status: done
+Plan: 01 (ruleset, now v1.1) and 02 (habit grouping) — all steps built + verified, Status: done
 
 ## In progress
-Nothing.
+Nothing. Since plan 02: tier colors (tokens --tier-strong/-medium/-weak), commit c562acd.
 
 ## Next step
-User: manual check in `npm run dev` (review inputs/zones, habit setup + quota, history ledger, old data upgraded),
-then merge PR #3, then tick «Рейтинг v1» in docs/ROADMAP.md.
+User: `/design-sync` (HistoryEntry grouping + tier colors + new tokens), manual check in `npm run dev`
+(v1.1: 3 Nov S = 50, «Чтение» 0 min = Терпимо; grouping/colors on 3 screens), merge PR #3, tick ROADMAP.
 
 ## Broken / open questions
-- Open (user, 2026-11-04): weekly minimum goals (e.g. sport ≥5/week) — product context §13 Open; interim = daily + N/A rest days.
-- Pending `/design-sync`: HistoryEntry grouping + tier colors, new tokens --tier-strong/-medium/-weak in tokens.css.
-- Deferred by user: quota overrun rule (zero-count days bad for the rest of the week) — product context §13 Open.
-- Hardening (optional): settingsOn / r.entries assume v2 shape with no runtime guard; a v3 upgrade re-running
-  the idempotent migrations would cover habits written by intermediate builds.
-- `HistoryEntry` clamp note hardcodes «±100» (fine for v1; read dayClamp when a v2 ruleset appears).
-- `App.tsx` `yesterday` from useState init: `today` may go stale if the app stays open past the day boundary.
+- Open in product context §13: weekly minimum goals (sport ≥5/week; interim daily + N/A rest days);
+  quota overrun rule (zero-count days bad for the rest of the week).
+- Optional hardening: runtime guard / v3 upgrade re-running idempotent migrations (habits without `versions`).
+- `HistoryEntry` clamp note hardcodes «±100»; `App.tsx` `today` may go stale past the day boundary.
 - Deploy to Vercel postponed by the user. Stray iOS note at end of LIFE_ELO_PRODUCT_CONTEXT.md still there.

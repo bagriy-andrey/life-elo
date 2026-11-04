@@ -148,7 +148,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   both themes) and `quiet` (no border/background, accent text). Files: `components/Button.tsx`, `Button.css`,
   `.design-sync/config.json` (`dtsPropsFor.Button` variant union + doc comments), Button preview — verify:
   `npm run build`; visual check both themes.
-- [ ] 13. [design-sync] `Dialog` component (alertdialog) — props `open`, `title`, `onClose`, children (body and
+- [x] 13. [design-sync] `Dialog` component (alertdialog) — props `open`, `title`, `onClose`, children (body and
   actions); overlay `rgba(0,0,0,.45)`, click on overlay closes, Escape closes, `role="alertdialog"`,
   `aria-modal`, `aria-labelledby`, focus moves into the dialog on open and returns on close; card-styled panel.
   Files: `components/Dialog.tsx`, `Dialog.css`, `index.ts`, `.design-sync/config.json`, preview — verify:

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { db, newId } from '../db/db'
+import { deleteHabit, ReducerInUseError } from '../db/habits'
 import { dayOf } from '../domain/day'
 import {
   buildQuota,
@@ -7,17 +8,19 @@ import {
   EMPTY_FORM,
   editedVersions,
   formOf,
+  hasAnswers,
   validateReducer,
   type HabitForm,
   type RuleChoice,
 } from '../domain/habitSetup'
 import { settingsOn } from '../domain/settings'
-import type { Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
+import type { DayReview, Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { Button, Card, SegmentedControl } from './components'
 import { groupByDirectionAndTier } from './grouping'
 import {
   BETTER_LABEL,
   DIRECTION_GROUP_LABEL,
+  DIRECTION_EDIT_LABEL,
   DIRECTION_LABEL,
   quotaSummary,
   RULE_CHOICE_LABEL,
@@ -32,6 +35,8 @@ const options = <T extends string>(labels: Record<T, string>) =>
 
 interface Props {
   habits: Habit[]
+  /** Stored reviews: decide whether a habit's direction can still change. */
+  reviews: DayReview[]
   /** New habits become reviewable starting from this day. */
   effectiveFrom: string
 }
@@ -133,7 +138,7 @@ function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
 
 const today = () => dayOf(new Date())
 
-export function Habits({ habits, effectiveFrom }: Props) {
+export function Habits({ habits, reviews, effectiveFrom }: Props) {
   const [name, setName] = useState('')
   const [direction, setDirection] = useState<HabitDirection>('destructive')
   const [tier, setTier] = useState<ImpactTier>('medium')
@@ -144,6 +149,9 @@ export function Habits({ habits, effectiveFrom }: Props) {
   const [editTier, setEditTier] = useState<ImpactTier>('medium')
   const [editForm, setEditForm] = useState<HabitForm>(EMPTY_FORM)
   const [editError, setEditError] = useState<string>()
+  const [editName, setEditName] = useState('')
+  const [editDirection, setEditDirection] = useState<HabitDirection>('destructive')
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const nameOf = (id: string) => habits.find((h) => h.id === id)?.name
 
@@ -184,36 +192,86 @@ export function Habits({ habits, effectiveFrom }: Props) {
     setEditTier(cur.tier)
     setEditForm(formOf(cur.rule, cur.quota))
     setEditError(undefined)
+    setEditName(h.name)
+    setEditDirection(h.direction)
+    setConfirmingDelete(false)
+  }
+
+  const remove = async (h: Habit) => {
+    try {
+      await deleteHabit(h.id)
+      setEditingId(undefined)
+    } catch (e) {
+      if (e instanceof ReducerInUseError) {
+        const names = e.users.map((u) => `«${u.name}»`).join(', ')
+        setEditError(`Нельзя удалить: привычка уменьшает лимит у ${names}`)
+        setConfirmingDelete(false)
+      } else throw e
+    }
   }
 
   const saveEdit = async (h: Habit) => {
     const day = today()
+    const newName = editName.trim()
+    if (!newName) return setEditError('Название не может быть пустым')
     const s = settingsFrom(editForm, h.id, day)
     if ('error' in s) return setEditError(s.error)
     const versions = editedVersions(h, { tier: editTier, rule: s.rule, quota: s.quota }, day)
-    await db.habits.update(h.id, { versions })
+    const canFlip = !hasAnswers(h.id, reviews)
+    await db.habits.update(h.id, {
+      versions,
+      name: newName,
+      direction: canFlip ? editDirection : h.direction,
+    })
     setEditingId(undefined)
   }
 
   const renderHabit = (h: Habit) => {
     const cur = settingsOn(h, today())
     if (editingId === h.id) {
+      const locked = hasAnswers(h.id, reviews)
       return (
         <Card key={h.id} className="stack-sm">
-          <strong>{h.name}</strong>
+          <input
+            aria-label="Название привычки"
+            placeholder="Название привычки"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          {locked ? (
+            <>
+              <span className="muted">Направление: {DIRECTION_EDIT_LABEL[h.direction]}</span>
+              <span className="muted">Направление нельзя поменять: по привычке уже есть ответы</span>
+            </>
+          ) : (
+            <SegmentedControl
+              value={editDirection}
+              onChange={setEditDirection}
+              options={options(DIRECTION_EDIT_LABEL)}
+            />
+          )}
           <span className="muted">Изменения действуют с сегодняшнего дня</span>
           <SegmentedControl value={editTier} onChange={setEditTier} options={options(TIER_LABEL)} />
           <RuleFields
             form={editForm}
             onChange={setEditForm}
             reducers={habits.filter((x) => x.id !== h.id)}
-            direction={h.direction}
+            direction={locked ? h.direction : editDirection}
           />
           {editError && <span className="neg">{editError}</span>}
           <Button variant="primary" onClick={() => saveEdit(h)}>
             Сохранить
           </Button>
           <Button onClick={() => setEditingId(undefined)}>Отмена</Button>
+          {confirmingDelete ? (
+            <>
+              <span className="neg">Удалить привычку и все её ответы? Рейтинг пересчитается.</span>
+              <Button onClick={() => remove(h)}>Удалить</Button>
+              <Button onClick={() => setConfirmingDelete(false)}>Отмена</Button>
+            </>
+          ) : (
+            <Button onClick={() => setConfirmingDelete(true)}>Удалить</Button>
+          )}
         </Card>
       )
     }

@@ -59,7 +59,7 @@ export default function App() {
             onDone={() => setTab('home')}
           />
         )}
-        {tab === 'habits' && <Habits habits={sortedHabits} effectiveFrom={yesterday} />}
+        {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
       <TabBar
         active={tab}

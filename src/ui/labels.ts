@@ -12,6 +12,12 @@ export const DIRECTION_LABEL: Record<HabitDirection, string> = {
   destructive: 'Нежелательная',
 }
 
+/** Short names used in the habit edit form. */
+export const DIRECTION_EDIT_LABEL: Record<HabitDirection, string> = {
+  constructive: 'Полезная',
+  destructive: 'Вредная',
+}
+
 export const DIRECTION_GROUP_LABEL: Record<HabitDirection, string> = {
   constructive: '＋ Полезные',
   destructive: '− Вредные',

@@ -6,6 +6,9 @@ import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/AuthProvider'
+import { createSyncEngine, startSync } from './sync/engine'
+import { getSyncState } from './sync/outbox'
+import { supabaseRemote } from './sync/remote'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { TabBar } from './ui/components'
@@ -77,9 +80,22 @@ function MainApp() {
   )
 }
 
+const syncEngine = createSyncEngine({ remote: supabaseRemote })
+
+/** Runs background sync while signed in. Stops on sign-out (effect cleanup). */
+function useBackgroundSync(userId: string | undefined) {
+  const syncedUserId = useLiveQuery(async () => (await getSyncState()).userId, [])
+  useEffect(() => {
+    // TODO(step 12): first sign-in decision (upload / pull / ask) sets syncState.userId; until then nothing syncs.
+    if (!userId || syncedUserId !== userId) return
+    return startSync(syncEngine)
+  }, [userId, syncedUserId])
+}
+
 export default function App() {
   const { configured, loading, recovery, session } = useAuth()
   const [startForgot, setStartForgot] = useState(false)
+  useBackgroundSync(session?.user.id)
   // The forgot hand-off is one-shot: a later sign-out opens login again.
   if (session && startForgot) setStartForgot(false)
   if (!configured)

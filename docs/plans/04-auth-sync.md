@@ -207,6 +207,7 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   triggers, debounce, status store + `useSyncStatus`) — files: `src/sync/remote.ts`, `src/sync/engine.ts`,
   `src/sync/engine.test.ts` (with a fake remote), `src/App.tsx` — verify: `npm test`; manual: two browsers, edit in one,
   see it in the other.
+  Note: manual two-browser check pending (user). Sync starts in App only when syncState.userId === session user (TODO hook for step 12). Tests simulate devices by snapshot/restore of one fake-indexeddb.
 - [ ] 12. First sign-in flow + choice screen — files: `src/sync/firstSignIn.ts`, `src/ui/SyncChoice.tsx`, `src/App.tsx`
   — verify: tests for the flow with a fake remote; manual: existing local data → empty account uploads.
 - [ ] 13. Profile tab: TabBar 4th item «Профиль», `Profile.tsx` (name, email, sync status, «Синхронизировать заново»,

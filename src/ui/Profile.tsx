@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { AUTH_FALLBACK_TEXT } from '../auth/errors'
 import { db } from '../db/db'
 import { useSyncStatus, type SyncEngine, type SyncStatus } from '../sync/engine'
+import { performLogout } from '../sync/logout'
 import { clearLocalData } from '../sync/outbox'
 import { Button, Card, Notice } from './components'
 import './auth/AuthScreen.css'
@@ -48,10 +49,8 @@ export function Profile({ engine, onPassword }: Props) {
 
   /** Only explicit logout clears local data (never on a SIGNED_OUT event). */
   const finish = async () => {
-    engine.cancel()
-    await engine.settled()
-    await clearLocalData()
-    await signOut() // local session is gone either way
+    const out = await performLogout({ engine, signOut, clearLocalData })
+    if (!out.ok) throw new Error('logout failed')
   }
 
   const logout = async () => {

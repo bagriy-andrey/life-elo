@@ -150,7 +150,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       signOut: () =>
         run(async () => {
-          const { error } = await supabase!.auth.signOut()
+          // Offline the global call fails and keeps the session: fall back to ending it locally.
+          const global = await supabase!.auth.signOut().catch(() => ({ error: new Error('network') }))
+          if (!global.error) return {}
+          const { error } = await supabase!.auth.signOut({ scope: 'local' })
           return error ? fail(error) : {}
         }),
       dismissRecovery: () => {

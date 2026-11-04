@@ -60,6 +60,9 @@ export interface SyncEngine {
   resync(): Promise<void>
   /** Aborts the in-flight run (no further local writes); a later run() starts fresh. */
   cancel(): void
+  /** run()/resync() become no-ops (and the in-flight run is cancelled) until enable(). */
+  disable(): void
+  enable(): void
   /** Resolves when no run is in flight. */
   settled(): Promise<void>
   status: SyncStatusStore
@@ -76,6 +79,7 @@ export function createSyncEngine(opts: {
 
   let gen = 0
   let resetCursor = false
+  let disabled = false
 
   async function push(g: number) {
     // One read transaction so every row is consistent with its outbox entry.
@@ -166,6 +170,7 @@ export function createSyncEngine(opts: {
   let running: Promise<void> | null = null
   let again = false
   function run(): Promise<void> {
+    if (disabled) return Promise.resolve()
     if (running) {
       again = true
       return running
@@ -185,12 +190,21 @@ export function createSyncEngine(opts: {
     run,
     status,
     async resync() {
+      if (disabled) return
       resetCursor = true
       await run()
     },
     cancel() {
       gen++
       again = false
+    },
+    disable() {
+      disabled = true
+      gen++
+      again = false
+    },
+    enable() {
+      disabled = false
     },
     settled: () => running ?? Promise.resolve(),
   }
@@ -199,6 +213,7 @@ export function createSyncEngine(opts: {
 /** Triggers: now, `online`, tab becomes visible, 2 s after local writes. Returns a stop function that cancels the in-flight run and resets status to idle;
  * await `engine.settled()` afterwards before clearing local data. */
 export function startSync(engine: SyncEngine): () => void {
+  engine.enable()
   const run = () => void engine.run()
   let timer: ReturnType<typeof setTimeout> | undefined
   let first = true

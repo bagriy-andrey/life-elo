@@ -105,7 +105,7 @@ function useBackgroundSync(userId: string | undefined) {
 
 /** Stops any running sync before local data is replaced. */
 async function stopSync() {
-  syncEngine.cancel()
+  syncEngine.disable()
   await syncEngine.settled()
 }
 

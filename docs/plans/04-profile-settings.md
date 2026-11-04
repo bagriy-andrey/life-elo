@@ -133,7 +133,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   existing habits/reviews intact.
 - [x] 10. [design-sync] `Field` component — label (text-sm, 600) + optional `required` asterisk + wrapped control
   (children, native input) + optional `prefix` (absolute-positioned, e.g. «@») + `hint` (muted xs) + `error` (`--neg`
-  xs, `role="alert"`-free, linked by `aria-describedby` via `useId`; the screen sets `aria-invalid` on the input).
+  xs, `role="alert"`-free, linked by `aria-describedby` via `useId`; `Field` itself sets `aria-invalid` and `id`; hint/error sit outside the `<label>`).
   Files: `components/Field.tsx`, `Field.css`, export in `components/index.ts`, `dtsPropsFor.Field` in
   `.design-sync/config.json` + a `cardMode: column` override, preview per `.design-sync/NOTES.md` — verify:
   `npm run build`, `npm run lint`; check the emitted `.d.ts`.

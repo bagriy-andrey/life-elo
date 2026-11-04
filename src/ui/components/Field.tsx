@@ -11,28 +11,34 @@ interface Props {
   prefix?: string
   /** Muted helper text; hidden while an error is shown. */
   hint?: string
-  /** Error text under the control. The control itself should get aria-invalid. */
+  /** Error text under the control. The control gets aria-invalid automatically. */
   error?: string
   className?: string
-  /** A single native control, e.g. <input>. It receives aria-describedby. */
+  /** A single native control, e.g. <input>. It receives id, aria-describedby and aria-invalid. */
   children: ReactNode
 }
 
 export function Field({ label, required, prefix, hint, error, className, children }: Props) {
+  const autoId = useId()
   const noteId = useId()
   const note = error || hint
   const child = Children.only(children)
+  type ControlProps = { id?: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }
+  const childId = isValidElement(child) ? (child.props as ControlProps).id : undefined
+  const id = childId ?? autoId
   const control = isValidElement(child)
-    ? cloneElement(child as ReactElement<{ 'aria-describedby'?: string }>, {
+    ? cloneElement(child as ReactElement<ControlProps>, {
+        id,
         'aria-describedby': note ? noteId : undefined,
+        'aria-invalid': error ? true : undefined,
       })
     : child
   return (
-    <label className={cx('field', className)}>
-      <span className="field-label">
+    <div className={cx('field', className)}>
+      <label className="field-label" htmlFor={id}>
         {label}
         {required && <span className="field-required" aria-hidden="true"> *</span>}
-      </span>
+      </label>
       <span className={cx('field-control', prefix && 'field-has-prefix')}>
         {prefix && <span className="field-prefix" aria-hidden="true">{prefix}</span>}
         {control}
@@ -42,6 +48,6 @@ export function Field({ label, required, prefix, hint, error, className, childre
           {note}
         </span>
       )}
-    </label>
+    </div>
   )
 }

@@ -24,7 +24,7 @@ export const RequiredWithPrefixAndHint = () => (
 export const WithError = () => (
   <div style={box}>
     <Field label="Имя" required error="Введите имя">
-      <input aria-invalid="true" />
+      <input />
     </Field>
   </div>
 )

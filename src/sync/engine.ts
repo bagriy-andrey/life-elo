@@ -149,7 +149,7 @@ export function createSyncEngine(opts: {
       }
       await push(g)
       if (!(await pull(g))) {
-        status.set({ kind: 'update-required' })
+        if (g === gen) status.set({ kind: 'update-required' })
         return
       }
       if (g !== gen) return

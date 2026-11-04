@@ -118,13 +118,13 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
 - [x] 8. Pure profile logic — `src/domain/profile.ts` (+ `profile.test.ts`): `Profile` type
   `{ id:'me', name, nick?, email?, birth?: 'YYYY-MM-DD', photo?: string, createdAt: number }` (also add to
   `types.ts` if that is the convention), `normalizeNick` (strip leading `@`, trim), `validateProfile(input, today)`
-  → `{ name?, nick?, email?, birth? }` error keys (`name.required`, `name.tooLong`, `nick.invalid`, `email.invalid`,
-  `birth.future`, `birth.year`), `ageOn(birth, today)` (birthday not yet reached → minus 1; Feb 29 safe),
+  → `{ name?, nick?, email?, birth? }` error keys (`profileError.nameRequired`, `nameTooLong`, `nickInvalid`, `emailInvalid`,
+  `birthInvalid`, `birthFuture`, `birthYear`), `ageOn(birth, today)` (birthday not yet reached → minus 1; Feb 29 safe),
   `initials(name)`. Dictionary keys for these errors + hint texts in ru/en/uk — files: `src/domain/profile.ts`,
   `src/domain/profile.test.ts`, `src/i18n/{ru,en,uk}.ts` — verify: `npm test` (boundaries: name 40/41 chars, nick
   2/3/20/21, email edge forms, birth today/tomorrow/121 years ago, birthday eve, initials of «  анна   мария  », one
   word, emoji/empty).
-- [ ] 9. Profile storage and wipe — `src/db/db.ts`: `profile: EntityTable<Profile,'id'>`, `db.version(3).stores({
+- [x] 9. Profile storage and wipe — `src/db/db.ts`: `profile: EntityTable<Profile,'id'>`, `db.version(3).stores({
   profile: 'id' })`; new `src/db/profile.ts`: `saveProfile(input, now)` (creates with `createdAt: now` or updates
   keeping existing `createdAt`; trims name, normalizes nick/email/birth, drops empty optionals), `clearAllData()`
   (single `rw` transaction over all tables; removing the prefs key is done by the caller/UI step). Pure bits
@@ -166,6 +166,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `src/ui/Profile.tsx`, `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts` — verify: `npm run build`; manual: first
   save creates profile (view shows today as «С нами с»), edit keeps the date, each validation message in 3 languages,
   invalid save writes nothing.
+  Note: Pass `toDayKey(new Date())` (calendar date) to validateProfile/ageOn — NOT dayOf/reviewDay (04:00 boundary would reject today's birth date 00:00–04:00).
 - [ ] 16. Photo — `src/ui/photo.ts`: pure `fitSize(w, h, max=256)` (never upscales, keeps ratio) + `resizeImage(file)
   → Promise<string>` (createImageBitmap/Image + canvas → JPEG data URL; rejects non-images and decode errors);
   `photo.test.ts` for `fitSize`. Profile edit: dashed avatar button + quiet text button «Добавить фото»/«Сменить

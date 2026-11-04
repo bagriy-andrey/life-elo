@@ -19,12 +19,12 @@ No CSS-in-JS and no style props. Components carry their own classes. For your ow
 | `pos` / `neg` / `zero` | signed-value colors (green / red-orange / grey) |
 
 Tokens (all in `styles.css` → `_ds_bundle.css`):
-- Color: `--bg`, `--card`, `--text`, `--muted`, `--border`, `--accent`, `--accent-text`, `--pos`, `--neg`, `--zero`
+- Color: `--bg`, `--card`, `--text`, `--muted`, `--border`, `--accent`, `--accent-text`, `--pos`, `--neg`, `--warn`, `--zero`
 - Type: `--font-sans`, `--text-xs`, `--text-sm`, `--text-md`, `--text-lg`, `--text-display`, `--line-height`
 - Spacing: `--space-2`, `-4`, `-6`, `-8`, `-10`, `-12`, `-14`, `-16`, `-28`
 - Radius: `--radius-sm` (12px, buttons), `--radius-md` (16px, cards), `--radius-full` (pills)
 
-Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A native `<input>` is pre-styled globally (bordered, `--radius-sm`). There is no TextInput component, so use `<input>` directly.
+Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A native `<input>` is pre-styled globally (bordered, `--radius-sm`). Prefer `TextField` (label, error text, optional `trailing` node) for labelled inputs; use `Notice tone="success"|"error"` for inline status messages. Tokens also include `--warn` (amber).
 
 ## Conventions
 

@@ -10,6 +10,7 @@
   --accent-text: #ffffff;
   --pos: #1f8a5b;
   --neg: #c2553b;
+  --warn: #d39a2b;
   --zero: #6e6b75;
   /* Habit tier (weight, not good/bad): one blue hue, stronger = more intense. Never green/red. */
   --tier-strong: #0b5fa5;
@@ -53,6 +54,7 @@
     --accent-text: #0f0f14;
     --pos: #4cc38a;
     --neg: #f08a6c;
+    --warn: #e6b34d; /* lighter amber: keeps contrast on the dark --card/--bg */
     --tier-strong: #8cc8f5;
     --tier-medium: #4a9be0;
     --tier-weak: #2a5f8f;

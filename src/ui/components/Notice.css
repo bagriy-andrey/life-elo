@@ -1,0 +1,14 @@
+.notice {
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  border: 1px solid;
+}
+.notice-success {
+  background: color-mix(in srgb, var(--pos) 12%, var(--card));
+  border-color: color-mix(in srgb, var(--pos) 35%, var(--border));
+}
+.notice-error {
+  background: color-mix(in srgb, var(--neg) 10%, var(--card));
+  border-color: color-mix(in srgb, var(--neg) 35%, var(--border));
+}

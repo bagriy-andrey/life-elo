@@ -33,7 +33,7 @@ Short, durable, non-obvious lessons. Compress or replace entries; keep this sect
 - `src/ui/components/` is mirrored in Claude Design: prop types for Button, Card, SegmentedControl,
   TabBar, HistoryEntry are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
-  Text input is still styled globally in `src/index.css` (no TextInput component yet).
+  Prefer `TextField` for labelled inputs; Habits/Review still use raw `<input>` styled globally in `src/index.css`.
 
 ## Workflow: plan → build → verify
 Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude wrappers.

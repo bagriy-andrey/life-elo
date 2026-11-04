@@ -11,7 +11,9 @@
     "Card": "/** Dimmed (opacity 0.5), e.g. a paused habit. */\n  inactive?: boolean;\n  /** Layout utility from the global stylesheet, e.g. \"stack-sm\" (vertical) or \"row\" (space-between). */\n  className?: string;\n  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;\n  style?: React.CSSProperties;\n  children?: React.ReactNode;\n  /** Any other native <div> attribute is forwarded. */\n  [attr: string]: unknown;",
     "SegmentedControl": "/** Equal-width buttons, left to right. tone colors the selected segment (pos = green, neg = red), accent when omitted. */\n  options: { value: string; label: string; tone?: \"pos\" | \"neg\" }[];\n  /** Selected option value. Nothing is selected when undefined. */\n  value?: string;\n  onChange: (value: string) => void;",
     "TabBar": "/** Tabs. badge shows a red attention dot after the label. */\n  items: { id: string; label: string; badge?: boolean }[];\n  /** id of the selected tab (accent color, bold). */\n  active: string;\n  onSelect: (id: string) => void;",
-    "HistoryEntry": "/** One reviewed day from the rating ledger: day is \"YYYY-MM-DD\", delta is the signed day total, contributions explain it line by line (rendered when the entry is expanded). */\n  entry: {\n    day: string; rulesetVersion: string; reviewRevision: number;\n    status: \"reviewed\" | \"unknown\"; ratingBefore: number; delta: number; ratingAfter: number;\n    dayScore: number; expected: number; clamped: boolean;\n    contributions: {\n      source: { kind: \"habit\"; habitId: string } | { kind: \"clean_day\" } | { kind: \"streak_bonus\"; habitId: string } | { kind: \"unknown_day\" };\n      zone?: \"excellent\" | \"ok\" | \"tolerable\" | \"bad\" | \"unknown\" | \"not_applicable\";\n      points: number; multiplier: number;\n    }[];\n  };\n  /** habitId -> name and the direction/tier in effect on the entry's day, used to group habit lines. */\n  habits: Map<string, { name: string; direction: 'constructive' | 'destructive'; tier: 'weak' | 'medium' | 'strong' }>;"
+    "HistoryEntry": "/** One reviewed day from the rating ledger: day is \"YYYY-MM-DD\", delta is the signed day total, contributions explain it line by line (rendered when the entry is expanded). */\n  entry: {\n    day: string; rulesetVersion: string; reviewRevision: number;\n    status: \"reviewed\" | \"unknown\"; ratingBefore: number; delta: number; ratingAfter: number;\n    dayScore: number; expected: number; clamped: boolean;\n    contributions: {\n      source: { kind: \"habit\"; habitId: string } | { kind: \"clean_day\" } | { kind: \"streak_bonus\"; habitId: string } | { kind: \"unknown_day\" };\n      zone?: \"excellent\" | \"ok\" | \"tolerable\" | \"bad\" | \"unknown\" | \"not_applicable\";\n      points: number; multiplier: number;\n    }[];\n  };\n  /** habitId -> name and the direction/tier in effect on the entry's day, used to group habit lines. */\n  habits: Map<string, { name: string; direction: 'constructive' | 'destructive'; tier: 'weak' | 'medium' | 'strong' }>;",
+    "TextField": "/** Label shown above the input and associated with it. */\n  label: React.ReactNode;\n  /** Error text below the input (--neg); sets aria-invalid. */\n  error?: React.ReactNode;\n  /** Node placed inside the input on the right, e.g. a show/hide button (adds right padding). */\n  trailing?: React.ReactNode;\n  className?: string;\n  /** Any other native <input> attribute (type, value, onChange, placeholder, autoComplete, inputMode...) is forwarded. */\n  [attr: string]: unknown;",
+    "Notice": "/** success = green, role=status; error = red, role=alert. */\n  tone: \"success\" | \"error\";\n  children?: React.ReactNode;"
   },
   "overrides": {
     "TabBar": {
@@ -38,6 +40,12 @@
       "cardMode": "column"
     },
     "Pill": {
+      "cardMode": "column"
+    },
+    "TextField": {
+      "cardMode": "column"
+    },
+    "Notice": {
       "cardMode": "column"
     }
   },

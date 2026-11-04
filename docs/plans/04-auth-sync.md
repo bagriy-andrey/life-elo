@@ -178,11 +178,12 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   `package.json` — verify: `npm test`, `npm run build`; record Google↔email linking behaviour in `docs/setup/backend.md`
   once the user has the project configured.
   Note: Google↔email linking NOT verified (no project yet): TODO manual check, then record in `docs/setup/backend.md`. Extras: `googleOnly.ts` (+test), `src/vite-env.d.ts`; `errors.ts` tidied (no `bad_jwt`, /link.*(invalid|expired)/). Provider exposes `configured`, `recovery` state, `dismissRecovery`.
-- [ ] 5. [design-sync] `TextField` (label, input props, error text, `aria-invalid`, optional trailing slot) and
+- [x] 5. [design-sync] `TextField` (label, input props, error text, `aria-invalid`, optional trailing slot) and
   `Notice` (`tone: 'success' | 'error'`, role status/alert); token `--warn`; move the global text-input styles
   from `src/index.css` into `TextField.css` if nothing else uses them; previews; `.design-sync/config.json`
   `dtsPropsFor` entries; update the AGENTS.md gotcha about TextInput — files: `src/ui/components/TextField.{tsx,css}`,
   `Notice.{tsx,css}`, `index.ts`, `src/ui/tokens.css`, `.design-sync/…` — verify: `npm run build`, `npm run lint`.
+  Note: global `input` styles stay in `src/index.css` (Habits/Review still use raw inputs); TextField.css only adds sizing/error/trailing.
 - [ ] 6. [design-sync] `PasswordField` (TextField + «Показать/Скрыть» toggle, optional 3-segment strength meter with
   labels «Слабый/Нормальный/Надёжный пароль») — files: `src/ui/components/PasswordField.{tsx,css}`, `index.ts`,
   preview, `.design-sync/config.json` — verify: `npm run build`, `npm run lint`.

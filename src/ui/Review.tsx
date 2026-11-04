@@ -7,10 +7,13 @@ import type { DayReview, Habit, HabitEntry, Zone } from '../domain/types'
 import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
 import { Button, Card, Pill, SegmentedControl } from './components'
+import { groupByDirectionAndTier } from './grouping'
 import {
   BOOLEAN_OPTIONS,
+  DIRECTION_GROUP_LABEL,
   formatDay,
   NOT_APPLICABLE_LABEL,
+  TIER_GROUP_LABEL,
   UNIT_LABEL,
   ZONE_LABEL,
   type BooleanAnswer,
@@ -151,20 +154,33 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
       {applicable.length === 0 && (
         <p className="muted">Нет привычек для этого дня. Добавьте их во вкладке «Привычки».</p>
       )}
-      {applicable.map((h) => {
-        const zone = zoneOf(h)
-        return (
-          <Card key={h.id} className="stack-sm">
-            <div className="row">
-              <strong>{h.name}</strong>
-              {zone && zone !== 'tolerable' && <Pill tone={toneOfZone(zone)}>{ZONE_LABEL[zone]}</Pill>}
+      {groupByDirectionAndTier(applicable, (h) => ({
+        direction: h.direction,
+        tier: settingsOn(h, day).tier,
+      })).map((g) => (
+        <section key={g.direction} className="stack">
+          <h2>{DIRECTION_GROUP_LABEL[g.direction]}</h2>
+          {g.tiers.map((t) => (
+            <div key={t.tier} className="stack">
+              <span className="muted">{TIER_GROUP_LABEL[t.tier]}</span>
+              {t.items.map((h) => {
+                const zone = zoneOf(h)
+                return (
+                  <Card key={h.id} className="stack-sm">
+                    <div className="row">
+                      <strong>{h.name}</strong>
+                      {zone && zone !== 'tolerable' && <Pill tone={toneOfZone(zone)}>{ZONE_LABEL[zone]}</Pill>}
+                    </div>
+                    <fieldset className="plain" disabled={locked}>
+                      {control(h)}
+                    </fieldset>
+                  </Card>
+                )
+              })}
             </div>
-            <fieldset className="plain" disabled={locked}>
-              {control(h)}
-            </fieldset>
-          </Card>
-        )
-      })}
+          ))}
+        </section>
+      ))}
       {applicable.length > 0 && !locked && (
         <>
           <p className="muted">Без ответа — «не помню», это не влияет на рейтинг.</p>

@@ -41,12 +41,12 @@ Chosen layout (sections + tier subsections, empty groups hidden):
 (none)
 
 ## Steps
-- [ ] 1. Pure grouping helper: `groupByDirectionAndTier<T>(items, meta: (t) => {direction, tier})` returning
+- [x] 1. Pure grouping helper: `groupByDirectionAndTier<T>(items, meta: (t) => {direction, tier})` returning
   `[{direction, tiers: [{tier, items}]}]` in the order above, empty groups dropped, stable; plus Russian
   labels `DIRECTION_GROUP_LABEL` (Полезные / Вредные) and `TIER_GROUP_LABEL` (Сильные / Средние / Слабые)
   — files: `src/ui/grouping.ts`, `src/ui/grouping.test.ts`, `src/ui/labels.ts` — verify: `npm test`
   (order, empty groups dropped, stability).
-- [ ] 2. Habits page and Review use the helper: section heading (existing `h2` style) per direction,
+- [x] 2. Habits page and Review use the helper: section heading (existing `h2` style) per direction,
   muted small subheading per tier; use existing classes (`stack`, `stack-sm`, `muted`) — no new global
   CSS unless unavoidable (then mark design-sync) — files: `src/ui/Habits.tsx`, `src/ui/Review.tsx` —
   verify: `npm run build`, `npm run lint`; manual in `npm run dev`: both screens show the groups.

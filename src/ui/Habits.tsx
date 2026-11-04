@@ -14,12 +14,15 @@ import {
 import { settingsOn } from '../domain/settings'
 import type { Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { Button, Card, SegmentedControl } from './components'
+import { groupByDirectionAndTier } from './grouping'
 import {
   BETTER_LABEL,
+  DIRECTION_GROUP_LABEL,
   DIRECTION_LABEL,
   quotaSummary,
   RULE_CHOICE_LABEL,
   ruleSummary,
+  TIER_GROUP_LABEL,
   TIER_LABEL,
 } from './labels'
 
@@ -191,6 +194,48 @@ export function Habits({ habits, effectiveFrom }: Props) {
     setEditingId(undefined)
   }
 
+  const renderHabit = (h: Habit) => {
+    const cur = settingsOn(h, today())
+    if (editingId === h.id) {
+      return (
+        <Card key={h.id} className="stack-sm">
+          <strong>{h.name}</strong>
+          <span className="muted">Изменения действуют с сегодняшнего дня</span>
+          <SegmentedControl value={editTier} onChange={setEditTier} options={options(TIER_LABEL)} />
+          <RuleFields
+            form={editForm}
+            onChange={setEditForm}
+            reducers={habits.filter((x) => x.id !== h.id)}
+            direction={h.direction}
+          />
+          {editError && <span className="neg">{editError}</span>}
+          <Button variant="primary" onClick={() => saveEdit(h)}>
+            Сохранить
+          </Button>
+          <Button onClick={() => setEditingId(undefined)}>Отмена</Button>
+        </Card>
+      )
+    }
+    return (
+      <Card key={h.id} className="row" inactive={!h.active}>
+        <div className="stack-sm">
+          <strong>{h.name}</strong>
+          <span className="muted">
+            {DIRECTION_LABEL[h.direction]} · {TIER_LABEL[cur.tier]}
+          </span>
+          <span className="muted">{ruleSummary(cur.rule)}</span>
+          {cur.quota && <span className="muted">{quotaSummary(cur.quota, nameOf)}</span>}
+        </div>
+        <div className="stack-sm">
+          <Button onClick={() => startEdit(h)}>Изменить</Button>
+          <Button onClick={() => db.habits.update(h.id, { active: !h.active })}>
+            {h.active ? 'Пауза' : 'Вернуть'}
+          </Button>
+        </div>
+      </Card>
+    )
+  }
+
   return (
     <section className="stack">
       <Card className="stack-sm">
@@ -208,47 +253,20 @@ export function Habits({ habits, effectiveFrom }: Props) {
         </Button>
       </Card>
 
-      {habits.map((h) => {
-        const cur = settingsOn(h, today())
-        if (editingId === h.id) {
-          return (
-            <Card key={h.id} className="stack-sm">
-              <strong>{h.name}</strong>
-              <span className="muted">Изменения действуют с сегодняшнего дня</span>
-              <SegmentedControl value={editTier} onChange={setEditTier} options={options(TIER_LABEL)} />
-              <RuleFields
-                form={editForm}
-                onChange={setEditForm}
-                reducers={habits.filter((x) => x.id !== h.id)}
-                direction={h.direction}
-              />
-              {editError && <span className="neg">{editError}</span>}
-              <Button variant="primary" onClick={() => saveEdit(h)}>
-                Сохранить
-              </Button>
-              <Button onClick={() => setEditingId(undefined)}>Отмена</Button>
-            </Card>
-          )
-        }
-        return (
-          <Card key={h.id} className="row" inactive={!h.active}>
-            <div className="stack-sm">
-              <strong>{h.name}</strong>
-              <span className="muted">
-                {DIRECTION_LABEL[h.direction]} · {TIER_LABEL[cur.tier]}
-              </span>
-              <span className="muted">{ruleSummary(cur.rule)}</span>
-              {cur.quota && <span className="muted">{quotaSummary(cur.quota, nameOf)}</span>}
+      {groupByDirectionAndTier(habits, (h) => ({
+        direction: h.direction,
+        tier: settingsOn(h, today()).tier,
+      })).map((g) => (
+        <section key={g.direction} className="stack">
+          <h2>{DIRECTION_GROUP_LABEL[g.direction]}</h2>
+          {g.tiers.map((t) => (
+            <div key={t.tier} className="stack">
+              <span className="muted">{TIER_GROUP_LABEL[t.tier]}</span>
+              {t.items.map(renderHabit)}
             </div>
-            <div className="stack-sm">
-              <Button onClick={() => startEdit(h)}>Изменить</Button>
-              <Button onClick={() => db.habits.update(h.id, { active: !h.active })}>
-                {h.active ? 'Пауза' : 'Вернуть'}
-              </Button>
-            </div>
-          </Card>
-        )
-      })}
+          ))}
+        </section>
+      ))}
     </section>
   )
 }

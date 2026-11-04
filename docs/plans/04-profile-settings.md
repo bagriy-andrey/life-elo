@@ -162,7 +162,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   with test if added — verify: `npm run build`, `npm run lint`; manual: with a profile saved via devtools/Dexie
   the view renders in 3 languages, rating matches Home. TabBar `dtsPropsFor` unchanged (items generic).
   Note: age text helper is `formatBirth` in `labels.ts` (tested); `onEdit` is a no-op and the no-profile state a plain empty message until step 15.
-- [ ] 15. Profile edit mode — `Profile.tsx`: header «Изменить»/«Отмена»; no profile → starts in edit mode without
+- [x] 15. Profile edit mode — `Profile.tsx`: header «Изменить»/«Отмена»; no profile → starts in edit mode without
   «Отмена»; form with `Field`s (Имя*, Ник with «@» prefix + hint when empty, Почта type=email, Дата рождения
   type=date `max=today` + age hint), `validateProfile` wiring (touched-on-blur, attempted-save, nick live),
   `aria-invalid`, primary full-width «Сохранить» (min-height 48) → `saveProfile`, then back to view mode.
@@ -170,6 +170,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   `src/ui/Profile.tsx`, `src/ui/Profile.css`, `src/i18n/{ru,en,uk}.ts` — verify: `npm run build`; manual: first
   save creates profile (view shows today as «С нами с»), edit keeps the date, each validation message in 3 languages,
   invalid save writes nothing.
+  Note: done; `today` (calendar date) is App state refreshed on visibilitychange and passed to Profile; `profile` prop is `Profile | null` (undefined = still loading, tab renders nothing); photo avatar/«Добавить фото» buttons are inert until step 16; removed unused `profile.empty` key, added `profile.name/nick/nickHint/...` keys.
   Note: Pass `toDayKey(new Date())` (calendar date) to validateProfile/ageOn — NOT dayOf/reviewDay (04:00 boundary would reject today's birth date 00:00–04:00).
   Note: Avatar in button mode must always get `label` (accessible name; photo img has alt="").
 - [ ] 16. Photo — `src/ui/photo.ts`: pure `fitSize(w, h, max=256)` (never upscales, keeps ratio) + `resizeImage(file)

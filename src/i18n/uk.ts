@@ -150,5 +150,12 @@ export const uk: Dict = {
     many: '{count} років',
     other: '{count} року',
   },
-  'profile.empty': 'Профіль ще не створено'
+  'profile.name': "Ім’я",
+  'profile.namePlaceholder': "Як вас звати",
+  'profile.nick': "Нік",
+  'profile.nickHint': "Латиниця, цифри та _, від 3 до 20 символів",
+  'profile.addPhoto': "Додати фото",
+  'profile.changePhoto': "Змінити фото",
+  'profile.photoLabel': "Обрати фото",
+  'profile.saveError': "Не вдалося зберегти профіль. Спробуйте ще раз."
 }

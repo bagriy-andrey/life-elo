@@ -140,5 +140,12 @@ export const en: Dict = {
     one: '{count} year old',
     other: '{count} years old',
   },
-  'profile.empty': 'No profile yet'
+  'profile.name': "Name",
+  'profile.namePlaceholder': "What should we call you",
+  'profile.nick': "Nickname",
+  'profile.nickHint': "Latin letters, digits and _, 3 to 20 characters",
+  'profile.addPhoto': "Add photo",
+  'profile.changePhoto': "Change photo",
+  'profile.photoLabel': "Choose photo",
+  'profile.saveError': "Could not save the profile. Please try again."
 }

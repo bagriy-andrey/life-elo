@@ -149,5 +149,12 @@ export const ru = {
     many: '{count} лет',
     other: '{count} года',
   },
-  'profile.empty': 'Профиль пока не создан'
+  'profile.name': "Имя",
+  'profile.namePlaceholder': "Как вас зовут",
+  'profile.nick': "Ник",
+  'profile.nickHint': "Латиница, цифры и _, от 3 до 20 символов",
+  'profile.addPhoto': "Добавить фото",
+  'profile.changePhoto': "Сменить фото",
+  'profile.photoLabel': "Выбрать фото",
+  'profile.saveError': "Не удалось сохранить профиль. Попробуйте ещё раз."
 }

@@ -36,3 +36,10 @@
 }
 .profile-row + .profile-row { border-top: 1px solid var(--border); }
 .profile-row-value { overflow-wrap: anywhere; }
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.profile-save { width: 100%; min-height: 48px; }

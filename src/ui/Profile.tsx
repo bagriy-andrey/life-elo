@@ -1,28 +1,153 @@
 import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { saveProfile } from '../db/profile'
+import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
-import { toDayKey } from '../domain/day'
+import type { DayKey } from '../domain/types'
 import { useI18n } from '../i18n'
-import { Avatar, Button, Card } from './components'
+import { Avatar, Button, Card, Field } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import './Profile.css'
 
 interface Props {
-  profile?: ProfileData
+  /** `null` = loaded, no profile yet. */
+  profile: ProfileData | null
   rating: number
-  onEdit: () => void
+  /** Calendar date (toDayKey), not the review day. */
+  today: DayKey
 }
 
-export function Profile({ profile, rating, onEdit }: Props) {
-  const { t, locale } = useI18n()
-  const [today] = useState(() => toDayKey(new Date()))
-  if (!profile) {
-    // Temporary until the edit mode (plan 04 step 15) takes over.
-    return (
-      <section className="stack">
+type FieldName = 'name' | 'nick' | 'email' | 'birth'
+
+function ProfileEdit({ profile, today, onDone, onCancel }: {
+  profile: ProfileData | null
+  today: DayKey
+  onDone: () => void
+  onCancel?: () => void
+}) {
+  const { t } = useI18n()
+  const [form, setForm] = useState({
+    name: profile?.name ?? '',
+    nick: profile?.nick ?? '',
+    email: profile?.email ?? '',
+    birth: profile?.birth ?? '',
+  })
+  const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({})
+  const [attempted, setAttempted] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  const errors = validateProfile(form, today)
+  const errorText = (f: FieldName) => {
+    const e = errors[f]
+    const show = touched[f] || attempted || (f === 'nick' && form.nick !== '')
+    return e && show ? t(e.key, e.params) : undefined
+  }
+  const set = (f: FieldName, value: string) => setForm((v) => ({ ...v, [f]: value }))
+  const blur = (f: FieldName) => () => setTouched((v) => ({ ...v, [f]: true }))
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (saving) return
+    if (Object.keys(errors).length > 0) {
+      setAttempted(true)
+      return
+    }
+    setSaving(true)
+    setFailed(false)
+    try {
+      await saveProfile(form, new Date())
+      onDone()
+    } catch {
+      setFailed(true)
+      setSaving(false)
+    }
+  }
+
+  const birthValid = form.birth !== '' && !errors.birth
+  return (
+    <form className="stack" onSubmit={submit} noValidate>
+      <div className="profile-head">
         <h2>{t('tab.profile')}</h2>
-        <p className="muted">{t('profile.empty')}</p>
-      </section>
+        {onCancel && <Button type="button" onClick={onCancel}>{t('common.cancel')}</Button>}
+      </div>
+      <div className="profile-id">
+        <Avatar name={form.name} src={profile?.photo} size={96} onClick={() => {}} label={t('profile.photoLabel')} />
+        <Button type="button" variant="quiet">
+          {profile?.photo ? t('profile.changePhoto') : t('profile.addPhoto')}
+        </Button>
+      </div>
+      <Card className="profile-form">
+        <Field label={t('profile.name')} required error={errorText('name')}>
+          <input
+            value={form.name}
+            placeholder={t('profile.namePlaceholder')}
+            autoComplete="name"
+            onChange={(e) => set('name', e.target.value)}
+            onBlur={blur('name')}
+          />
+        </Field>
+        <Field
+          label={t('profile.nick')}
+          prefix="@"
+          hint={form.nick === '' ? t('profile.nickHint') : undefined}
+          error={errorText('nick')}
+        >
+          <input
+            value={form.nick}
+            placeholder="nickname"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            onChange={(e) => set('nick', e.target.value.replace(/^@+/, ''))}
+            onBlur={blur('nick')}
+          />
+        </Field>
+        <Field label={t('profile.email')} error={errorText('email')}>
+          <input
+            type="email"
+            inputMode="email"
+            autoCapitalize="none"
+            autoComplete="email"
+            value={form.email}
+            onChange={(e) => set('email', e.target.value)}
+            onBlur={blur('email')}
+          />
+        </Field>
+        <Field
+          label={t('profile.birth')}
+          hint={birthValid ? t('profile.age', { count: ageOn(form.birth, today) }) : undefined}
+          error={errorText('birth')}
+        >
+          <input
+            type="date"
+            max={today}
+            value={form.birth}
+            onChange={(e) => set('birth', e.target.value)}
+            onBlur={blur('birth')}
+          />
+        </Field>
+      </Card>
+      {failed && <p className="neg">{t('profile.saveError')}</p>}
+      <Button type="submit" variant="primary" className="profile-save" disabled={saving}>
+        {t('common.save')}
+      </Button>
+    </form>
+  )
+}
+
+export function Profile({ profile, rating, today }: Props) {
+  const { t, locale } = useI18n()
+  const [editing, setEditing] = useState(false)
+  if (!profile || editing) {
+    return (
+      <ProfileEdit
+        profile={profile}
+        today={today}
+        onDone={() => setEditing(false)}
+        onCancel={profile ? () => setEditing(false) : undefined}
+      />
     )
   }
   const sign = rating > 0 ? 'pos' : rating < 0 ? 'neg' : 'zero'
@@ -35,7 +160,7 @@ export function Profile({ profile, rating, onEdit }: Props) {
     <section className="stack">
       <div className="profile-head">
         <h2>{t('tab.profile')}</h2>
-        <Button onClick={onEdit}>{t('profile.edit')}</Button>
+        <Button onClick={() => setEditing(true)}>{t('profile.edit')}</Button>
       </div>
       <div className="profile-id">
         <Avatar src={profile.photo} name={profile.name} size={96} />

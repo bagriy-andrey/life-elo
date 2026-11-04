@@ -172,11 +172,12 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   googleOnly)`, `authErrorText(error)` (Supabase error code/status → Russian texts in the Spec) — files:
   `src/auth/validation.ts`, `src/auth/validation.test.ts`, `src/auth/errors.ts`, `src/auth/errors.test.ts` — verify: `npm test`.
   Note: exported as `validate`/`newPwErr` (design names) plus aliases `validateAuthForm`/`newPasswordError`; screen `recovery` added.
-- [ ] 4. Supabase client + `AuthProvider`/`useAuth` (session, loading, `googleOnly`, recovery-token handling from URL,
+- [x] 4. Supabase client + `AuthProvider`/`useAuth` (session, loading, `googleOnly`, recovery-token handling from URL,
   actions: signIn, signUp, google, resetPassword, setNewPassword, changePassword, signOut) — files:
   `src/auth/supabase.ts`, `src/auth/AuthProvider.tsx`, `src/auth/recoveryUrl.ts` (+ test for URL parsing),
   `package.json` — verify: `npm test`, `npm run build`; record Google↔email linking behaviour in `docs/setup/backend.md`
   once the user has the project configured.
+  Note: Google↔email linking NOT verified (no project yet): TODO manual check, then record in `docs/setup/backend.md`. Extras: `googleOnly.ts` (+test), `src/vite-env.d.ts`; `errors.ts` tidied (no `bad_jwt`, /link.*(invalid|expired)/). Provider exposes `configured`, `recovery` state, `dismissRecovery`.
 - [ ] 5. [design-sync] `TextField` (label, input props, error text, `aria-invalid`, optional trailing slot) and
   `Notice` (`tone: 'success' | 'error'`, role status/alert); token `--warn`; move the global text-input styles
   from `src/index.css` into `TextField.css` if nothing else uses them; previews; `.design-sync/config.json`

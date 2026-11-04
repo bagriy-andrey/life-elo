@@ -22,7 +22,7 @@ describe('authErrorText', () => {
   it('maps status 429 and invalid token message', () => {
     expect(authErrorText({ status: 429 })).toBe(RATE)
     expect(authErrorText({ status: 401, message: 'Invalid token' })).toBe(EXPIRED)
-    expect(authErrorText({ status: 403, message: 'Email link is invalid or has expired' })).toBe(AUTH_FALLBACK_TEXT)
+    expect(authErrorText({ status: 403, message: 'Email link is invalid or has expired' })).toBe(EXPIRED)
   })
   it('network failures', () => {
     const offline = 'Нет соединения. Проверьте интернет и попробуйте снова.'

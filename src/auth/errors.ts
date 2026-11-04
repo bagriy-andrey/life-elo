@@ -22,7 +22,6 @@ export function authErrorText(error: AuthErrorLike | null | undefined): string {
     case 'over_request_rate_limit':
       return RATE
     case 'otp_expired':
-    case 'bad_jwt':
     case 'flow_state_expired':
     case 'flow_state_not_found':
       return EXPIRED
@@ -32,7 +31,7 @@ export function authErrorText(error: AuthErrorLike | null | undefined): string {
       return 'Новый пароль совпадает с текущим'
   }
   if (error.status === 429) return RATE
-  if (/invalid.*token|token.*(expired|invalid)/i.test(error.message ?? '')) return EXPIRED
+  if (/invalid.*token|token.*(expired|invalid)|link.*(invalid|expired)/i.test(error.message ?? '')) return EXPIRED
   if (
     error.status === undefined ||
     error.status === 0 ||

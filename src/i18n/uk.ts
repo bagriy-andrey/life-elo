@@ -129,4 +129,14 @@ export const uk: Dict = {
   'habits.notReduced': 'Ліміт не зменшується',
   'habits.reducedBy': 'Зменшується днями «{name}»',
   'habitError.deleteInUse': 'Не можна видалити: звичка зменшує ліміт у {names}',
+  'profileError.nameRequired': 'Вкажіть імʼя',
+  'profileError.nameTooLong': 'Не довше {max} символів',
+  'profileError.nickInvalid': 'Нік: 3–20 символів, латиниця, цифри та _',
+  'profileError.emailInvalid': 'Некоректний e-mail',
+  'profileError.birthInvalid': 'Некоректна дата',
+  'profileError.birthFuture': 'Дата народження не може бути в майбутньому',
+  'profileError.birthYear': 'Вік не може бути більшим за {max} років',
+  'profileHint.nick': 'Необовʼязково. 3–20 символів: латиниця, цифри, _',
+  'profileHint.email': 'Необовʼязково. Зберігається лише на цьому пристрої',
+  'profileHint.birth': 'Необовʼязково'
 }

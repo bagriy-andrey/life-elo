@@ -115,7 +115,7 @@ A 4th tab «Профиль» (after Привычки): the user's name, optional
   no flash, correct colors with OS in the opposite mode. `.design-sync/NOTES.md`: tokens now have forced-theme
   selectors.
   Note: Prefs/Theme/parse live in `src/i18n/prefs.ts` (step 1); tests in `src/i18n/i18n.test.ts`; `src/ui/prefs.ts` has only `applyTheme`.
-- [ ] 8. Pure profile logic — `src/domain/profile.ts` (+ `profile.test.ts`): `Profile` type
+- [x] 8. Pure profile logic — `src/domain/profile.ts` (+ `profile.test.ts`): `Profile` type
   `{ id:'me', name, nick?, email?, birth?: 'YYYY-MM-DD', photo?: string, createdAt: number }` (also add to
   `types.ts` if that is the convention), `normalizeNick` (strip leading `@`, trim), `validateProfile(input, today)`
   → `{ name?, nick?, email?, birth? }` error keys (`name.required`, `name.tooLong`, `nick.invalid`, `email.invalid`,

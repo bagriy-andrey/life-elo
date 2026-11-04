@@ -128,4 +128,14 @@ export const ru = {
   'habits.notReduced': 'Лимит не уменьшается',
   'habits.reducedBy': 'Уменьшается днями «{name}»',
   'habitError.deleteInUse': 'Нельзя удалить: привычка уменьшает лимит у {names}',
+  'profileError.nameRequired': 'Укажите имя',
+  'profileError.nameTooLong': 'Не длиннее {max} символов',
+  'profileError.nickInvalid': 'Ник: 3–20 символов, латиница, цифры и _',
+  'profileError.emailInvalid': 'Некорректный e-mail',
+  'profileError.birthInvalid': 'Некорректная дата',
+  'profileError.birthFuture': 'Дата рождения не может быть в будущем',
+  'profileError.birthYear': 'Возраст не может быть больше {max} лет',
+  'profileHint.nick': 'Необязательно. 3–20 символов: латиница, цифры, _',
+  'profileHint.email': 'Необязательно. Хранится только на этом устройстве',
+  'profileHint.birth': 'Необязательно'
 }

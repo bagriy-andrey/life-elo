@@ -121,4 +121,14 @@ export const en: Dict = {
   'habits.notReduced': 'Limit is not reduced',
   'habits.reducedBy': 'Reduced by days of "{name}"',
   'habitError.deleteInUse': 'Cannot delete: this habit reduces the limit of {names}',
+  'profileError.nameRequired': 'Enter a name',
+  'profileError.nameTooLong': 'At most {max} characters',
+  'profileError.nickInvalid': 'Nickname: 3–20 characters, Latin letters, digits and _',
+  'profileError.emailInvalid': 'Invalid e-mail',
+  'profileError.birthInvalid': 'Invalid date',
+  'profileError.birthFuture': 'Birth date cannot be in the future',
+  'profileError.birthYear': 'Age cannot exceed {max} years',
+  'profileHint.nick': 'Optional. 3–20 characters: Latin letters, digits, _',
+  'profileHint.email': 'Optional. Stored only on this device',
+  'profileHint.birth': 'Optional'
 }

@@ -17,6 +17,10 @@ create index records_user_rev_idx on public.records (user_id, rev);
 
 alter table public.records enable row level security;
 
+revoke all on public.records from anon;
+grant select, insert, update, delete on public.records to authenticated;
+grant usage on sequence public.records_rev_seq to authenticated;
+
 create policy records_select on public.records for select to authenticated
   using (user_id = auth.uid());
 create policy records_insert on public.records for insert to authenticated
@@ -38,10 +42,12 @@ begin
   end if;
   perform pg_advisory_xact_lock(hashtext(auth.uid()::text));
 
+  -- client_updated_at must be an ISO timestamp string; duplicates in one batch keep the latest.
   with incoming as (
-    select * from jsonb_to_recordset(items) as x(
+    select distinct on (x.tbl, x.key) * from jsonb_to_recordset(items) as x(
       tbl text, key text, data jsonb, deleted boolean, schema int, client_updated_at timestamptz
     )
+    order by x.tbl, x.key, x.client_updated_at desc
   ), upserted as (
     insert into public.records as r (user_id, tbl, key, data, deleted, schema, client_updated_at, rev)
     select auth.uid(), i.tbl, i.key, case when coalesce(i.deleted, false) then null else i.data end,

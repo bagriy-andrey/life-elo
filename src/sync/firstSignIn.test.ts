@@ -33,6 +33,15 @@ beforeEach(async () => {
 })
 
 describe('first sign-in', () => {
+  it('a profile-only device is non-empty and uploaded', async () => {
+    await db.profile.put({ id: 'me', name: 'A', createdAt: 1 })
+    await db.outbox.clear()
+    const remote = new FakeRemote()
+    expect(await prepareFirstSignIn('u1', remote)).toBe('upload')
+    await uploadLocal('u1')
+    expect((await db.outbox.toArray()).map((o) => `${o.tbl}/${o.key}`)).toEqual(['profile/me'])
+  })
+
   it('upload: enqueues all local rows and sets userId', async () => {
     await db.habits.bulkPut([habit('a'), habit('b')])
     await db.reviews.put({ day: '2026-01-01' } as never)

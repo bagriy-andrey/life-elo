@@ -8,6 +8,7 @@ export const SYNCED_TABLES = [
   "reviews",
   "wellbeing",
   "rewards",
+  "profile",
 ] as const;
 export type SyncedTable = (typeof SYNCED_TABLES)[number];
 
@@ -115,6 +116,7 @@ export function applyRemote<T>(fn: () => Promise<T>): Promise<T> {
       db.reviews,
       db.wellbeing,
       db.rewards,
+      db.profile,
       db.outbox,
       db.syncState,
     ],
@@ -136,6 +138,7 @@ export function clearLocalData(): Promise<void> {
       db.reviews.clear(),
       db.wellbeing.clear(),
       db.rewards.clear(),
+      db.profile.clear(),
       db.outbox.clear(),
       db.syncState.clear(),
     ]);

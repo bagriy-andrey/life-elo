@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../db/db'
 import type { Habit } from '../domain/types'
+import { saveProfile } from '../db/profile'
 import { createStatusStore, createSyncEngine } from './engine'
 import type { PushItem, RemoteRecord } from './merge'
 import { applyRemote, clearLocalData, getSyncState, setSyncState } from './outbox'
@@ -76,6 +77,27 @@ beforeEach(async () => {
 })
 
 describe('sync engine', () => {
+  it('profile converges between two devices', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    await saveProfile({ name: 'Анна', photo: 'data:image/jpeg;base64,AAAA' }, new Date(1000))
+    await e.run()
+    expect(remote.rows.get('profile/me')?.deleted).toBe(false)
+    await clearLocalData() // device B: blank
+    await e.run()
+    expect((await db.profile.get('me'))?.name).toBe('Анна')
+    expect((await db.profile.get('me'))?.photo).toBe('data:image/jpeg;base64,AAAA')
+    expect(await db.outbox.count()).toBe(0)
+    await tick()
+    await saveProfile({ name: 'Анна К.' }, new Date(2000))
+    await e.run()
+    await clearLocalData()
+    await e.run()
+    const p = await db.profile.get('me')
+    expect(p?.name).toBe('Анна К.')
+    expect(p?.photo).toBe('data:image/jpeg;base64,AAAA')
+  })
+
   it('two devices converge; later offline edit wins; tombstones propagate', async () => {
     const remote = new FakeRemote()
     const e = engine(remote)

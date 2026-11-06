@@ -1,4 +1,5 @@
 import "fake-indexeddb/auto";
+import { saveProfile } from "../db/profile";
 import Dexie from "dexie";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "../db/db";
@@ -32,6 +33,14 @@ beforeEach(async () => {
 });
 
 describe("outbox", () => {
+  it("saveProfile enqueues ('profile','me'); clearLocalData clears profile", async () => {
+    await saveProfile({ name: "A" }, new Date(1));
+    expect((await db.outbox.toArray()).map((o) => [o.tbl, o.key])).toEqual([["profile", "me"]]);
+    await clearLocalData();
+    expect(await db.profile.count()).toBe(0);
+    expect(await db.outbox.count()).toBe(0);
+  });
+
   it("plain put/update/delete enqueue", async () => {
     await db.habits.put(habit("a"));
     expect(await outbox()).toEqual(["habits:a"]);

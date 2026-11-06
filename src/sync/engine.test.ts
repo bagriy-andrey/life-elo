@@ -6,6 +6,7 @@ import { saveProfile } from '../db/profile'
 import { createStatusStore, createSyncEngine } from './engine'
 import type { PushItem, RemoteRecord } from './merge'
 import { applyRemote, clearLocalData, getSyncState, setSyncState } from './outbox'
+import { keepDevice } from './firstSignIn'
 import type { SyncRemote } from './remote'
 
 class FakeRemote implements SyncRemote {
@@ -32,10 +33,12 @@ class FakeRemote implements SyncRemote {
     return [...this.rows.values()].filter((r) => r.rev > after).sort((a, b) => a.rev - b.rev).slice(0, limit)
   }
   async count() {
-    return this.rows.size
+    return [...this.rows.values()].filter((r) => !r.deleted).length
   }
   async reset() {
-    this.rows.clear()
+    for (const [k, r] of this.rows) {
+      if (!r.deleted) this.rows.set(k, { ...r, deleted: true, data: null, rev: ++this.rev })
+    }
   }
 }
 
@@ -131,6 +134,40 @@ describe('sync engine', () => {
     await load(devA2)
     await e.run()
     expect(await db.habits.get('a')).toBeUndefined()
+  })
+
+  it('reset tombstones: another device pulls the wipe; count ignores tombstones', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    await db.habits.put(habit('a'))
+    await e.run()
+    const devA = await save()
+    await load(blank)
+    await e.run()
+    expect(await db.habits.count()).toBe(1) // B has it
+    const devB = await save()
+    await load(devA)
+    await remote.reset() // A wipes
+    expect(await remote.count()).toBe(0)
+    await load(devB)
+    await e.run()
+    expect(await db.habits.count()).toBe(0)
+    expect(await db.outbox.count()).toBe(0)
+  })
+
+  it('keepDevice after a tombstoning reset still uploads every local row', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    await db.habits.put(habit('old'))
+    await e.run()
+    await clearLocalData()
+    await db.habits.put(habit('a'))
+    await db.habits.put(habit('b'))
+    await keepDevice('u1', remote)
+    await e.run()
+    expect(await remote.count()).toBe(2)
+    expect(remote.rows.get('habits/old')?.deleted).toBe(true)
+    expect(remote.rows.get('habits/a')?.deleted).toBe(false)
   })
 
   it('offline edit that is older than remote loses', async () => {

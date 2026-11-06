@@ -31,7 +31,10 @@ export const supabaseRemote: SyncRemote = {
     return (data ?? []).map((r) => ({ ...r, rev: Number(r.rev) })) as RemoteRecord[]
   },
   async count() {
-    const { count, error } = await client().from('records').select('*', { count: 'exact', head: true })
+    const { count, error } = await client()
+      .from('records')
+      .select('*', { count: 'exact', head: true })
+      .eq('deleted', false)
     if (error) throw new Error(error.message)
     return count ?? 0
   },

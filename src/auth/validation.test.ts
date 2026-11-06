@@ -19,6 +19,9 @@ describe('strength', () => {
     expect(strength('абвгдеж1!')).toBe(3)
     expect(strength('abcdefghijkl')).toBe(2)
     expect(strength('abcdefgh1234')).toBe(3)
+    // Ukrainian letters and ё are letters, not symbols.
+    expect(strength('їжакєґі1')).toBe(2)
+    expect(strength('ёлкаёлк1')).toBe(2)
   })
 })
 
@@ -29,6 +32,7 @@ describe('newPwErr', () => {
     expect(newPwErr('abcdefgh')).toBe('auth.err.passwordMix')
     expect(newPwErr('12345678')).toBe('auth.err.passwordMix')
     expect(newPwErr('abcdefg1')).toBe('')
+    expect(newPwErr('їїїїїїї1')).toBe('')
   })
 })
 

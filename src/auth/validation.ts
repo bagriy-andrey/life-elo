@@ -8,7 +8,7 @@ export type AuthForm = Partial<Record<AuthField, string>>
 /** Values are i18n keys. */
 export type AuthErrors = Partial<Record<AuthField, Key>>
 
-const LETTER = /[A-Za-z\u0410-\u044F]/
+const LETTER = /\p{L}/u
 const DIGIT = /\d/
 
 /** Password strength 0..3 (0 for empty). */
@@ -17,7 +17,7 @@ export function strength(p: string): number {
   let s = 0
   if (p.length >= 8) s++
   if (LETTER.test(p) && DIGIT.test(p)) s++
-  if (p.length >= 12 || /[^A-Za-z\u0410-\u044F0-9]/.test(p)) s++
+  if (p.length >= 12 || /[^\p{L}0-9]/u.test(p)) s++
   return s
 }
 

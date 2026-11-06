@@ -97,9 +97,9 @@
 
 1. `npx supabase login` (откроется браузер для входа).
 2. `npx supabase link --project-ref <ref>` (введите пароль базы из шага 1).
-3. `npx supabase db push` применит файлы из `supabase/migrations/`.
+3. `npx supabase db push --remote` применит файлы из `supabase/migrations/` к облачному проекту (без `--remote` CLI ищет локальную базу в Docker и падает с ECONNREFUSED 127.0.0.1:54322).
 
-Повторяйте `db push` после каждого нового файла миграции.
+Повторяйте `db push --remote` после каждого нового файла миграции.
 
 ## 7. Vercel: деплой
 

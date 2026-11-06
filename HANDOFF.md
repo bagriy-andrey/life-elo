@@ -5,7 +5,7 @@ Plan: docs/plans/04-auth-sync.md, 15 of 15 built + verified; Status: done, manua
 ## In progress
 Nothing.
 ## Next step
-User: create Supabase project etc. per docs/setup/backend.md, `npx supabase db push`, deploy to Vercel,
+User: create Supabase project etc. per docs/setup/backend.md, `npx supabase db push --remote`, deploy to Vercel,
 run the §8 checklist (incl. iPhone PWA + Google), record results in plan step 15; then `/design-sync`
 (TextField, Notice, PasswordField, --warn, HistoryEntry) and write HEAD to .design-sync/last-sync; open PR.
 ## Broken / open questions

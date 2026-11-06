@@ -219,8 +219,9 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
 - [x] 14. Change / set password screen per design (current check, `signOut others`, Google-only mode, «Не помню
   текущий пароль») — files: `src/ui/ProfilePassword.tsx`, `src/ui/Profile.tsx` — verify: build; manual both modes.
   Note: automated part done; manual check pending. «Не помню текущий пароль» shows an inline hint (robust option; no sign-out hand-off). Sub-view state lives in App (`passwordOpen`), files: `ProfilePassword.tsx/.css`, `App.tsx`.
-- [ ] 15. Vercel: confirm SPA/PWA serve `/?type=recovery…` (no rewrite needed; add `vercel.json` only if required),
+- [x] 15. Vercel: confirm SPA/PWA serve `/?type=recovery…` (no rewrite needed; add `vercel.json` only if required),
   README «Деплой и установка на iPhone»; ROADMAP: mark deploy item, remove the iOS note at the end of the product
   context — files: `README.md`, `docs/ROADMAP.md`, `LIFE_ELO_PRODUCT_CONTEXT.md`, `vercel.json` (optional) — verify:
   user deploys; manual E2E on iPhone PWA: register, Google, forgot → Safari reset → PWA login, two-device sync,
   offline edit then reconnect, RLS check with a second account. Record results in this step's note.
+  Note: deploy + manual E2E pending (user); checklist in `docs/setup/backend.md` §8. No `vercel.json` and no vite config change needed: generateSW has no runtimeCaching (Supabase calls not cached; precache of build assets only), navigateFallback serves index.html for `/?type=recovery…`.

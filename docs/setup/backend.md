@@ -137,9 +137,18 @@
 - [ ] Первый вход с локальными данными в пустой аккаунт: данные загружаются в облако.
 - [ ] Данные есть и локально, и в облаке: приложение спрашивает, какую копию оставить.
 - [ ] Выход: на устройстве не остаётся данных аккаунта (IndexedDB пуста).
-- [ ] RLS: войдите вторым аккаунтом. Он не видит данных первого. Дополнительно в SQL editor Supabase:
-      `select count(*) from public.<таблица>;` под ролью `authenticated` с `set local role authenticated;` и
-      `set local request.jwt.claims = '{"sub":"<uuid второго аккаунта>"}';` должен вернуть только его строки.
+- [ ] RLS: войдите вторым аккаунтом. Он не видит данных первого. Дополнительно в SQL editor Supabase
+      (uuid второго аккаунта — в Authentication → Users):
+      ```sql
+      begin;
+      set local role authenticated;
+      set local request.jwt.claims = '{"sub":"<uuid второго аккаунта>","role":"authenticated"}';
+      select count(*) as visible,
+             count(*) filter (where user_id <> '<uuid второго аккаунта>') as foreign_rows
+      from public.records;
+      rollback;
+      ```
+      `foreign_rows` должно быть 0.
 - [ ] Установка на iPhone: Safari, Поделиться, На экран «Домой».
 
 ## Заметки

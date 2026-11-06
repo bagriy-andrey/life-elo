@@ -1,27 +1,32 @@
 import type { HabitDirection, ImpactTier, Quota, Zone, ZonedRule } from '../domain/types'
+import { ageOn } from '../domain/profile'
 import type { RuleChoice } from '../domain/habitSetup'
+import type { I18n } from '../i18n'
 
-export const TIER_LABEL: Record<ImpactTier, string> = {
-  weak: 'Слабая',
-  medium: 'Средняя',
-  strong: 'Сильная',
-}
+type T = I18n['t']
+type Unit = Extract<ZonedRule, { kind: 'measured' }>['unit']
 
-export const DIRECTION_LABEL: Record<HabitDirection, string> = {
-  constructive: 'Конструктивная',
-  destructive: 'Нежелательная',
-}
+const TIERS: ImpactTier[] = ['weak', 'medium', 'strong']
+const DIRECTIONS: HabitDirection[] = ['constructive', 'destructive']
+const ZONES: Zone[] = ['excellent', 'ok', 'tolerable', 'bad']
+const UNITS: Unit[] = ['count', 'minutes', 'steps', 'time']
+const RULE_CHOICES: RuleChoice[] = ['boolean', 'count', 'minutes', 'steps', 'time']
 
+const mapOf = <K extends string>(keys: K[], label: (k: K) => string) =>
+  Object.fromEntries(keys.map((k) => [k, label(k)])) as Record<K, string>
+
+export const tierLabels = (t: T) => mapOf(TIERS, (k) => t(`tier.${k}`))
+export const tierGroupLabels = (t: T) => mapOf(TIERS, (k) => t(`tierGroup.${k}`))
+export const directionLabels = (t: T) => mapOf(DIRECTIONS, (k) => t(`direction.${k}`))
 /** Short names used in the habit edit form. */
-export const DIRECTION_EDIT_LABEL: Record<HabitDirection, string> = {
-  constructive: 'Полезная',
-  destructive: 'Вредная',
-}
-
-export const DIRECTION_GROUP_LABEL: Record<HabitDirection, string> = {
-  constructive: '＋ Полезные',
-  destructive: '− Вредные',
-}
+export const directionEditLabels = (t: T) => mapOf(DIRECTIONS, (k) => t(`directionEdit.${k}`))
+export const directionGroupLabels = (t: T) => mapOf(DIRECTIONS, (k) => t(`directionGroup.${k}`))
+export const zoneLabels = (t: T) => mapOf(ZONES, (k) => t(`zone.${k}`))
+/** Plural-aware: pass the displayed value as `count`. */
+export const unitLabels = (t: T, count = 0) => mapOf(UNITS, (k) => t(`unit.${k}`, { count }))
+export const ruleChoiceLabels = (t: T) => mapOf(RULE_CHOICES, (k) => t(`ruleChoice.${k}`))
+export const betterLabels = (t: T) => ({ lower: t('better.lower'), higher: t('better.higher') })
+export const notApplicableLabel = (t: T) => t('answer.na')
 
 /** Tier color (weight, not good/bad): green/red stay reserved for results (points, zones). */
 export const TIER_COLOR: Record<ImpactTier, string> = {
@@ -30,46 +35,23 @@ export const TIER_COLOR: Record<ImpactTier, string> = {
   weak: 'var(--tier-weak)',
 }
 
-export const TIER_GROUP_LABEL: Record<ImpactTier, string> = {
-  strong: 'Сильные',
-  medium: 'Средние',
-  weak: 'Слабые',
-}
-
-export const ZONE_LABEL: Record<Zone, string> = {
-  excellent: 'Отлично',
-  ok: 'В рамках',
-  tolerable: 'Терпимо',
-  bad: 'Плохо',
-}
-
-export const UNIT_LABEL: Record<Extract<ZonedRule, { kind: 'measured' }>['unit'], string> = {
-  count: 'раз',
-  minutes: 'мин',
-  steps: 'шагов',
-  time: 'время',
-}
-
 /** Answer options for a boolean habit; `value` is the string form of the stored entry. */
 export type BooleanAnswer = 'true' | 'false' | 'na'
 
-export const BOOLEAN_OPTIONS: Record<
-  HabitDirection,
-  { value: BooleanAnswer; label: string; tone?: 'pos' | 'neg' }[]
-> = {
+export const booleanOptions = (
+  t: T,
+): Record<HabitDirection, { value: BooleanAnswer; label: string; tone?: 'pos' | 'neg' }[]> => ({
   constructive: [
-    { value: 'true', label: 'Сделал', tone: 'pos' },
-    { value: 'false', label: 'Не сделал' },
-    { value: 'na', label: 'Не актуально' },
+    { value: 'true', label: t('answer.constructive.true'), tone: 'pos' },
+    { value: 'false', label: t('answer.constructive.false') },
+    { value: 'na', label: t('answer.na') },
   ],
   destructive: [
-    { value: 'true', label: 'Соблюдал', tone: 'pos' },
-    { value: 'false', label: 'Нарушил', tone: 'neg' },
-    { value: 'na', label: 'Не актуально' },
+    { value: 'true', label: t('answer.destructive.true'), tone: 'pos' },
+    { value: 'false', label: t('answer.destructive.false'), tone: 'neg' },
+    { value: 'na', label: t('answer.na') },
   ],
-}
-
-export const NOT_APPLICABLE_LABEL = 'Не актуально'
+})
 
 /** Signed number with U+2212 minus, rounded to `digits` (points: 2, rating: 1), no trailing zeros. */
 export const formatSigned = (n: number, digits = 2) => {
@@ -77,47 +59,38 @@ export const formatSigned = (n: number, digits = 2) => {
   return r === 0 ? '0' : n > 0 ? `+${r}` : `−${r}`
 }
 
-export const formatDay = (day: string) =>
-  new Date(`${day}T12:00:00`).toLocaleDateString('ru-RU', {
+export const formatDay = (day: string, locale: string) =>
+  new Date(`${day}T12:00:00`).toLocaleDateString(locale, {
     weekday: 'short',
     day: 'numeric',
     month: 'long',
   })
 
-export const RULE_CHOICE_LABEL: Record<RuleChoice, string> = {
-  boolean: 'Да/нет',
-  count: 'Число',
-  minutes: 'Минуты',
-  steps: 'Шаги',
-  time: 'Время',
-}
-
-export const BETTER_LABEL = { lower: 'Меньше — лучше', higher: 'Больше — лучше' } as const
-
-const UNIT_SUFFIX: Record<Extract<ZonedRule, { kind: 'measured' }>['unit'], string> = {
-  count: ' раз',
-  minutes: ' мин',
-  steps: ' шагов',
-  time: '',
-}
-
 /** One-line summary of a rule, e.g. «Отлично ≤ 0 раз · В рамках ≤ 1 раз». */
-export function ruleSummary(rule: ZonedRule): string {
-  if (rule.kind === 'boolean') return 'Да/нет'
+export function ruleSummary(t: T, rule: ZonedRule): string {
+  if (rule.kind === 'boolean') return t('ruleChoice.boolean')
   const sign = rule.better === 'lower' ? '≤' : '≥'
-  const fmt = (v: number | string) => `${sign} ${v}${UNIT_SUFFIX[rule.unit]}`
-  const parts = [`Отлично ${fmt(rule.excellent)}`]
-  if (rule.ok !== undefined) parts.push(`В рамках ${fmt(rule.ok)}`)
-  if (rule.tolerable !== undefined) parts.push(`Терпимо ${fmt(rule.tolerable)}`)
+  const unit = rule.unit
+  const withUnit = (v: number | string) => (unit === 'time' ? `${v}` : `${v} ${t(`unit.${unit}`, { count: Number(v) })}`)
+  const part = (zone: 'excellent' | 'ok' | 'tolerable', v: number | string) =>
+    t('rule.zoneValue', { zone: t(`zone.${zone}`), value: `${sign} ${withUnit(v)}` })
+  const parts = [part('excellent', rule.excellent)]
+  if (rule.ok !== undefined) parts.push(part('ok', rule.ok))
+  if (rule.tolerable !== undefined) parts.push(part('tolerable', rule.tolerable))
   return parts.join(' · ')
 }
 
 /** Quota summary; `nameOf` resolves the reducer habit id to a name. */
-export function quotaSummary(quota: Quota, nameOf: (id: string) => string | undefined): string {
+export function quotaSummary(t: T, quota: Quota, nameOf: (id: string) => string | undefined): string {
   const parts: string[] = []
-  if (quota.perDay !== undefined) parts.push(`${quota.perDay}/день`)
-  if (quota.perWeek !== undefined) parts.push(`${quota.perWeek}/неделю`)
-  let text = `Лимит ${parts.join(', ')}`
-  if (quota.reducedByDaysOf) text += ` (уменьшается днями «${nameOf(quota.reducedByDaysOf) ?? '?'}»)`
-  return text
+  if (quota.perDay !== undefined) parts.push(t('quota.perDay', { count: quota.perDay }))
+  if (quota.perWeek !== undefined) parts.push(t('quota.perWeek', { count: quota.perWeek }))
+  const joined = parts.join(', ')
+  return quota.reducedByDaysOf
+    ? t('quota.summaryReduced', { parts: joined, name: nameOf(quota.reducedByDaysOf) ?? '?' })
+    : t('quota.summary', { parts: joined })
 }
+
+/** «14 мая 1996 · 30 лет». `today` is a calendar date (toDayKey), not a review day. */
+export const formatBirth = (birth: string, today: string, t: T, locale: string) =>
+  `${new Date(`${birth}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} · ${t('profile.age', { count: ageOn(birth, today) })}`

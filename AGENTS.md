@@ -6,7 +6,7 @@ Product source of truth: `LIFE_ELO_PRODUCT_CONTEXT.md` — read it before produc
 ## Stack
 Vite + React + TypeScript PWA (`vite-plugin-pwa`). Dexie (IndexedDB) is the app's read model and works offline;
 Supabase (Auth + Postgres/RLS, no custom server) provides accounts and sync; hosting on Vercel. Setup: `docs/setup/backend.md`.
-Target: installed on iPhone via Safari → "Add to Home Screen". UI language: Russian (for now).
+Target: installed on iPhone via Safari → "Add to Home Screen". UI language: ru/en/uk via `src/i18n` (ru is the key source of truth).
 
 Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run build`.
 
@@ -30,10 +30,12 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
-- `src/ui/components/` is mirrored in Claude Design: prop types for Button, Card, SegmentedControl,
-  TabBar, HistoryEntry, TextField, Notice, PasswordField are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+- `src/ui/components/` is mirrored in Claude Design: props of Button (variants), Card, SegmentedControl,
+  TabBar, HistoryEntry, Field, Avatar, Dialog, TextField, Notice, PasswordField are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
-  Prefer `TextField` for labelled inputs; Habits/Review still use raw `<input>` styled globally in `src/index.css`.
+  Text inputs go through `Field` (global input styles live in `src/index.css`).
+- Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).
+- Age/birth use the calendar date `toDayKey(new Date())`, not `dayOf`/`reviewDay` (04:00 boundary).
 
 ## Workflow: plan → build → verify
 Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude wrappers.

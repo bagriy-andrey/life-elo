@@ -1,17 +1,19 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { db } from './db/db'
-import { addDays, reviewDay } from './domain/day'
+import { addDays, reviewDay, toDayKey } from './domain/day'
 import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/AuthProvider'
+import { useI18n } from './i18n'
 import { adoptRemote, keepDevice, prepareFirstSignIn, resolveAutomatic } from './sync/firstSignIn'
 import { createSyncEngine, startSync } from './sync/engine'
 import { getSyncState } from './sync/outbox'
 import { supabaseRemote } from './sync/remote'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
+import { Account } from './ui/Account'
 import { Button, TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
@@ -26,20 +28,26 @@ const NO_HABITS: Habit[] = []
 const NO_REVIEWS: DayReview[] = []
 
 function MainApp() {
+  const { t } = useI18n()
   const [tab, setTab] = useState<Tab>('home')
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [yesterday, setYesterday] = useState(() => reviewDay(new Date()))
+  const [today, setToday] = useState(() => toDayKey(new Date()))
   const [reviewing, setReviewing] = useState(yesterday)
 
   // The PWA may stay open across midnight: re-evaluate when it comes back.
   useEffect(() => {
-    const refresh = () => setYesterday(reviewDay(new Date()))
+    const refresh = () => {
+      setYesterday(reviewDay(new Date()))
+      setToday(toDayKey(new Date()))
+    }
     document.addEventListener('visibilitychange', refresh)
     return () => document.removeEventListener('visibilitychange', refresh)
   }, [])
 
   const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
+  const profile = useLiveQuery(async () => (await db.profile.get('me')) ?? null, [])
 
   const result = useMemo(() => replay(habits, reviews, RULESET_V1, addDays(yesterday, 1)), [habits, reviews, yesterday])
   const sortedHabits = [...habits].sort((a, b) => a.createdAt - b.createdAt)
@@ -71,10 +79,12 @@ function MainApp() {
           />
         )}
         {tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => setPasswordOpen(false)} />}
-        {tab === 'profile' && !passwordOpen && (
+        {tab === 'profile' && !passwordOpen && profile !== undefined && (
           <Profile
-            engine={syncEngine}
-            onPassword={() => setPasswordOpen(true)}
+            profile={profile}
+            rating={result.rating}
+            today={today}
+            account={<Account engine={syncEngine} onPassword={() => setPasswordOpen(true)} />}
           />
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
@@ -87,10 +97,10 @@ function MainApp() {
           else setTab(id)
         }}
         items={[
-          { id: 'home', label: 'Главная' },
-          { id: 'review', label: 'Обзор дня', badge: !!pendingDay },
-          { id: 'habits', label: 'Привычки' },
-          { id: 'profile', label: 'Профиль' },
+          { id: 'home', label: t('tab.home') },
+          { id: 'review', label: t('tab.review'), badge: !!pendingDay },
+          { id: 'habits', label: t('tab.habits') },
+          { id: 'profile', label: t('tab.profile') },
         ]}
       />
     </div>

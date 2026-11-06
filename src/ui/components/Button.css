@@ -11,3 +11,20 @@
   font-weight: 600;
   padding: var(--space-14);
 }
+.btn-danger {
+  background: var(--neg);
+  color: var(--accent-text);
+  border: none;
+  font-weight: 600;
+  padding: var(--space-14);
+}
+.btn-quiet {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: var(--text-sm);
+  min-height: 44px;
+}
+.btn-quiet.neg {
+  color: var(--neg);
+}

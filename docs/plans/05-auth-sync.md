@@ -1,4 +1,4 @@
-# 04 — Accounts (email / Google), password recovery, cloud sync
+# 05 — Accounts (email / Google), password recovery, cloud sync
 
 Status: done (manual E2E partly done 2026-11-06; reset email not arriving — deferred, see HANDOFF.md)
 Design input: Claude Design project 67c2bfac-e6da-422e-98bb-a3415b430a31, `templates/auth/Auth.dc.html`

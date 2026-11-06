@@ -1,19 +1,19 @@
 # Handoff
 Updated: 2026-11-06 by Claude Code
-Branch: auth-sync (not pushed, no PR yet)
-Plan: docs/plans/04-auth-sync.md, 15 of 15 built + verified; Status: done, manual E2E pending
+Branch: auth-sync (PR #5) — origin/main (PR #4 profile/settings/i18n) merged in
+Plan: docs/plans/06-auth-sync-integration.md, step 1 of 7 (plan 05 auth-sync: built, manual E2E partly done)
 ## In progress
-Nothing.
+Nothing uncommitted.
 ## Next step
-User: create Supabase project etc. per docs/setup/backend.md, `npx supabase db push --remote`, deploy to Vercel,
-run the §8 checklist (incl. iPhone PWA + Google), record results in plan step 15; then `/design-sync`
-(TextField, Notice, PasswordField, --warn, HistoryEntry) and write HEAD to .design-sync/last-sync; open PR.
+/build-plan docs/plans/06-auth-sync-integration.md all
 ## Broken / open questions
-- Verified on localhost 2026-11-06: register, login, Google, Google↔email linking, sync between two browsers.
-- KNOWN ISSUE (deferred by user): password-reset email does not arrive (Resend SMTP + test sender onboarding@resend.dev,
-  template pasted). Check Resend → Emails and Supabase → Logs → Auth; test sender only delivers to the Resend account email.
-- Not verified yet: Google in iOS PWA, logout wipe, offline edit.
-- User decisions: (a) all-unknown reviewed day lifts a negative rating, a skipped day can't (pre-existing, §6.5; v2?);
-  (b) leftover data of account A uploads silently into empty account B — add confirm?;
-  (c) «Не помню текущий пароль» shows a hint instead of sign-out → forgot with email prefilled — keep?
-- Lint: 1 known warning (only-export-components on useAuth in AuthProvider.tsx).
+- Merge resolution is mechanical: auth/sync UI strings still hardcoded Russian, TextField duplicates Field,
+  profile not synced, «Удалить все данные» gets re-downloaded from the server — all covered by plan 06.
+- Dexie: sync tables are v4 now. A browser that ran the old auth-sync build (v3 = outbox) needs site data
+  cleared on localhost once.
+- KNOWN ISSUE (deferred): password-reset email does not arrive (Resend test sender). Check Resend → Emails,
+  Supabase → Logs → Auth.
+- Not verified yet: Google in iOS PWA, logout wipe, offline edit, Vercel deploy.
+- /design-sync waits until plan 06 step 4 (Field/PasswordField); remote currently matches main (last-sync 9f27464).
+- User decisions pending: all-unknown review lifts negative rating (§6.5, v2?); A's leftover data → empty account B
+  without confirm; «Не помню текущий пароль» hint vs sign-out hand-off.

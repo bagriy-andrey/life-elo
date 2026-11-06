@@ -4,7 +4,6 @@
   font: var(--text-md) / var(--line-height) var(--font-sans);
   color: var(--text);
   background: var(--bg);
-  color-scheme: light dark;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }

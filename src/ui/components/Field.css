@@ -1,0 +1,24 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field-label { font-size: var(--text-sm); font-weight: 600; }
+.field-required { color: var(--neg); }
+.field-control { position: relative; display: block; }
+.field-control input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.field-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+.field-has-prefix input { padding-left: 28px; }
+.field-error { color: var(--neg); font-size: var(--text-xs); }
+.field-hint { color: var(--muted); font-size: var(--text-xs); }

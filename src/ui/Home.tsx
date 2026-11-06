@@ -2,6 +2,7 @@ import type { Habit } from '../domain/types'
 import type { ReplayResult } from '../engine/rating'
 import { Banner, EloScore, HistoryEntry } from './components'
 import { settingsOn } from '../domain/settings'
+import { useI18n } from '../i18n'
 import { formatDay, formatSigned } from './labels'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function Home({ result, habits, pendingDay, onReview }: Props) {
+  const { t, locale } = useI18n()
   const habitsOn = (day: string) =>
     new Map(
       habits.map((h) => {
@@ -28,22 +30,22 @@ export function Home({ result, habits, pendingDay, onReview }: Props) {
         streak={result.cleanDayStreak}
         caption={
           last
-            ? `${formatSigned(last.delta, 1)} за ${formatDay(last.day)}`
-            : 'Старт с нуля — подтвердите первый день'
+            ? t('home.lastDelta', { delta: formatSigned(last.delta, 1), day: formatDay(last.day, locale) })
+            : t('home.startCaption')
         }
       />
 
       {pendingDay && (
         <Banner
-          title="Как прошёл вчерашний день?"
-          subtitle={`${formatDay(pendingDay)} ждёт подтверждения →`}
+          title={t('home.pendingTitle')}
+          subtitle={t('home.pendingSubtitle', { day: formatDay(pendingDay, locale) })}
           onClick={onReview}
         />
       )}
 
       {result.ledger.length > 0 && (
         <div className="stack">
-          <h2>История</h2>
+          <h2>{t('home.history')}</h2>
           {[...result.ledger].reverse().map((entry) => (
             <HistoryEntry key={entry.day} entry={entry} habits={habitsOn(entry.day)} />
           ))}

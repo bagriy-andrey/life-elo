@@ -43,8 +43,32 @@
   --radius-full: 999px;
 }
 
+/* Themes: data-theme="light"|"dark" forces a theme; no attribute = follow the OS.
+   The dark values below appear twice (forced + OS) and MUST stay identical. */
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #121216;
+  --card: #1d1d23;
+  --text: #ecebf0;
+  --muted: #9a97a3;
+  --border: #2d2d35;
+  --accent: #7f8cff;
+  --accent-text: #0f0f14;
+  --pos: #4cc38a;
+  --neg: #f08a6c;
+  --tier-strong: #8cc8f5;
+  --tier-medium: #4a9be0;
+  --tier-weak: #2a5f8f;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #121216;
     --card: #1d1d23;
     --text: #ecebf0;

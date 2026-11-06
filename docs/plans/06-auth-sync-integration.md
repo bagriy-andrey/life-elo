@@ -51,6 +51,7 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
   `formatSynced` uses the i18n locale — files: `src/i18n/{ru,en,uk}.ts`, `src/auth/{validation,errors}.ts` (+tests),
   `src/ui/auth/*.tsx`, `src/ui/{Account,ProfilePassword,SyncChoice}.tsx`, `src/App.tsx` — verify: `npm test`
   (i18n key parity test), grep for Cyrillic outside `src/i18n` and tests.
+  Note: `PasswordField` now takes required `showLabel`/`hideLabel` + optional `strengthLabels` props (dtsPropsFor and preview updated); new helper `src/ui/auth/passwordLabels.ts`; `ActionResult.error` is an i18n key; `AUTH_FALLBACK_TEXT` renamed `AUTH_FALLBACK` (key).
 - [ ] 6. Profile tab layout polish + smoke tests: Account block styles consistent with Profile.css (no `auth-link`
   import from AuthScreen.css in Account), `renderToString` tests for AuthScreen, NewPassword, SyncChoice, Account,
   ProfilePassword — files: `src/ui/Account.tsx`, `src/ui/Profile.css`, `src/ui/*.test.tsx` — verify: `npm test`, build.

@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { PasswordField } from 'life-elo'
+import { PasswordField as Base } from 'life-elo'
+
+const labels = { showLabel: 'Показать', hideLabel: 'Скрыть', strengthLabels: ['Слабый пароль', 'Нормальный пароль', 'Надёжный пароль'] } as const
+const PasswordField = (props: Omit<React.ComponentProps<typeof Base>, 'showLabel' | 'hideLabel'>) => <Base {...labels} {...props} />
 
 export const Hidden = () => (
   <div style={{ width: 360 }}>

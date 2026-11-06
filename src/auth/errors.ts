@@ -1,3 +1,5 @@
+import type { Key } from '../i18n/types'
+
 export interface AuthErrorLike {
   code?: string
   status?: number
@@ -5,19 +7,20 @@ export interface AuthErrorLike {
   message?: string
 }
 
-export const AUTH_FALLBACK_TEXT = 'Что-то пошло не так. Попробуйте ещё раз.'
-const RATE = 'Слишком часто. Подождите минуту и попробуйте снова.'
-const EXPIRED = 'Ссылка устарела или уже использована. Запросите новую.'
-const OFFLINE = 'Нет соединения. Проверьте интернет и попробуйте снова.'
+export const AUTH_FALLBACK: Key = 'authError.generic'
+const RATE: Key = 'authError.rate'
+const EXPIRED: Key = 'authError.expired'
+const OFFLINE: Key = 'authError.offline'
 
-export function authErrorText(error: AuthErrorLike | null | undefined): string {
-  if (!error) return AUTH_FALLBACK_TEXT
+/** Maps an auth failure to an i18n key; screens translate it with `t`. */
+export function authErrorText(error: AuthErrorLike | null | undefined): Key {
+  if (!error) return AUTH_FALLBACK
   switch (error.code) {
     case 'invalid_credentials':
-      return 'Неверная почта или пароль'
+      return 'authError.credentials'
     case 'user_already_exists':
     case 'email_exists':
-      return 'Аккаунт с этой почтой уже есть. Войдите или восстановите пароль.'
+      return 'authError.exists'
     case 'over_email_send_rate_limit':
     case 'over_request_rate_limit':
       return RATE
@@ -26,9 +29,9 @@ export function authErrorText(error: AuthErrorLike | null | undefined): string {
     case 'flow_state_not_found':
       return EXPIRED
     case 'weak_password':
-      return 'Пароль слишком простой'
+      return 'authError.weak'
     case 'same_password':
-      return 'Новый пароль совпадает с текущим'
+      return 'authError.same'
   }
   if (error.status === 429) return RATE
   if (/invalid.*token|token.*(expired|invalid)|link.*(invalid|expired)/i.test(error.message ?? '')) return EXPIRED
@@ -40,5 +43,5 @@ export function authErrorText(error: AuthErrorLike | null | undefined): string {
     // No HTTP status: request never reached the server.
     if (!error.code) return OFFLINE
   }
-  return AUTH_FALLBACK_TEXT
+  return AUTH_FALLBACK
 }

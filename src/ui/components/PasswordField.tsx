@@ -12,12 +12,15 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'type'> & {
   onToggleVisible: () => void
   /** Strength meter level; shown only when > 0 and there is no error. */
   strength?: 0 | 1 | 2 | 3
+  /** Toggle texts (the component holds no language of its own). */
+  showLabel: string
+  hideLabel: string
+  /** Meter texts for levels 1..3 (weak, fair, strong); no meter label when omitted. */
+  strengthLabels?: readonly [string, string, string]
 }
 
-const LABELS = { 1: 'Слабый пароль', 2: 'Нормальный пароль', 3: 'Надёжный пароль' } as const
-
 /** Password input with a show/hide toggle and an optional 3-segment strength meter. */
-export function PasswordField({ visible, onToggleVisible, strength, error, className, label, ...input }: Props) {
+export function PasswordField({ visible, onToggleVisible, strength, error, className, label, showLabel, hideLabel, strengthLabels, ...input }: Props) {
   const level = strength === 1 || strength === 2 || strength === 3 ? strength : 0
   const tone = level === 3 ? 'pos' : level === 2 ? 'warn' : 'neg'
   const filled = level === 1 ? 1 : level
@@ -28,7 +31,7 @@ export function PasswordField({ visible, onToggleVisible, strength, error, class
         error={error}
         trailing={
           <button type="button" className="password-toggle" aria-pressed={visible} onClick={onToggleVisible}>
-            {visible ? 'Скрыть' : 'Показать'}
+            {visible ? hideLabel : showLabel}
           </button>
         }
       >
@@ -41,7 +44,7 @@ export function PasswordField({ visible, onToggleVisible, strength, error, class
               <span key={i} className={cx('password-meter-bar', i <= filled && `is-${tone}`)} />
             ))}
           </div>
-          <span className="password-meter-label">{LABELS[level as 1 | 2 | 3]}</span>
+          <span className="password-meter-label">{strengthLabels?.[level - 1]}</span>
         </div>
       )}
     </div>

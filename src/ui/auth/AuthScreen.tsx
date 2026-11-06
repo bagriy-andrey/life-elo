@@ -1,35 +1,38 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/AuthProvider'
 import { strength, validate, type AuthErrors, type AuthField, type AuthForm } from '../../auth/validation'
+import { useI18n } from '../../i18n'
+import type { Key } from '../../i18n/types'
 import { Button, Notice, Field, PasswordField } from '../components'
+import { usePasswordLabels } from './passwordLabels'
 import './AuthScreen.css'
 
 type Mode = 'login' | 'register' | 'forgot'
 
-const COPY: Record<Mode, { title: string; subtitle: string; submit: string; ask: string; switchTo: Mode; switchLabel: string }> = {
+const COPY: Record<Mode, { title: Key; subtitle: Key; submit: Key; ask: Key; switchTo: Mode; switchLabel: Key }> = {
   login: {
-    title: 'Вход',
-    subtitle: 'Рады снова видеть. Продолжим считать рейтинг.',
-    submit: 'Войти',
-    ask: 'Нет аккаунта?',
+    title: 'auth.login.title',
+    subtitle: 'auth.login.subtitle',
+    submit: 'auth.login.submit',
+    ask: 'auth.login.ask',
     switchTo: 'register',
-    switchLabel: 'Зарегистрироваться',
+    switchLabel: 'auth.login.switch',
   },
   register: {
-    title: 'Регистрация',
-    subtitle: 'Аккаунт сохранит привычки и рейтинг на всех устройствах.',
-    submit: 'Создать аккаунт',
-    ask: 'Уже есть аккаунт?',
+    title: 'auth.register.title',
+    subtitle: 'auth.register.subtitle',
+    submit: 'auth.register.submit',
+    ask: 'auth.register.ask',
     switchTo: 'login',
-    switchLabel: 'Войти',
+    switchLabel: 'auth.login.submit',
   },
   forgot: {
-    title: 'Восстановление пароля',
-    subtitle: 'Пришлём ссылку для нового пароля на вашу почту.',
-    submit: 'Отправить ссылку',
-    ask: 'Вспомнили?',
+    title: 'auth.forgot.title',
+    subtitle: 'auth.forgot.subtitle',
+    submit: 'auth.forgot.submit',
+    ask: 'auth.forgot.ask',
     switchTo: 'login',
-    switchLabel: 'Войти',
+    switchLabel: 'auth.login.submit',
   },
 }
 
@@ -44,19 +47,25 @@ export function AuthLogo() {
 
 export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
   const auth = useAuth()
+  const { t } = useI18n()
+  const pwLabels = usePasswordLabels()
   const [mode, setMode] = useState<Mode>(initialMode)
   const [form, setForm] = useState<AuthForm>({})
   const [touched, setTouched] = useState<Partial<Record<AuthField, boolean>>>({})
   const [submitted, setSubmitted] = useState(false)
   const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [formError, setFormError] = useState('')
+  const [formError, setFormError] = useState<Key | ''>('')
   const [sentTo, setSentTo] = useState('')
   const [resent, setResent] = useState(false)
 
   const copy = COPY[mode]
   const errors: AuthErrors = validate(mode, form)
   const shown = (f: AuthField) => (submitted || touched[f] ? errors[f] : undefined)
+  const shownText = (f: AuthField) => {
+    const k = shown(f)
+    return k ? t(k) : undefined
+  }
   const set = (f: AuthField) => (e: { target: { value: string } }) => {
     setForm((p) => ({ ...p, [f]: e.target.value }))
     setFormError('')
@@ -119,37 +128,37 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
     <div className="auth">
       <AuthLogo />
       <div className="auth-head">
-        <h1 className="auth-title">{copy.title}</h1>
-        <p className="auth-subtitle">{copy.subtitle}</p>
+        <h1 className="auth-title">{t(copy.title)}</h1>
+        <p className="auth-subtitle">{t(copy.subtitle)}</p>
       </div>
 
       {done && (
         <Notice tone="success">
-          {resent ? `Отправили ещё раз на ${sentTo}` : `Письмо отправлено на ${sentTo}. Ссылка действует 1 час.`}
+          {resent ? t('auth.sentAgain', { email: sentTo }) : t('auth.sentTo', { email: sentTo })}
         </Notice>
       )}
-      {formError && <Notice tone="error">{formError}</Notice>}
+      {formError && <Notice tone="error">{t(formError)}</Notice>}
 
       {mode !== 'forgot' && (
         <>
           <button type="button" className="auth-google" onClick={google} disabled={busy}>
             <span className="auth-google-badge" aria-hidden="true">G</span>
-            {mode === 'login' ? 'Войти через Google' : 'Продолжить с Google'}
+            {mode === 'login' ? t('auth.googleLogin') : t('auth.googleRegister')}
           </button>
-          <div className="auth-divider">или по почте</div>
+          <div className="auth-divider">{t('auth.orEmail')}</div>
         </>
       )}
 
       {done ? (
         <Button className="auth-submit" disabled={busy} onClick={() => send(true)}>
-          {busy ? 'Подождите…' : 'Отправить ещё раз'}
+          {busy ? t('auth.busy') : t('auth.resend')}
         </Button>
       ) : (
         <form className="auth-form" noValidate onSubmit={submit}>
           {mode === 'register' && (
-            <Field label="Имя" error={shown('name')}>
+            <Field label={t('profile.name')} error={shownText('name')}>
               <input
-                placeholder="Как вас зовут"
+                placeholder={t('profile.namePlaceholder')}
                 autoComplete="name"
                 value={form.name ?? ''}
                 onChange={set('name')}
@@ -157,7 +166,7 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
               />
             </Field>
           )}
-          <Field label="Почта" error={shown('email')}>
+          <Field label={t('profile.email')} error={shownText('email')}>
             <input
               type="email"
               inputMode="email"
@@ -172,44 +181,46 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
           {mode !== 'forgot' && (
             <div className="auth-pw">
               <PasswordField
-                label="Пароль"
+                label={t('auth.password')}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                placeholder={mode === 'register' ? 'Минимум 8 символов' : undefined}
+                placeholder={mode === 'register' ? t('password.placeholder') : undefined}
                 value={form.password ?? ''}
                 onChange={set('password')}
                 onBlur={blur('password')}
-                error={shown('password')}
+                error={shownText('password')}
                 strength={mode === 'register' ? (strength(form.password ?? '') as 0 | 1 | 2 | 3) : undefined}
                 {...pwProps}
+                {...pwLabels}
               />
               {mode === 'login' && (
                 <button type="button" className="auth-link auth-forgot" onClick={() => switchMode('forgot')}>
-                  Забыли пароль?
+                  {t('auth.forgot.link')}
                 </button>
               )}
             </div>
           )}
           {mode === 'register' && (
             <PasswordField
-              label="Повторите пароль"
+              label={t('auth.confirm')}
               autoComplete="new-password"
               value={form.confirm ?? ''}
               onChange={set('confirm')}
               onBlur={blur('confirm')}
-              error={shown('confirm')}
+              error={shownText('confirm')}
               {...pwProps}
+              {...pwLabels}
             />
           )}
           <Button variant="primary" type="submit" className="auth-submit" disabled={busy}>
-            {busy ? 'Подождите…' : copy.submit}
+            {busy ? t('auth.busy') : t(copy.submit)}
           </Button>
         </form>
       )}
 
       <div className="auth-footer">
-        <span>{copy.ask}</span>
+        <span>{t(copy.ask)}</span>
         <button type="button" className="auth-link" onClick={() => switchMode(copy.switchTo)}>
-          {copy.switchLabel}
+          {t(copy.switchLabel)}
         </button>
       </div>
     </div>

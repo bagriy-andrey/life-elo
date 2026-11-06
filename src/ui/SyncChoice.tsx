@@ -1,28 +1,31 @@
 import { useState } from 'react'
-import { AUTH_FALLBACK_TEXT } from '../auth/errors'
+import { AUTH_FALLBACK } from '../auth/errors'
+import { useI18n } from '../i18n'
+import type { Key } from '../i18n/types'
 import { Button, Card, Notice } from './components'
 import { AuthLogo } from './auth/AuthScreen'
 import './auth/AuthScreen.css'
 
 export type SyncChoiceKind = 'account' | 'device'
 
-const OPTIONS: Record<SyncChoiceKind, { title: string; hint: string; confirm: string }> = {
+const OPTIONS: Record<SyncChoiceKind, { title: Key; hint: Key; confirm: Key }> = {
   account: {
-    title: 'Оставить данные аккаунта',
-    hint: 'Данные на этом устройстве удалятся',
-    confirm: 'Да, оставить данные аккаунта',
+    title: 'sync.choice.account',
+    hint: 'sync.choice.accountHint',
+    confirm: 'sync.choice.accountConfirm',
   },
   device: {
-    title: 'Оставить данные устройства',
-    hint: 'Данные в аккаунте заменятся данными с этого устройства',
-    confirm: 'Да, оставить данные устройства',
+    title: 'sync.choice.device',
+    hint: 'sync.choice.deviceHint',
+    confirm: 'sync.choice.deviceConfirm',
   },
 }
 
 export function SyncChoice({ onChoose }: { onChoose: (kind: SyncChoiceKind) => Promise<void> }) {
+  const { t } = useI18n()
   const [pending, setPending] = useState<SyncChoiceKind | null>(null)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Key | ''>('')
 
   const confirm = async () => {
     if (!pending || busy) return
@@ -31,7 +34,7 @@ export function SyncChoice({ onChoose }: { onChoose: (kind: SyncChoiceKind) => P
     try {
       await onChoose(pending)
     } catch {
-      setError(AUTH_FALLBACK_TEXT)
+      setError(AUTH_FALLBACK)
       setBusy(false)
     }
   }
@@ -40,27 +43,27 @@ export function SyncChoice({ onChoose }: { onChoose: (kind: SyncChoiceKind) => P
     <div className="auth">
       <AuthLogo />
       <div className="auth-head">
-        <h1 className="auth-title">На устройстве и в аккаунте есть данные</h1>
-        <p className="auth-subtitle">Выберите, какую копию оставить. Другая будет удалена.</p>
+        <h1 className="auth-title">{t('sync.choice.title')}</h1>
+        <p className="auth-subtitle">{t('sync.choice.subtitle')}</p>
       </div>
-      {error && <Notice tone="error">{error}</Notice>}
+      {error && <Notice tone="error">{t(error)}</Notice>}
       {pending ? (
         <Card>
-          <p className="auth-subtitle">{OPTIONS[pending].hint}. Это нельзя отменить.</p>
+          <p className="auth-subtitle">{t('sync.choice.warn', { hint: t(OPTIONS[pending].hint) })}</p>
           <Button variant="primary" className="auth-submit" disabled={busy} onClick={confirm}>
-            {busy ? 'Подождите…' : OPTIONS[pending].confirm}
+            {busy ? t('auth.busy') : t(OPTIONS[pending].confirm)}
           </Button>
           <Button className="auth-submit" disabled={busy} onClick={() => setPending(null)}>
-            Отмена
+            {t('common.cancel')}
           </Button>
         </Card>
       ) : (
         (['account', 'device'] as const).map((k) => (
           <Card key={k}>
             <Button className="auth-submit" onClick={() => setPending(k)}>
-              {OPTIONS[k].title}
+              {t(OPTIONS[k].title)}
             </Button>
-            <p className="auth-muted">{OPTIONS[k].hint}</p>
+            <p className="auth-muted">{t(OPTIONS[k].hint)}</p>
           </Card>
         ))
       )}

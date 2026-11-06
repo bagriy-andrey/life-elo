@@ -130,6 +130,7 @@ type Gate = 'checking' | 'offline' | 'ask' | 'ready'
 
 /** First sign-in on this device: decides upload / pull / ask. Never decides without the remote state. */
 function FirstSignInGate({ userId }: { userId: string }) {
+  const { t } = useI18n()
   const [gate, setGate] = useState<Gate>('checking')
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
@@ -166,12 +167,12 @@ function FirstSignInGate({ userId }: { userId: string }) {
     return (
       <div className="auth">
         <AuthLogo />
-        <p className="auth-muted">Нужен интернет для первой синхронизации</p>
+        <p className="auth-muted">{t('sync.needInternet')}</p>
         <Button className="auth-submit" onClick={() => {
             setGate('checking')
             setAttempt((n) => n + 1)
           }}>
-          Повторить
+          {t('sync.retry')}
         </Button>
       </div>
     )
@@ -183,6 +184,7 @@ function FirstSignInGate({ userId }: { userId: string }) {
 }
 
 export default function App() {
+  const { t } = useI18n()
   const { configured, loading, recovery, session } = useAuth()
   const [startForgot, setStartForgot] = useState(false)
   useBackgroundSync(session?.user.id)
@@ -191,7 +193,7 @@ export default function App() {
   if (!configured)
     return (
       <div className="auth-message">
-        Вход не настроен: добавьте ключи Supabase в .env (см. docs/setup/backend.md)
+        {t('sync.notConfigured')}
       </div>
     )
   if (loading)

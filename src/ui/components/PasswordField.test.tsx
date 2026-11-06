@@ -3,11 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { PasswordField } from './PasswordField'
 
 const noop = () => {}
+const labels = { showLabel: 'Показать', hideLabel: 'Скрыть', strengthLabels: ['Слабый пароль', 'Нормальный пароль', 'Надёжный пароль'] } as const
 
 describe('PasswordField', () => {
   it('renders toggle text, meter label and masks by default', () => {
     const html = renderToString(
-      <PasswordField label="Пароль" visible={false} onToggleVisible={noop} strength={2} />,
+      <PasswordField label="Пароль" visible={false} onToggleVisible={noop} {...labels} strength={2} />,
     )
     expect(html).toContain('Показать')
     expect(html).toContain('type="password"')
@@ -17,7 +18,7 @@ describe('PasswordField', () => {
 
   it('shows plain text and hides the meter with error + aria-invalid', () => {
     const html = renderToString(
-      <PasswordField label="Пароль" visible onToggleVisible={noop} strength={3} error="Слишком короткий" />,
+      <PasswordField label="Пароль" visible onToggleVisible={noop} {...labels} strength={3} error="Слишком короткий" />,
     )
     expect(html).toContain('Скрыть')
     expect(html).toContain('type="text"')

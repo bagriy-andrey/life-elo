@@ -1,13 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from './supabase'
+import type { Key } from '../i18n/types'
 import { authErrorText, type AuthErrorLike } from './errors'
 import { endSession } from './endSession'
 import { isGoogleOnly } from './googleOnly'
 import { clearRecoveryFromLocation, parseRecoveryUrl } from './recoveryUrl'
 
 export interface ActionResult {
-  error?: string
+  /** i18n key; screens translate it with `t`. */
+  error?: Key
 }
 export interface ChangePasswordResult extends ActionResult {
   /** True when the current password was wrong (UI shows it on the current-password field). */
@@ -36,7 +38,7 @@ export interface AuthValue {
   dismissRecovery(): void
 }
 
-const NOT_CONFIGURED = 'Вход пока не настроен.'
+const NOT_CONFIGURED: Key = 'authError.notConfigured'
 
 const AuthContext = createContext<AuthValue | null>(null)
 
@@ -136,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const check = await supabase!.auth.signInWithPassword({ email, password: current })
           if (check.error) {
             if (check.error.code === 'invalid_credentials')
-              return { error: 'Текущий пароль указан неверно', wrongCurrent: true }
+              return { error: 'authError.wrongCurrent', wrongCurrent: true }
             return fail(check.error)
           }
           const { error } = await supabase!.auth.updateUser({ password: next })

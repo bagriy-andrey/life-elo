@@ -1,33 +1,35 @@
 import { useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
-import { AUTH_FALLBACK_TEXT } from '../auth/errors'
+import { AUTH_FALLBACK } from '../auth/errors'
 import { db } from '../db/db'
+import { useI18n, type I18n } from '../i18n'
+import type { Key } from '../i18n/types'
 import { useSyncStatus, type SyncEngine, type SyncStatus } from '../sync/engine'
 import { performLogout } from '../sync/logout'
 import { clearLocalData } from '../sync/outbox'
 import { Button, Card, Notice } from './components'
 import './auth/AuthScreen.css'
 
-function formatSynced(at: number, now = new Date()): string {
+function formatSynced(at: number, t: I18n['t'], locale: string, now = new Date()): string {
   const d = new Date(at)
-  const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-  if (d.toDateString() === now.toDateString()) return `Синхронизировано · ${time}`
-  const date = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).replace(/\.$/, '')
-  return `Синхронизировано · ${date}, ${time}`
+  const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+  if (d.toDateString() === now.toDateString()) return t('sync.syncedAt', { time })
+  const date = d.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace(/\.$/, '')
+  return t('sync.syncedOn', { date, time })
 }
 
-function statusText(s: SyncStatus): string {
+function statusText(s: SyncStatus, t: I18n['t'], locale: string): string {
   switch (s.kind) {
     case 'syncing':
-      return 'Синхронизация…'
+      return t('sync.syncing')
     case 'offline':
-      return 'Нет сети — изменения сохранены на устройстве'
+      return t('sync.offline')
     case 'error':
-      return 'Ошибка синхронизации'
+      return t('sync.error')
     case 'update-required':
-      return 'Обновите приложение, чтобы продолжить синхронизацию'
+      return t('sync.updateRequired')
     default:
-      return s.lastSyncedAt ? formatSynced(s.lastSyncedAt) : 'Ещё не синхронизировано'
+      return s.lastSyncedAt ? formatSynced(s.lastSyncedAt, t, locale) : t('sync.never')
   }
 }
 
@@ -39,10 +41,11 @@ interface Props {
 /** Account block of the profile tab: sign-in identity, sync status, password, logout. */
 export function Account({ engine, onPassword }: Props) {
   const { user, googleOnly, signOut } = useAuth()
+  const { t, locale } = useI18n()
   const status = useSyncStatus()
   const [busy, setBusy] = useState(false)
   const [confirming, setConfirming] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<Key | ''>('')
 
   const email = user?.email ?? ''
 
@@ -65,7 +68,7 @@ export function Account({ engine, onPassword }: Props) {
       }
       await finish()
     } catch {
-      setError(AUTH_FALLBACK_TEXT)
+      setError(AUTH_FALLBACK)
       setBusy(false)
     }
   }
@@ -77,41 +80,41 @@ export function Account({ engine, onPassword }: Props) {
     try {
       await finish()
     } catch {
-      setError(AUTH_FALLBACK_TEXT)
+      setError(AUTH_FALLBACK)
       setBusy(false)
     }
   }
 
   return (
     <section className="stack">
-      <h2>Аккаунт</h2>
+      <h2>{t('account.title')}</h2>
       <Card>
         <div className="stack-sm">
           <span className="muted">{email}</span>
-          <span>{statusText(status)}</span>
-          {status.kind === 'error' && <Button onClick={() => void engine.run()}>Повторить</Button>}
+          <span>{statusText(status, t, locale)}</span>
+          {status.kind === 'error' && <Button onClick={() => void engine.run()}>{t('sync.retry')}</Button>}
           <button type="button" className="auth-link" onClick={() => void engine.resync()}>
-            Синхронизировать заново
+            {t('account.resync')}
           </button>
         </div>
       </Card>
-      {error && <Notice tone="error">{error}</Notice>}
-      <Button onClick={onPassword}>{googleOnly ? 'Задать пароль' : 'Сменить пароль'}</Button>
+      {error && <Notice tone="error">{t(error)}</Notice>}
+      <Button onClick={onPassword}>{googleOnly ? t('password.set') : t('account.changePassword')}</Button>
       {confirming ? (
         <Card>
           <div className="stack-sm">
-            <p>Есть несинхронизированные изменения. Если выйти, они пропадут.</p>
+            <p>{t('account.unsynced')}</p>
             <Button variant="primary" disabled={busy} onClick={confirmLogout}>
-              {busy ? 'Подождите…' : 'Выйти'}
+              {busy ? t('auth.busy') : t('account.logout')}
             </Button>
             <Button disabled={busy} onClick={() => setConfirming(false)}>
-              Отмена
+              {t('common.cancel')}
             </Button>
           </div>
         </Card>
       ) : (
         <Button disabled={busy} onClick={logout}>
-          {busy ? 'Подождите…' : 'Выйти'}
+          {busy ? t('auth.busy') : t('account.logout')}
         </Button>
       )}
     </section>

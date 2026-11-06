@@ -1,6 +1,6 @@
 # 06 — Integrate accounts & sync with profile/settings/i18n (main)
 
-Status: approved
+Status: done
 Design input: Claude Design project 67c2bfac-e6da-422e-98bb-a3415b430a31 (`templates/auth/Auth.dc.html`,
 `templates/profile/Profile.dc.html`; components Field, Avatar, Dialog already synced from main).
 
@@ -56,5 +56,5 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
   import from AuthScreen.css in Account), `renderToString` tests for AuthScreen, NewPassword, SyncChoice, Account,
   ProfilePassword — files: `src/ui/Account.tsx`, `src/ui/Profile.css`, `src/ui/*.test.tsx` — verify: `npm test`, build.
   Note: also exported `AuthContext` (test fake), `useSyncStatus` got a server snapshot (SSR), new key `account.sync`, test helper `src/ui/authTestUtils.tsx`; Account reuses Profile.css classes (`profile-rows`, `clear-btn`, `settings-title`).
-- [ ] 7. Docs: AGENTS.md layout/rules, `docs/setup/backend.md` (profile synced, prefs per device, second migration),
+- [x] 7. Docs: AGENTS.md layout/rules, `docs/setup/backend.md` (profile synced, prefs per device, second migration),
   README, HANDOFF; then the user runs `/design-sync` — files: docs — verify: read-through.

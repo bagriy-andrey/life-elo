@@ -244,6 +244,7 @@ export const en: Dict = {
   'sync.choice.deviceConfirm': 'Yes, keep device data',
   'sync.choice.warn': '{hint}. This can’t be undone.',
   'account.title': 'Account',
+  'account.loginEmail': 'Sign-in email',
   'account.sync': 'Sync',
   'account.resync': 'Sync again',
   'account.changePassword': 'Change password',

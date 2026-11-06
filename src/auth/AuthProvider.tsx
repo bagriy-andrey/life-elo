@@ -1,47 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Session, User } from '@supabase/supabase-js'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from './supabase'
 import type { Key } from '../i18n/types'
 import { authErrorText, type AuthErrorLike } from './errors'
 import { endSession } from './endSession'
 import { isGoogleOnly } from './googleOnly'
 import { clearRecoveryFromLocation, parseRecoveryUrl } from './recoveryUrl'
-
-export interface ActionResult {
-  /** i18n key; screens translate it with `t`. */
-  error?: Key
-}
-export interface ChangePasswordResult extends ActionResult {
-  /** True when the current password was wrong (UI shows it on the current-password field). */
-  wrongCurrent?: boolean
-}
-/** null = no recovery link; verifying → ready (set password) | invalid (expired) → done (saved). */
-export type RecoveryState = null | 'verifying' | 'ready' | 'invalid' | 'done'
-
-export interface AuthValue {
-  configured: boolean
-  loading: boolean
-  session: Session | null
-  user: User | null
-  googleOnly: boolean
-  recovery: RecoveryState
-  signIn(email: string, password: string): Promise<ActionResult>
-  signUp(name: string, email: string, password: string): Promise<ActionResult>
-  google(): Promise<ActionResult>
-  resetPassword(email: string): Promise<ActionResult>
-  setNewPassword(password: string): Promise<ActionResult>
-  changePassword(current: string, next: string): Promise<ChangePasswordResult>
-  /** Password for a Google-only account (no current password). */
-  setPassword(password: string): Promise<ActionResult>
-  signOut(): Promise<ActionResult>
-  /** Leaves the recovery flow (e.g. to the forgot screen). */
-  dismissRecovery(): void
-}
+import { AuthContext, type ActionResult, type AuthValue, type ChangePasswordResult, type RecoveryState } from './context'
 
 const NOT_CONFIGURED: Key = 'authError.notConfigured'
-
-/** Exported so tests can provide a fake value. */
-export const AuthContext = createContext<AuthValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
@@ -170,10 +137,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loading, session, recovery, run])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth(): AuthValue {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider')
-  return ctx
 }

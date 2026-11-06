@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AuthContext, type AuthValue } from '../auth/AuthProvider'
+import { AuthContext, type AuthValue } from '../auth/context'
 import { I18nProvider } from '../i18n'
 
 const ok = async () => ({})

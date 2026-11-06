@@ -254,6 +254,7 @@ export const uk: Dict = {
   'sync.choice.deviceConfirm': 'Так, залишити дані пристрою',
   'sync.choice.warn': '{hint}. Це не можна скасувати.',
   'account.title': 'Обліковий запис',
+  'account.loginEmail': 'Пошта для входу',
   'account.sync': 'Синхронізація',
   'account.resync': 'Синхронізувати заново',
   'account.changePassword': 'Змінити пароль',

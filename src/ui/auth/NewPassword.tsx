@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useAuth } from '../../auth/AuthProvider'
+import { useAuth } from '../../auth/context'
 import { strength, validate, type AuthField, type AuthForm } from '../../auth/validation'
 import { useI18n } from '../../i18n'
 import type { Key } from '../../i18n/types'

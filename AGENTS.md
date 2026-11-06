@@ -14,8 +14,8 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - `src/domain/` — types and day-boundary logic (`dayOf`, `reviewDay`).
 - `src/engine/` — pure, deterministic rating engine (`replay`) + versioned `RulesetConfig`.
 - `src/db/` — Dexie schema. Rating/streaks are never stored; they are derived by replaying confirmed reviews.
-- `src/auth/` — Supabase client, session provider, auth validation and error texts.
-- `src/sync/` — outbox, merge rules, remote calls, sync engine (raw records only).
+- `src/auth/` — Supabase client, `AuthProvider`, `context.ts` (`useAuth`), validation, error texts.
+- `src/sync/` — outbox, merge rules, remote calls, sync engine (raw records only: reviews, wellbeing, profile, tombstones).
 - `supabase/` — SQL migrations and email templates (the whole backend).
 - `src/ui/` — screens.
 
@@ -25,6 +25,8 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - Days are finalized by next-morning review of yesterday; editing a past day = save + replay (no double credit).
 - Wellbeing check-in is optional and never modifies Elo directly.
 - Rating and streaks are never stored on the server either; sync moves raw records only.
+- Profile is synced between devices; language and theme are per device (localStorage, not synced).
+- «Удалить все данные» wipes the account everywhere: server tombstones, other devices clear on their next sync.
 - Reward Coins (future) are separate from Elo; spending never lowers Elo.
 - `RULESET_V1` numbers are agreed (product context §6.5); tuning goes through a new ruleset version. Ask the user before choosing any coefficient not in §6.5.
 
@@ -35,6 +37,7 @@ Short, durable, non-obvious lessons. Compress or replace entries; keep this sect
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
   Text inputs go through `Field` (global input styles live in `src/index.css`).
 - Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).
+- Supabase CLI: `npx supabase db push --remote` (without `--remote` it targets a local Docker DB and fails).
 - Age/birth use the calendar date `toDayKey(new Date())`, not `dayOf`/`reviewDay` (04:00 boundary).
 
 ## Workflow: plan → build → verify

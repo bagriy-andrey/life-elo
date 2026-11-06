@@ -2,6 +2,10 @@
 
 Personal habit & wellbeing PWA. See `LIFE_ELO_PRODUCT_CONTEXT.md` and `CLAUDE.md`.
 
+Local-first PWA: data lives in IndexedDB and works offline. An optional account (Supabase: email+password or
+Google) syncs raw records (reviews, wellbeing, profile) between devices; rating is always recomputed locally.
+Language and theme are per device.
+
 ```sh
 npm install
 npm run dev   # also reachable from a phone on the same Wi-Fi

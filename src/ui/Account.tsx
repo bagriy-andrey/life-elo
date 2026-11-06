@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '../auth/AuthProvider'
+import { useAuth } from '../auth/context'
 import { AUTH_FALLBACK } from '../auth/errors'
 import { db } from '../db/db'
 import { useI18n, type I18n } from '../i18n'
@@ -90,7 +90,7 @@ export function Account({ engine, onPassword }: Props) {
       <h2 className="settings-title">{t('account.title')}</h2>
       <Card className="profile-rows">
         <div className="profile-row">
-          <span className="muted">{t('profile.email')}</span>
+          <span className="muted">{t('account.loginEmail')}</span>
           <span className="profile-row-value">{email || '—'}</span>
         </div>
         <div className="profile-row">

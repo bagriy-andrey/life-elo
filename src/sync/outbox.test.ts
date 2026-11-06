@@ -123,31 +123,28 @@ describe("outbox", () => {
   });
 });
 
-describe("v2 -> v3 upgrade", () => {
-  it("keeps data", async () => {
-    const name = "life-elo-upgrade";
-    const old = new Dexie(name);
-    old.version(2).stores({
+describe("main-v3 -> v4 upgrade", () => {
+  it("keeps data and the upgrade does not enqueue", async () => {
+    db.close();
+    await Dexie.delete("life-elo");
+    const old = new Dexie("life-elo");
+    old.version(1).stores({
       habits: "id, active",
       events: "id, habitId, day",
       reviews: "day",
       wellbeing: "day",
       rewards: "id, kind, status",
     });
+    old.version(2).stores({});
+    old.version(3).stores({ profile: "id" });
+    await old.open();
     await old.table("habits").put(habit("keep"));
+    await old.table("profile").put({ id: "me" });
     old.close();
-    const up = new Dexie(name);
-    up.version(2).stores({
-      habits: "id, active",
-      events: "id, habitId, day",
-      reviews: "day",
-      wellbeing: "day",
-      rewards: "id, kind, status",
-    });
-    up.version(3).stores({ outbox: "[tbl+key]", syncState: "id" });
-    await up.open();
-    expect((await up.table("habits").get("keep")).id).toBe("keep");
-    expect(await up.table("outbox").count()).toBe(0);
-    up.close();
+
+    await db.open();
+    expect((await db.habits.get("keep"))?.id).toBe("keep");
+    expect((await db.profile.get("me"))?.id).toBe("me");
+    expect(await db.outbox.count()).toBe(0);
   });
 });

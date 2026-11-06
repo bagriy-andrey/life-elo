@@ -32,7 +32,7 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
 (none — defaults: language/theme not synced; «Удалить все данные» deletes everywhere while signed in)
 
 ## Steps
-- [ ] 1. Merge resolution follow-ups + v3→v4 upgrade test (main-v3 DB with profile + habits opens at v4 with data,
+- [x] 1. Merge resolution follow-ups + v3→v4 upgrade test (main-v3 DB with profile + habits opens at v4 with data,
   outbox empty) — files: `src/sync/outbox.test.ts` — verify: `npm test`.
 - [ ] 2. Profile sync: add `profile` to `SYNCED_TABLES` (key `id`), counts in `firstSignIn`, migration
   `supabase/migrations/<ts>_records_profile.sql` (replace the `tbl` check constraint), tests (enqueue on

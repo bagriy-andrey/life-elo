@@ -38,9 +38,9 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
   `supabase/migrations/<ts>_records_profile.sql` (replace the `tbl` check constraint), tests (enqueue on
   `saveProfile`, convergence of a profile between two fake devices) — files: `src/sync/outbox.ts`,
   `src/sync/firstSignIn.ts`, tests, migration, `docs/setup/backend.md` (re-run db push) — verify: `npm test`.
-- [ ] 3. «Удалить все данные» while signed in: route through sync (disable engine → `remote.reset()` →
+- [x] 3. «Удалить все данные» while signed in: route through sync (disable engine → `remote.reset()` →
   clear local synced tables + outbox, keep `syncState.userId`, cursor 0 → enable); offline → error; update i18n
-  dialog texts in ru/en/uk — files: `src/db/profile.ts` or new `src/sync/wipe.ts`, `src/ui/Profile.tsx`,
+  dialog texts in ru/en/uk (note: clearAllData removed, unreachable; ClearData gets onClearData prop from App) — files: `src/db/profile.ts` or new `src/sync/wipe.ts`, `src/ui/Profile.tsx`,
   `src/i18n/*.ts`, tests — verify: `npm test`.
 - [ ] 4. [design-sync] `PasswordField` on top of `Field` (add trailing slot to Field if needed), switch
   AuthScreen/NewPassword/ProfilePassword to `Field`, delete `TextField` (+ preview, dtsPropsFor, override,

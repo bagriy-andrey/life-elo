@@ -17,7 +17,7 @@ const profile = {
 const render = (p: ProfileData | null) =>
   renderToString(
     <I18nProvider>
-      <Profile profile={p} rating={12.3} today={today} />
+      <Profile profile={p} rating={12.3} today={today} onClearData={async () => {}} />
     </I18nProvider>,
   )
 

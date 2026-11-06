@@ -11,6 +11,7 @@ import { adoptRemote, keepDevice, prepareFirstSignIn, resolveAutomatic } from '.
 import { createSyncEngine, startSync } from './sync/engine'
 import { getSyncState } from './sync/outbox'
 import { supabaseRemote } from './sync/remote'
+import { wipeAccountData } from './sync/wipe'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { Account } from './ui/Account'
@@ -84,6 +85,7 @@ function MainApp() {
             profile={profile}
             rating={result.rating}
             today={today}
+            onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
             account={<Account engine={syncEngine} onPassword={() => setPasswordOpen(true)} />}
           />
         )}

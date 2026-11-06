@@ -9,7 +9,10 @@ User: create Supabase project etc. per docs/setup/backend.md, `npx supabase db p
 run the §8 checklist (incl. iPhone PWA + Google), record results in plan step 15; then `/design-sync`
 (TextField, Notice, PasswordField, --warn, HistoryEntry) and write HEAD to .design-sync/last-sync; open PR.
 ## Broken / open questions
-- Not verified live yet: password reset email, sync between two devices, Google in iOS PWA (login/register/Google/linking OK on localhost 2026-11-06).
+- Verified on localhost 2026-11-06: register, login, Google, Google↔email linking, sync between two browsers.
+- KNOWN ISSUE (deferred by user): password-reset email does not arrive (Resend SMTP + test sender onboarding@resend.dev,
+  template pasted). Check Resend → Emails and Supabase → Logs → Auth; test sender only delivers to the Resend account email.
+- Not verified yet: Google in iOS PWA, logout wipe, offline edit.
 - User decisions: (a) all-unknown reviewed day lifts a negative rating, a skipped day can't (pre-existing, §6.5; v2?);
   (b) leftover data of account A uploads silently into empty account B — add confirm?;
   (c) «Не помню текущий пароль» shows a hint instead of sign-out → forgot with email prefilled — keep?

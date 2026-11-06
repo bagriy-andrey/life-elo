@@ -40,7 +40,8 @@ export interface AuthValue {
 
 const NOT_CONFIGURED: Key = 'authError.notConfigured'
 
-const AuthContext = createContext<AuthValue | null>(null)
+/** Exported so tests can provide a fake value. */
+export const AuthContext = createContext<AuthValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)

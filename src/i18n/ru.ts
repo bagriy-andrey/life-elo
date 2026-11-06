@@ -253,6 +253,7 @@ export const ru = {
   'sync.choice.deviceConfirm': 'Да, оставить данные устройства',
   'sync.choice.warn': '{hint}. Это нельзя отменить.',
   'account.title': 'Аккаунт',
+  'account.sync': 'Синхронизация',
   'account.resync': 'Синхронизировать заново',
   'account.changePassword': 'Сменить пароль',
   'account.unsynced': 'Есть несинхронизированные изменения. Если выйти, они пропадут.',

@@ -38,7 +38,7 @@ export function createStatusStore(): SyncStatusStore {
 export const syncStatusStore = createStatusStore()
 
 export function useSyncStatus(): SyncStatus {
-  return useSyncExternalStore(syncStatusStore.subscribe, syncStatusStore.get)
+  return useSyncExternalStore(syncStatusStore.subscribe, syncStatusStore.get, syncStatusStore.get)
 }
 
 const PUSH_BATCH = 200

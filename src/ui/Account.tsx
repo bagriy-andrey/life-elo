@@ -8,7 +8,7 @@ import { useSyncStatus, type SyncEngine, type SyncStatus } from '../sync/engine'
 import { performLogout } from '../sync/logout'
 import { clearLocalData } from '../sync/outbox'
 import { Button, Card, Notice } from './components'
-import './auth/AuthScreen.css'
+import './Profile.css'
 
 function formatSynced(at: number, t: I18n['t'], locale: string, now = new Date()): string {
   const d = new Date(at)
@@ -87,33 +87,43 @@ export function Account({ engine, onPassword }: Props) {
 
   return (
     <section className="stack">
-      <h2>{t('account.title')}</h2>
-      <Card>
-        <div className="stack-sm">
-          <span className="muted">{email}</span>
-          <span>{statusText(status, t, locale)}</span>
-          {status.kind === 'error' && <Button onClick={() => void engine.run()}>{t('sync.retry')}</Button>}
-          <button type="button" className="auth-link" onClick={() => void engine.resync()}>
-            {t('account.resync')}
-          </button>
+      <h2 className="settings-title">{t('account.title')}</h2>
+      <Card className="profile-rows">
+        <div className="profile-row">
+          <span className="muted">{t('profile.email')}</span>
+          <span className="profile-row-value">{email || '—'}</span>
+        </div>
+        <div className="profile-row">
+          <span className="muted">{t('account.sync')}</span>
+          <span className="profile-row-value">{statusText(status, t, locale)}</span>
         </div>
       </Card>
+      {status.kind === 'error' && (
+        <Button className="clear-btn" onClick={() => void engine.run()}>
+          {t('sync.retry')}
+        </Button>
+      )}
+      <Button variant="quiet" className="clear-btn" onClick={() => void engine.resync()}>
+        {t('account.resync')}
+      </Button>
       {error && <Notice tone="error">{t(error)}</Notice>}
-      <Button onClick={onPassword}>{googleOnly ? t('password.set') : t('account.changePassword')}</Button>
+      <Button className="clear-btn" onClick={onPassword}>
+        {googleOnly ? t('password.set') : t('account.changePassword')}
+      </Button>
       {confirming ? (
         <Card>
           <div className="stack-sm">
             <p>{t('account.unsynced')}</p>
-            <Button variant="primary" disabled={busy} onClick={confirmLogout}>
+            <Button variant="primary" className="clear-btn" disabled={busy} onClick={confirmLogout}>
               {busy ? t('auth.busy') : t('account.logout')}
             </Button>
-            <Button disabled={busy} onClick={() => setConfirming(false)}>
+            <Button className="clear-btn" disabled={busy} onClick={() => setConfirming(false)}>
               {t('common.cancel')}
             </Button>
           </div>
         </Card>
       ) : (
-        <Button disabled={busy} onClick={logout}>
+        <Button className="clear-btn" disabled={busy} onClick={logout}>
           {busy ? t('auth.busy') : t('account.logout')}
         </Button>
       )}

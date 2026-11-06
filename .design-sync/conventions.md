@@ -32,7 +32,7 @@ Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A nati
 - `Card` is the generic surface. Give it a layout class: `className="row"` for list rows, `className="stack-sm"` for stacked content. `inactive` dims it.
 - `Button variant="primary"` is the main action (one per screen). Default buttons are secondary/inline actions.
 - `SegmentedControl` options use `tone: "pos"` for good outcomes and `"neg"` for violations. Omit `tone` for neutral choices (accent color).
-- Text inputs: wrap a native `<input>` in `Field` (`label`, `required`, `prefix="@"`, `hint`, `error`); the input gets `aria-invalid` automatically.
+- Text inputs: wrap a native `<input>` in `Field` (`label`, `required`, `prefix="@"`, `hint`, `error`, `trailing`); the input gets `aria-invalid` automatically. `PasswordField` is built on `Field`.
 - `Button variant="danger"` is a destructive confirm (filled `--neg`); `variant="quiet"` is text-only (add `className="neg"` for destructive text actions).
 - `Avatar name src`: photo or initials on an accent tint (`size` defaults to 96). With `onClick` it becomes a button: always pass `label`.
 - `Dialog open title onClose`: confirm modal. Children = `<p className="dialog-body">` + `<div className="dialog-actions">`; put `autoFocus` on the safe action.

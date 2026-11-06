@@ -42,7 +42,7 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
   clear local synced tables + outbox, keep `syncState.userId`, cursor 0 → enable); offline → error; update i18n
   dialog texts in ru/en/uk (note: clearAllData removed, unreachable; ClearData gets onClearData prop from App) — files: `src/db/profile.ts` or new `src/sync/wipe.ts`, `src/ui/Profile.tsx`,
   `src/i18n/*.ts`, tests — verify: `npm test`.
-- [ ] 4. [design-sync] `PasswordField` on top of `Field` (add trailing slot to Field if needed), switch
+- [x] 4. [design-sync] `PasswordField` on top of `Field` (add trailing slot to Field if needed), switch
   AuthScreen/NewPassword/ProfilePassword to `Field`, delete `TextField` (+ preview, dtsPropsFor, override,
   conventions, AGENTS.md gotcha) — files: `src/ui/components/{Field,PasswordField}.*`, `TextField.*` (delete),
   `src/ui/auth/*.tsx`, `src/ui/ProfilePassword.tsx`, `.design-sync/*`, `AGENTS.md` — verify: build, lint, tests.

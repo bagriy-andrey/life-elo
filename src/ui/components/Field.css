@@ -22,3 +22,12 @@
 .field-has-prefix input { padding-left: 28px; }
 .field-error { color: var(--neg); font-size: var(--text-xs); }
 .field-hint { color: var(--muted); font-size: var(--text-xs); }
+.field-has-trailing input { padding-right: 96px; }
+.field-trailing {
+  position: absolute;
+  top: 0;
+  right: var(--space-8);
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}

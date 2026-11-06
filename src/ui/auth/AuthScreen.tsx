@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/AuthProvider'
 import { strength, validate, type AuthErrors, type AuthField, type AuthForm } from '../../auth/validation'
-import { Button, Notice, PasswordField, TextField } from '../components'
+import { Button, Notice, Field, PasswordField } from '../components'
 import './AuthScreen.css'
 
 type Mode = 'login' | 'register' | 'forgot'
@@ -147,28 +147,28 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
       ) : (
         <form className="auth-form" noValidate onSubmit={submit}>
           {mode === 'register' && (
-            <TextField
-              label="Имя"
-              placeholder="Как вас зовут"
-              autoComplete="name"
-              value={form.name ?? ''}
-              onChange={set('name')}
-              onBlur={blur('name')}
-              error={shown('name')}
-            />
+            <Field label="Имя" error={shown('name')}>
+              <input
+                placeholder="Как вас зовут"
+                autoComplete="name"
+                value={form.name ?? ''}
+                onChange={set('name')}
+                onBlur={blur('name')}
+              />
+            </Field>
           )}
-          <TextField
-            label="Почта"
-            type="email"
-            inputMode="email"
-            autoCapitalize="none"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={form.email ?? ''}
-            onChange={set('email')}
-            onBlur={blur('email')}
-            error={shown('email')}
-          />
+          <Field label="Почта" error={shown('email')}>
+            <input
+              type="email"
+              inputMode="email"
+              autoCapitalize="none"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={form.email ?? ''}
+              onChange={set('email')}
+              onBlur={blur('email')}
+            />
+          </Field>
           {mode !== 'forgot' && (
             <div className="auth-pw">
               <PasswordField

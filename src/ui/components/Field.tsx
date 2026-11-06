@@ -13,12 +13,14 @@ interface Props {
   hint?: string
   /** Error text under the control. The control gets aria-invalid automatically. */
   error?: string
+  /** Node inside the control's right edge, e.g. a show/hide button (adds right padding to the input). */
+  trailing?: ReactNode
   className?: string
   /** A single native control, e.g. <input>. It receives id, aria-describedby and aria-invalid. */
   children: ReactNode
 }
 
-export function Field({ label, required, prefix, hint, error, className, children }: Props) {
+export function Field({ label, required, prefix, hint, error, trailing, className, children }: Props) {
   const autoId = useId()
   const noteId = useId()
   const note = error || hint
@@ -39,9 +41,10 @@ export function Field({ label, required, prefix, hint, error, className, childre
         {label}
         {required && <span className="field-required" aria-hidden="true"> *</span>}
       </label>
-      <span className={cx('field-control', prefix && 'field-has-prefix')}>
+      <span className={cx('field-control', prefix && 'field-has-prefix', !!trailing && 'field-has-trailing')}>
         {prefix && <span className="field-prefix" aria-hidden="true">{prefix}</span>}
         {control}
+        {trailing && <span className="field-trailing">{trailing}</span>}
       </span>
       {note && (
         <span id={noteId} className={error ? 'field-error' : 'field-hint'}>

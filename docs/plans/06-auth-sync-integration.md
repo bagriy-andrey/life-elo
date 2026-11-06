@@ -34,7 +34,7 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
 ## Steps
 - [x] 1. Merge resolution follow-ups + v3→v4 upgrade test (main-v3 DB with profile + habits opens at v4 with data,
   outbox empty) — files: `src/sync/outbox.test.ts` — verify: `npm test`.
-- [ ] 2. Profile sync: add `profile` to `SYNCED_TABLES` (key `id`), counts in `firstSignIn`, migration
+- [x] 2. Profile sync: add `profile` to `SYNCED_TABLES` (key `id`), counts in `firstSignIn`, migration
   `supabase/migrations/<ts>_records_profile.sql` (replace the `tbl` check constraint), tests (enqueue on
   `saveProfile`, convergence of a profile between two fake devices) — files: `src/sync/outbox.ts`,
   `src/sync/firstSignIn.ts`, tests, migration, `docs/setup/backend.md` (re-run db push) — verify: `npm test`.

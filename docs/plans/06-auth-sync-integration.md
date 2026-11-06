@@ -46,7 +46,7 @@ Dialog) was merged meanwhile. The merge commit resolved conflicts mechanically: 
   AuthScreen/NewPassword/ProfilePassword to `Field`, delete `TextField` (+ preview, dtsPropsFor, override,
   conventions, AGENTS.md gotcha) — files: `src/ui/components/{Field,PasswordField}.*`, `TextField.*` (delete),
   `src/ui/auth/*.tsx`, `src/ui/ProfilePassword.tsx`, `.design-sync/*`, `AGENTS.md` — verify: build, lint, tests.
-- [ ] 5. i18n of auth: keys `auth.*`, `sync.*`, `account.*`, `password.*` in ru/en/uk (ru = source of truth;
+- [x] 5. i18n of auth: keys `auth.*`, `sync.*`, `account.*`, `password.*` in ru/en/uk (ru = source of truth;
   en/uk translated), `validate()`/`authErrorText` return keys, all auth/sync/account screens use `t()`;
   `formatSynced` uses the i18n locale — files: `src/i18n/{ru,en,uk}.ts`, `src/auth/{validation,errors}.ts` (+tests),
   `src/ui/auth/*.tsx`, `src/ui/{Account,ProfilePassword,SyncChoice}.tsx`, `src/App.tsx` — verify: `npm test`

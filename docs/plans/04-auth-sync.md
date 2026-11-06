@@ -216,8 +216,9 @@ Account deletion, changing email, email confirmation, Apple sign-in, realtime pu
   recovery elsewhere signs out globally and unsynced edits must survive until the next sign-in of the same user) — files: `src/ui/Profile.tsx`, `src/App.tsx` — verify: build, lint; manual
   logout leaves IndexedDB empty.
   Note: automated part done; manual check pending. «Сменить пароль» is a TODO(step 14) no-op.
-- [ ] 14. Change / set password screen per design (current check, `signOut others`, Google-only mode, «Не помню
+- [x] 14. Change / set password screen per design (current check, `signOut others`, Google-only mode, «Не помню
   текущий пароль») — files: `src/ui/ProfilePassword.tsx`, `src/ui/Profile.tsx` — verify: build; manual both modes.
+  Note: automated part done; manual check pending. «Не помню текущий пароль» shows an inline hint (robust option; no sign-out hand-off). Sub-view state lives in App (`passwordOpen`), files: `ProfilePassword.tsx/.css`, `App.tsx`.
 - [ ] 15. Vercel: confirm SPA/PWA serve `/?type=recovery…` (no rewrite needed; add `vercel.json` only if required),
   README «Деплой и установка на iPhone»; ROADMAP: mark deploy item, remove the iOS note at the end of the product
   context — files: `README.md`, `docs/ROADMAP.md`, `LIFE_ELO_PRODUCT_CONTEXT.md`, `vercel.json` (optional) — verify:

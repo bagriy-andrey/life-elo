@@ -16,6 +16,7 @@ import { Button, TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
+import { ProfilePassword } from './ui/ProfilePassword'
 import { Review } from './ui/Review'
 import { SyncChoice } from './ui/SyncChoice'
 
@@ -26,6 +27,7 @@ const NO_REVIEWS: DayReview[] = []
 
 function MainApp() {
   const [tab, setTab] = useState<Tab>('home')
+  const [passwordOpen, setPasswordOpen] = useState(false)
   const [yesterday, setYesterday] = useState(() => reviewDay(new Date()))
   const [reviewing, setReviewing] = useState(yesterday)
 
@@ -68,19 +70,22 @@ function MainApp() {
             onDone={() => setTab('home')}
           />
         )}
-        {tab === 'profile' && (
+        {tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => setPasswordOpen(false)} />}
+        {tab === 'profile' && !passwordOpen && (
           <Profile
             engine={syncEngine}
-            onPassword={() => {
-              // TODO(step 14): open the change / set password screen
-            }}
+            onPassword={() => setPasswordOpen(true)}
           />
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
       <TabBar
         active={tab}
-        onSelect={(id) => (id === 'review' ? openReview() : setTab(id))}
+        onSelect={(id) => {
+          setPasswordOpen(false)
+          if (id === 'review') openReview()
+          else setTab(id)
+        }}
         items={[
           { id: 'home', label: 'Главная' },
           { id: 'review', label: 'Обзор дня', badge: !!pendingDay },

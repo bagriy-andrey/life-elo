@@ -1,6 +1,6 @@
 # 04 — Accounts (email / Google), password recovery, cloud sync
 
-Status: approved
+Status: done (manual E2E pending: docs/setup/backend.md §8)
 Design input: Claude Design project 67c2bfac-e6da-422e-98bb-a3415b430a31, `templates/auth/Auth.dc.html`
 (screens: login, register, forgot, change password; prop `googleOnly` for a Google-only account).
 

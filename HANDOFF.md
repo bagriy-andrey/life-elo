@@ -1,17 +1,16 @@
 # Handoff
-Updated: 2026-11-04 by Claude Code
-Branch: auth-sync
-Plan: docs/plans/04-auth-sync.md, steps 1–13 ticked; step 13 FAILED re-verify (fix round used), 14–15 open
+Updated: 2026-11-06 by Claude Code
+Branch: auth-sync (not pushed, no PR yet)
+Plan: docs/plans/04-auth-sync.md, 15 of 15 built + verified; Status: done, manual E2E pending
 ## In progress
-Nothing uncommitted.
+Nothing.
 ## Next step
-Fix step 13 logout (2 CRITICAL), re-verify, then /build-plan docs/plans/04-auth-sync.md all (steps 14–15).
-1. src/auth/AuthProvider.tsx signOut: local-scope signOut removes the session but returns {error} offline
-   (AuthRetryableFetchError, status 0) → treat as success when session is gone / error is retryable; test it.
-2. src/sync/logout.ts: on failed signOut call engine.enable() (sync stays disabled otherwise); test run() works after.
+User: create Supabase project etc. per docs/setup/backend.md, `npx supabase db push`, deploy to Vercel,
+run the §8 checklist (incl. iPhone PWA + Google), record results in plan step 15; then `/design-sync`
+(TextField, Notice, PasswordField, --warn, HistoryEntry) and write HEAD to .design-sync/last-sync; open PR.
 ## Broken / open questions
-- Manual checks pending (need Supabase project + `db push`): steps 7, 8, 11, 12, 13; Google↔email linking note in docs/setup/backend.md.
-- Run `/design-sync` (TextField, Notice, PasswordField, --warn token, HistoryEntry), then write HEAD to .design-sync/last-sync.
-- User decisions: (a) all-unknown reviewed day lifts negative rating while a skipped day can't (pre-existing, §6.5; v2 ruleset?);
-  (b) leftover local data of account A silently uploads into empty account B — add confirm?
-- Lint: 1 known warning (only-export-components, AuthProvider.tsx useAuth).
+- Not verified live yet: all Supabase calls, Google↔email identity linking (note it in backend.md), Google in iOS PWA.
+- User decisions: (a) all-unknown reviewed day lifts a negative rating, a skipped day can't (pre-existing, §6.5; v2?);
+  (b) leftover data of account A uploads silently into empty account B — add confirm?;
+  (c) «Не помню текущий пароль» shows a hint instead of sign-out → forgot with email prefilled — keep?
+- Lint: 1 known warning (only-export-components on useAuth in AuthProvider.tsx).

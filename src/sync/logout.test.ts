@@ -30,14 +30,18 @@ describe('performLogout', () => {
     expect(r.pull).toHaveBeenCalled()
   })
 
-  it('does not wipe data when sign-out fails', async () => {
+  it('does not wipe data when sign-out fails, and sync works again', async () => {
+    const r = remote()
+    const engine = createSyncEngine({ remote: r, status: createStatusStore() })
     const clear = vi.fn(async () => {})
     const res = await performLogout({
-      engine: createSyncEngine({ remote: remote(), status: createStatusStore() }),
+      engine,
       signOut: async () => ({ error: 'x' }),
       clearLocalData: clear,
     })
     expect(res.ok).toBe(false)
     expect(clear).not.toHaveBeenCalled()
+    await engine.run()
+    expect(r.pull).toHaveBeenCalled()
   })
 })

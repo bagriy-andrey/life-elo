@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from './supabase'
 import { authErrorText, type AuthErrorLike } from './errors'
+import { endSession } from './endSession'
 import { isGoogleOnly } from './googleOnly'
 import { clearRecoveryFromLocation, parseRecoveryUrl } from './recoveryUrl'
 
@@ -150,11 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       signOut: () =>
         run(async () => {
-          // Offline the global call fails and keeps the session: fall back to ending it locally.
-          const global = await supabase!.auth.signOut().catch(() => ({ error: new Error('network') }))
-          if (!global.error) return {}
-          const { error } = await supabase!.auth.signOut({ scope: 'local' })
-          return error ? fail(error) : {}
+          const { error } = await endSession(supabase!.auth)
+          return error ? fail(error as AuthErrorLike) : {}
         }),
       dismissRecovery: () => {
         // 'ready' holds a live recovery session: end it so leaving does not land in the app.

@@ -40,7 +40,7 @@ Short, durable, non-obvious lessons. Compress or replace entries; keep this sect
   Text inputs go through `Field` (global input styles live in `src/index.css`).
 - Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).
 - Supabase CLI: `npx supabase db push --remote` (without `--remote` it targets a local Docker DB and fails).
-- Age/birth use the calendar date `toDayKey(new Date())`, (`dayOf` is the same calendar day; the 04:00 wrap lives only in `timeToMinutes`).
+- Age/birth use the calendar date `toDayKey(new Date())` (`dayOf` is now the same calendar day; the 04:00 wrap lives only in `timeToMinutes`).
 
 ## Workflow: plan → build → verify
 Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude wrappers.

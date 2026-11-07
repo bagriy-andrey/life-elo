@@ -22,6 +22,9 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 
 - Components read strings via `useI18n()`; without a provider it falls back to ru, so previews render in Russian.
 
+- `PasswordField` is i18n-free: `showLabel`/`hideLabel` (required) and `strengthLabels` come from the app's `t()`;
+  its preview passes Russian literals. Keep `dtsPropsFor.PasswordField` in step with the props.
+
 ## Known render warns
 - none
 

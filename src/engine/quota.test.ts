@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { HabitEntry } from '../domain/types'
-import { quotaZone } from './quota'
+import { quotaZone, weeklyQuotaUsage } from './quota'
 
 const n = (value: number | boolean): HabitEntry => ({ kind: 'value', value })
 // 2026-11-02 is a Monday.
@@ -50,5 +50,33 @@ describe('quotaZone', () => {
     const w = { [SUN]: { m: n(1) }, [TUE]: { m: n(1) }, [NEXT_MON]: { m: n(1) } }
     expect(quotaZone(plain, NEXT_MON, w)).toBe('ok')
     expect(quotaZone(plain, SUN, { [MON]: { m: n(1) }, [TUE]: { m: n(1) }, [SUN]: { m: n(1) } })).toBe('bad')
+  })
+})
+
+describe('weeklyQuotaUsage', () => {
+  it('no weekly quota -> null', () => {
+    expect(weeklyQuotaUsage({ id: 'm' }, TUE, {})).toBeNull()
+    expect(weeklyQuotaUsage({ id: 'm', quota: { perDay: 1 } }, TUE, {})).toBeNull()
+  })
+  it('Monday: nothing used (previous week not counted)', () => {
+    expect(weeklyQuotaUsage(plain, MON, { '2026-11-01': { m: n(1) }, [MON]: { m: n(1) } })).toEqual({ used: 0, limit: 2 })
+  })
+  it('mid-week counts Mon..day-1 only, not day itself', () => {
+    const w = { [MON]: { m: n(1) }, [TUE]: { m: n(1) }, [WED]: { m: n(1) } }
+    expect(weeklyQuotaUsage(plain, WED, w)).toEqual({ used: 2, limit: 2 })
+    expect(weeklyQuotaUsage(plain, TUE, w)).toEqual({ used: 1, limit: 2 })
+  })
+  it('reducedByDaysOf lowers the limit', () => {
+    const w = { [MON]: { m: n(1), sex: n(true) } }
+    expect(weeklyQuotaUsage(m, TUE, w)).toEqual({ used: 1, limit: 1 })
+  })
+  it('limit floors at 0', () => {
+    const w = { [MON]: { sex: n(true) }, [TUE]: { sex: n(2) }, [WED]: { sex: n(true) } }
+    expect(weeklyQuotaUsage(m, '2026-11-05', w)).toEqual({ used: 0, limit: 0 })
+  })
+  it('N/A, unknown and missing add nothing; only passed days are read', () => {
+    const w = { [MON]: { m: { kind: 'not_applicable' } }, [TUE]: { m: { kind: 'unknown' } } } as const
+    expect(weeklyQuotaUsage(plain, WED, w)).toEqual({ used: 0, limit: 2 })
+    expect(weeklyQuotaUsage(plain, WED, { [MON]: { m: n(1) } })).toEqual({ used: 1, limit: 2 })
   })
 })

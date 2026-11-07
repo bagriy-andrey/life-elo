@@ -46,3 +46,22 @@ export function quotaZone(
   }
   return 'ok'
 }
+
+/**
+ * Weekly usage for the review UI: count used on Mon..`day`-1 (excluding `day` itself) and the
+ * effective limit `max(0, perWeek - reducerActiveDays)` over the same days. Same helpers as
+ * `quotaZone`. `null` when the habit has no weekly quota. Pass confirmed days only.
+ */
+export function weeklyQuotaUsage(
+  habit: QuotaHabit,
+  day: DayKey,
+  entriesByDay: Record<DayKey, DayEntries | undefined>,
+): { used: number; limit: number } | null {
+  const perWeek = habit.quota?.perWeek
+  if (perWeek === undefined) return null
+  const days = daysInWeekUpTo(day).slice(0, -1)
+  const used = days.reduce((sum, d) => sum + countOf(entriesByDay[d]?.[habit.id]), 0)
+  const reducer = habit.quota?.reducedByDaysOf
+  const reduction = reducer ? days.filter((d) => isActive(entriesByDay[d]?.[reducer])).length : 0
+  return { used, limit: Math.max(0, perWeek - reduction) }
+}

@@ -14,5 +14,5 @@ Nothing uncommitted.
   Supabase → Logs → Auth.
 - Unverified: Cyrillic-only password passes our check but Supabase `letters_digits` policy may reject it.
 - Not verified yet: Google in iOS PWA, logout wipe, offline edit, Vercel deploy.
-- User decisions pending: all-unknown review lifts negative rating (§6.5, v2?); A's leftover data → empty account B
-  without confirm.
+- User decision pending: A's leftover local data uploads into an empty account B without confirm — add one?
+  (All-unknown review vs negative rating: kept as is, logged in product context §13 Open.)

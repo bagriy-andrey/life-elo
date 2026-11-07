@@ -8,6 +8,8 @@ import {
   shouldShowYesterdayReview,
   stepFor,
 } from './reviewFlow'
+import { classifyZone } from '../engine/zones'
+import { quotaZone } from '../engine/quota'
 import type { DayReview, Habit, HabitVersion } from './types'
 
 const DAY = '2026-05-10'
@@ -73,11 +75,46 @@ describe('buildCards', () => {
 })
 
 describe('entryForYesNo', () => {
-  it('maps direction x answer', () => {
-    expect(entryForYesNo('constructive', 'good')).toEqual({ kind: 'value', value: true })
-    expect(entryForYesNo('constructive', 'bad')).toEqual({ kind: 'value', value: false })
-    expect(entryForYesNo('destructive', 'good')).toEqual({ kind: 'value', value: false })
-    expect(entryForYesNo('destructive', 'bad')).toEqual({ kind: 'value', value: true })
+  const v = (value: boolean | number) => ({ kind: 'value', value })
+  it('constructive without quota', () => {
+    const c = { direction: 'constructive' as const }
+    expect(entryForYesNo(c, 'good')).toEqual(v(true))
+    expect(entryForYesNo(c, 'bad')).toEqual(v(false))
+  })
+  it('destructive without quota', () => {
+    const c = { direction: 'destructive' as const }
+    expect(entryForYesNo(c, 'good')).toEqual(v(true))
+    expect(entryForYesNo(c, 'bad')).toEqual(v(false))
+  })
+  it('habit with quota uses counts', () => {
+    for (const direction of ['destructive', 'constructive'] as const) {
+      const c = { direction, quota: { perDay: 1 } }
+      expect(entryForYesNo(c, 'good')).toEqual(v(0))
+      expect(entryForYesNo(c, 'bad')).toEqual(v(1))
+    }
+  })
+  it('agrees with the engine zones', () => {
+    const day = '2026-11-03'
+    const boolRule = { kind: 'boolean' } as const
+    for (const direction of ['constructive', 'destructive'] as const) {
+      const c = { direction }
+      const zone = (a: 'good' | 'bad') => classifyZone({ direction, rule: boolRule }, entryForYesNo(c, a))
+      expect(zone('good')).not.toBe('bad')
+      expect(zone('bad')).toBe(direction === 'constructive' ? 'tolerable' : 'bad')
+    }
+    // quota: bad is a count over the limit (perDay 0 here; a weekly case follows)
+    const q = { id: 'q', quota: { perDay: 0 } }
+    const qc = { direction: 'destructive' as const, quota: q.quota }
+    const zoneQ = (a: 'good' | 'bad') => quotaZone(q, day, { [day]: { q: entryForYesNo(qc, a) } })
+    expect(zoneQ('good')).toBe('ok')
+    expect(zoneQ('bad')).toBe('bad')
+    const w = { id: 'q', quota: { perWeek: 1 } }
+    const wc = { direction: 'destructive' as const, quota: w.quota }
+    const prev = '2026-11-02'
+    const zoneW = (a: 'good' | 'bad') =>
+      quotaZone(w, day, { [prev]: { q: { kind: 'value', value: 1 } }, [day]: { q: entryForYesNo(wc, a) } })
+    expect(zoneW('good')).toBe('ok')
+    expect(zoneW('bad')).toBe('bad')
   })
 })
 

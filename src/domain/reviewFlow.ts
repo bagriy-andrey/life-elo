@@ -45,12 +45,15 @@ export function buildCards(habits: Habit[], day: DayKey): ReviewCard[] {
 }
 
 /**
- * Yes/no answer. Constructive: good = true, bad = false. Destructive: good ("held back") = false,
- * bad ("slipped" / "had it") = true (counts as 1 for quota habits).
+ * Yes/no answer, matching the engine (single source of truth).
+ * Constructive: good = true, bad = false. Destructive without quota: good ("held back") = true (ok),
+ * bad ("slipped") = false. Any habit with a quota (yes/no card, perDay <= 1): good = count 0,
+ * bad ("had it") = count 1 (numbers, like the numeric input; zoned by `quotaZone`).
  */
-export function entryForYesNo(direction: HabitDirection, answer: 'good' | 'bad'): HabitEntry {
+export function entryForYesNo(card: Pick<ReviewCard, 'direction' | 'quota'>, answer: 'good' | 'bad'): HabitEntry {
   const good = answer === 'good'
-  return { kind: 'value', value: direction === 'constructive' ? good : !good }
+  if (card.quota) return { kind: 'value', value: good ? 0 : 1 }
+  return { kind: 'value', value: good }
 }
 
 export type ParseError = 'empty' | 'invalid' | 'max'

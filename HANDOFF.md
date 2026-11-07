@@ -5,7 +5,7 @@ Plan: docs/plans/06-auth-sync-integration.md — done (7/7). Tests/lint/build gr
 ## In progress
 Nothing uncommitted.
 ## Next step (user)
-1. `npx supabase db push --remote` (2 new migrations: 20261105000000_records_profile, 20261106000000_reset_tombstones).
+1. ~~db push~~ done 2026-11-07 (records_profile, reset_tombstones applied to LifeElo).
 2. Clear site data on localhost once (Dexie sync tables are v4; old v3 outbox build breaks otherwise).
 3. Run `/design-sync`, write HEAD hash to `.design-sync/last-sync`, commit.
 4. Merge PR #5, then deploy on Vercel (docs/setup/backend.md §7), run the §8 checklist.

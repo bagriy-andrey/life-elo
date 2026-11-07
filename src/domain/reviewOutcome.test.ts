@@ -30,7 +30,7 @@ const sugar = habit('sugar', 'destructive')
 const habits = [gym, sugar]
 const D1 = '2026-01-01'
 const D2 = '2026-01-02'
-/** Replays as of the day after the last review (that day is still pending, not locked); `before` uses the saved day as today. */
+/** Replays as of 2026-01-03: D2 is the pending day, so an unreviewed D2 does not break streaks. */
 const run = (reviews: DayReview[], today = '2026-01-03') => replay(habits, reviews, cfg, today)
 
 const good = { gym: yes, sugar: yes }

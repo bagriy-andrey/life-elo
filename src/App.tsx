@@ -7,7 +7,7 @@ import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/context'
 import { useI18n } from './i18n'
-import { adoptRemote, keepDevice, prepareFirstSignIn, resolveAutomatic } from './sync/firstSignIn'
+import { claimDevice, isClaimedBy } from './sync/firstSignIn'
 import { createSyncEngine, startSync } from './sync/engine'
 import { getSyncState } from './sync/outbox'
 import { supabaseRemote } from './sync/remote'
@@ -15,13 +15,12 @@ import { wipeAccountData } from './sync/wipe'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { Account } from './ui/Account'
-import { Button, TabBar } from './ui/components'
+import { TabBar } from './ui/components'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
 import { ProfilePassword } from './ui/ProfilePassword'
 import { Review } from './ui/Review'
-import { SyncChoice } from './ui/SyncChoice'
 
 type Tab = 'home' | 'review' | 'habits' | 'profile'
 
@@ -126,56 +125,30 @@ async function stopSync() {
   await syncEngine.settled()
 }
 
-type Gate = 'checking' | 'offline' | 'ask' | 'ready'
-
-/** First sign-in on this device: decides upload / pull / ask. Never decides without the remote state. */
+/**
+ * Sign-in on this device: the server is the source of truth, so anything not cached for this user
+ * is dropped and pulled again by background sync. Works offline (the app opens empty and fills in
+ * once the network is back).
+ */
 function FirstSignInGate({ userId }: { userId: string }) {
-  const { t } = useI18n()
-  const [gate, setGate] = useState<Gate>('checking')
-  const [attempt, setAttempt] = useState(0)
+  const [ready, setReady] = useState(false)
   useEffect(() => {
     let alive = true
     ;(async () => {
       try {
-        const mode = await prepareFirstSignIn(userId, supabaseRemote)
         // A previous account's run may still be in flight when the device is re-claimed.
-        if (mode !== 'none') await stopSync()
-        const done = await resolveAutomatic(mode, userId)
-        if (alive) setGate(done ? 'ready' : 'ask')
-      } catch {
-        if (alive) setGate('offline')
+        if (!(await isClaimedBy(userId))) await stopSync()
+        await claimDevice(userId)
+      } finally {
+        if (alive) setReady(true)
       }
     })()
     return () => {
       alive = false
     }
-  }, [userId, attempt])
+  }, [userId])
 
-  if (gate === 'ready') return <MainApp />
-  if (gate === 'ask')
-    return (
-      <SyncChoice
-        onChoose={async (kind) => {
-          await stopSync()
-          if (kind === 'account') await adoptRemote(userId)
-          else await keepDevice(userId, supabaseRemote)
-          setGate('ready')
-        }}
-      />
-    )
-  if (gate === 'offline')
-    return (
-      <div className="auth">
-        <AuthLogo />
-        <p className="auth-muted">{t('sync.needInternet')}</p>
-        <Button className="auth-submit" onClick={() => {
-            setGate('checking')
-            setAttempt((n) => n + 1)
-          }}>
-          {t('sync.retry')}
-        </Button>
-      </div>
-    )
+  if (ready) return <MainApp />
   return (
     <div className="auth auth-splash">
       <AuthLogo />

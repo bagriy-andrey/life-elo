@@ -6,7 +6,6 @@ import { saveProfile } from '../db/profile'
 import { createStatusStore, createSyncEngine } from './engine'
 import type { PushItem, RemoteRecord } from './merge'
 import { applyRemote, clearLocalData, getSyncState, setSyncState } from './outbox'
-import { keepDevice } from './firstSignIn'
 import type { SyncRemote } from './remote'
 
 class FakeRemote implements SyncRemote {
@@ -155,20 +154,6 @@ describe('sync engine', () => {
     expect(await db.outbox.count()).toBe(0)
   })
 
-  it('keepDevice after a tombstoning reset still uploads every local row', async () => {
-    const remote = new FakeRemote()
-    const e = engine(remote)
-    await db.habits.put(habit('old'))
-    await e.run()
-    await clearLocalData()
-    await db.habits.put(habit('a'))
-    await db.habits.put(habit('b'))
-    await keepDevice('u1', remote)
-    await e.run()
-    expect(await remote.count()).toBe(2)
-    expect(remote.rows.get('habits/old')?.deleted).toBe(true)
-    expect(remote.rows.get('habits/a')?.deleted).toBe(false)
-  })
 
   it('offline edit that is older than remote loses', async () => {
     const remote = new FakeRemote()

@@ -34,18 +34,6 @@ export function schemaGate(remoteSchema: number, localSchema: number): 'ok' | 'm
   return 'ok'
 }
 
-export function firstSignInMode(args: {
-  syncedUserId: string | undefined
-  userId: string
-  localCount: number
-  remoteCount: number
-}): 'none' | 'upload' | 'pull' | 'ask' {
-  if (args.syncedUserId === args.userId) return 'none'
-  if (args.remoteCount === 0) return 'upload'
-  if (args.localCount === 0) return 'pull'
-  return 'ask'
-}
-
 export function toPushItem(
   tbl: string,
   key: string,

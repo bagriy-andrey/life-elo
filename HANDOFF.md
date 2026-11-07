@@ -14,5 +14,6 @@ Nothing uncommitted.
   Supabase → Logs → Auth.
 - Unverified: Cyrillic-only password passes our check but Supabase `letters_digits` policy may reject it.
 - Not verified yet: Google in iOS PWA, logout wipe, offline edit, Vercel deploy.
-- User decision pending: A's leftover local data uploads into an empty account B without confirm — add one?
+- 2026-11-07: server is the source of truth; sign-in drops non-matching local data and pulls (no upload, no choice
+  screen). Pre-account data on the user's iPhone is intentionally not migrated.
   (All-unknown review vs negative rating: kept as is, logged in product context §13 Open.)

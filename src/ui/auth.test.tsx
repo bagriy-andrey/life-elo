@@ -6,7 +6,6 @@ import { AuthScreen } from './auth/AuthScreen'
 import { NewPassword } from './auth/NewPassword'
 import { withAuth } from './authTestUtils'
 import { ProfilePassword } from './ProfilePassword'
-import { SyncChoice } from './SyncChoice'
 
 const engine = { run: async () => {}, resync: async () => {} } as unknown as SyncEngine
 
@@ -25,11 +24,6 @@ describe('auth screens smoke render', () => {
     expect(r('done')).toContain('Пароль изменён')
   })
 
-  it('SyncChoice renders both options', () => {
-    const html = renderToString(withAuth(<SyncChoice onChoose={async () => {}} />))
-    expect(html).toContain('На устройстве и в аккаунте есть данные')
-    expect(html).toContain('auth-submit')
-  })
 
   it('ProfilePassword googleOnly true / false', () => {
     const g = renderToString(withAuth(<ProfilePassword onBack={() => {}} />, { googleOnly: true }))

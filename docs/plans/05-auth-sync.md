@@ -103,6 +103,8 @@ index (user_id, rev)
 - Profile has a hidden-but-reachable «Синхронизировать заново» (cursor = 0, full pull, idempotent) for recovery.
 
 ### First sign-in on a device
+> Superseded 2026-11-07: the device only caches the signed-in account. Sign-in drops any other/pre-account data and
+> pulls; no upload, no choice screen (`src/sync/firstSignIn.ts` `claimDevice`; `SyncChoice` removed).
 `syncState.userId` empty or different from the session user →
 - remote empty (`count` = 0): enqueue all local rows, set `userId`, run sync (upload);
 - local empty: set `userId`, pull;

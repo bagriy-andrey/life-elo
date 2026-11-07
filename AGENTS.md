@@ -25,6 +25,8 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - Days are finalized by next-morning review of yesterday; editing a past day = save + replay (no double credit).
 - Wellbeing check-in is optional and never modifies Elo directly.
 - Rating and streaks are never stored on the server either; sync moves raw records only.
+- The server is the source of truth; Dexie only caches the signed-in account (sign-in drops other/pre-account
+  data and pulls; local data is never uploaded into an account).
 - Profile is synced between devices; language and theme are per device (localStorage, not synced).
 - «Удалить все данные» wipes the account everywhere: server tombstones, other devices clear on their next sync.
 - Reward Coins (future) are separate from Elo; spending never lowers Elo.

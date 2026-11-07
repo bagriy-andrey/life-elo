@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyDecision, firstSignInMode, schemaGate, toPushItem } from './merge'
+import { applyDecision, schemaGate, toPushItem } from './merge'
 
 const remote = { client_updated_at: '2026-01-01T00:00:00.000Z' }
 const t = Date.parse(remote.client_updated_at)
@@ -17,20 +17,6 @@ describe('schemaGate', () => {
     expect(schemaGate(3, 3)).toBe('ok')
     expect(schemaGate(2, 3)).toBe('migrate')
     expect(schemaGate(4, 3)).toBe('update-app')
-  })
-})
-
-describe('firstSignInMode', () => {
-  const base = { syncedUserId: undefined, userId: 'u', localCount: 1, remoteCount: 1 }
-  it('none for the same user', () => expect(firstSignInMode({ ...base, syncedUserId: 'u' })).toBe('none'))
-  it('upload when remote is empty (even if local is empty)', () => {
-    expect(firstSignInMode({ ...base, remoteCount: 0 })).toBe('upload')
-    expect(firstSignInMode({ ...base, remoteCount: 0, localCount: 0 })).toBe('upload')
-  })
-  it('pull when local is empty', () => expect(firstSignInMode({ ...base, localCount: 0 })).toBe('pull'))
-  it('ask when both have data, also for a different previous user', () => {
-    expect(firstSignInMode(base)).toBe('ask')
-    expect(firstSignInMode({ ...base, syncedUserId: 'other' })).toBe('ask')
   })
 })
 

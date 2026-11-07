@@ -4,7 +4,6 @@ import type { PushItem, RemoteRecord } from './merge'
 export interface SyncRemote {
   push(items: PushItem[]): Promise<number>
   pull(afterRev: number, limit: number): Promise<RemoteRecord[]>
-  count(): Promise<number>
   reset(): Promise<void>
 }
 
@@ -29,14 +28,6 @@ export const supabaseRemote: SyncRemote = {
       .limit(limit)
     if (error) throw new Error(error.message)
     return (data ?? []).map((r) => ({ ...r, rev: Number(r.rev) })) as RemoteRecord[]
-  },
-  async count() {
-    const { count, error } = await client()
-      .from('records')
-      .select('*', { count: 'exact', head: true })
-      .eq('deleted', false)
-    if (error) throw new Error(error.message)
-    return count ?? 0
   },
   async reset() {
     const { error } = await client().rpc('reset_records')

@@ -1,18 +1,19 @@
 # Handoff
-Updated: 2026-11-04 by Claude Code
-Branch: profile-settings (not pushed, no PR yet)
-Plan: docs/plans/04-profile-settings.md — 19/19 steps built + verified, Status: done
-
+Updated: 2026-11-06 by Claude Code
+Branch: auth-sync (PR #5) — origin/main (PR #4 profile/settings/i18n) merged in
+Plan: docs/plans/06-auth-sync-integration.md — done (7/7). Tests/lint/build green (1 lint warning: src/i18n/index.tsx, from main).
 ## In progress
-Nothing.
-
-## Next step
-Design sync done (last-sync 9f27464). User: manual check in `npm run dev` (list below), then push + PR.
-
+Nothing uncommitted.
+## Next step (user)
+1. ~~db push~~ done 2026-11-07 (records_profile, reset_tombstones applied to LifeElo).
+2. Clear site data on localhost once (Dexie sync tables are v4; old v3 outbox build breaks otherwise).
+3. ~~/design-sync~~ done 2026-11-07 (Notice, PasswordField added; Field updated).
+4. Merge PR #5, then deploy on Vercel (docs/setup/backend.md §7), run the §8 checklist.
 ## Broken / open questions
-- Manual checks not done by agents: en/uk on every screen; theme no-flash on reload + «Системная» follows OS;
-  photo on iPhone (large JPEG, HEIC, rotation); Dialog Esc/Tab/focus restore; clear-all-data wipes + reloads;
-  v2→v3 DB upgrade keeps existing data.
-- No DOM test env: Dialog focus, clear flow and IndexedDB ops are untested; only Profile has a render smoke test.
-- Light-theme danger button contrast is 4.51:1 (just AA); darkening --neg would break it.
-- Carried from before: open product questions in product context §13; HistoryEntry «±100» note; Vercel deploy postponed.
+- KNOWN ISSUE (deferred): password-reset email does not arrive (Resend test sender). Check Resend → Emails,
+  Supabase → Logs → Auth.
+- Unverified: Cyrillic-only password passes our check but Supabase `letters_digits` policy may reject it.
+- Not verified yet: Google in iOS PWA, logout wipe, offline edit, Vercel deploy.
+- 2026-11-07: server is the source of truth; sign-in drops non-matching local data and pulls (no upload, no choice
+  screen). Pre-account data on the user's iPhone is intentionally not migrated.
+  (All-unknown review vs negative rating: kept as is, logged in product context §13 Open.)

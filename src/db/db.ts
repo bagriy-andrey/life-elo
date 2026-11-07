@@ -8,6 +8,7 @@ import type {
   Reward,
   WellbeingCheckIn,
 } from '../domain/types'
+import { installOutbox, type OutboxEntry, type SyncState } from '../sync/outbox'
 import { buildReview } from './confirm'
 import { migrateHabit, migrateReview, type LegacyHabit, type LegacyReview } from './migrate'
 
@@ -23,6 +24,8 @@ export const db = new Dexie('life-elo') as Dexie & {
   wellbeing: EntityTable<WellbeingCheckIn, 'day'>
   rewards: EntityTable<Reward, 'id'>
   profile: EntityTable<Profile, 'id'>
+  outbox: EntityTable<OutboxEntry, 'tbl'>
+  syncState: EntityTable<SyncState, 'id'>
 }
 
 db.version(1).stores({
@@ -47,6 +50,10 @@ db.version(2)
 
 // v3: single-row `profile` store (id 'me'). Never affects Elo.
 db.version(3).stores({ profile: 'id' })
+
+// v4: sync outbox (pending changes) and sync state; filled by the DBCore middleware in src/sync/outbox.ts.
+db.version(4).stores({ outbox: '[tbl+key]', syncState: 'id' })
+installOutbox(db)
 
 export const newId = () => crypto.randomUUID()
 

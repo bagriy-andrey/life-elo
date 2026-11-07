@@ -14,13 +14,16 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
   (playwright is installed into `.ds-sync/` alongside esbuild/ts-morph).
 - esbuild splits component CSS into `dist/index.css`; without merging it into cssEntry the previews
   render as unstyled browser defaults while global utilities still work. build-lib.mjs does the merge.
-- `cfg.dtsPropsFor` is hand-written for Button (incl. variants), Field, Avatar, Dialog, Card (native attrs are otherwise filtered out),
+- `cfg.dtsPropsFor` is hand-written for Button (incl. variants), Field, Avatar, Dialog, Notice, PasswordField, Card (native attrs are otherwise filtered out),
   SegmentedControl, TabBar (generic `T extends string` → `string`), and HistoryEntry (LedgerEntry inlined).
 - TabBar is `position: fixed`: its preview wraps it in a `transform: translateZ(0)` frame, and the card is
   `cardMode: single`. HistoryEntry previews open `<details>` via a ref callback.
   Dialog uses the same `translateZ(0)` frame (390×380) so its fixed overlay stays inside the card; without it the panel's top is clipped.
 
 - Components read strings via `useI18n()`; without a provider it falls back to ru, so previews render in Russian.
+
+- `PasswordField` is i18n-free: `showLabel`/`hideLabel` (required) and `strengthLabels` come from the app's `t()`;
+  its preview passes Russian literals. Keep `dtsPropsFor.PasswordField` in step with the props.
 
 ## Known render warns
 - none

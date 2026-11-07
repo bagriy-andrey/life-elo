@@ -277,3 +277,17 @@ describe('day boundary', () => {
     expect(reviewDay(new Date(2026, 0, 2, 8, 0))).toBe('2026-01-01')
   })
 })
+
+describe('unknown habits', () => {
+  it('ignores review entries for habit ids that do not exist', () => {
+    const base = [review(START, { gym: yes }), review(addDays(START, 1), { gym: no })]
+    const withGhost = [
+      review(START, { gym: yes, ghost: yes }),
+      review(addDays(START, 1), { gym: no, ghost: num(0) }),
+    ]
+    const a = replay([gym], base, cfg, addDays(START, 3))
+    const b = replay([gym], withGhost, cfg, addDays(START, 3))
+    expect(b.rating).toBe(a.rating)
+    expect(b.ledger.flatMap((e) => e.contributions)).toEqual(a.ledger.flatMap((e) => e.contributions))
+  })
+})

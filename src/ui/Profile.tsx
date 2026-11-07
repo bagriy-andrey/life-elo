@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import type { ChangeEvent, FormEvent } from 'react'
-import { clearAllData, saveProfile } from '../db/profile'
+import type { ChangeEvent, FormEvent, ReactNode } from 'react'
+import { saveProfile } from '../db/profile'
 import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
 import type { DayKey } from '../domain/types'
@@ -21,6 +21,10 @@ interface Props {
   rating: number
   /** Calendar date (toDayKey), not the review day. */
   today: DayKey
+  /** Account block (sign-in, sync, logout), shown above the settings. */
+  account?: ReactNode
+  /** Deletes all data (server + device); rejects if it could not. */
+  onClearData: () => Promise<void>
 }
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
@@ -173,7 +177,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
 
 const LANG_NAMES = { ru: 'Русский', en: 'English', uk: 'Українська' } as const
 
-function ClearData() {
+function ClearData({ onClear }: { onClear: () => Promise<void> }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [clearing, setClearing] = useState(false)
@@ -188,7 +192,7 @@ function ClearData() {
     setClearing(true)
     setFailed(false)
     try {
-      await clearAllData()
+      await onClear()
     } catch {
       setFailed(true)
       setClearing(false)
@@ -223,7 +227,7 @@ function ClearData() {
   )
 }
 
-function Settings() {
+function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
   const { t, lang, setLang } = useI18n()
   // localStorage prefs are the single source of truth; this is the only place theme changes.
   const [theme, setThemeState] = useState<Theme>(() => loadPrefs().theme)
@@ -253,12 +257,12 @@ function Settings() {
           />
         </div>
       </Card>
-      <ClearData />
+      <ClearData onClear={onClearData} />
     </section>
   )
 }
 
-export function Profile({ profile, rating, today }: Props) {
+export function Profile({ profile, rating, today, account, onClearData }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -270,7 +274,8 @@ export function Profile({ profile, rating, today }: Props) {
           onDone={() => setEditing(false)}
           onCancel={profile ? () => setEditing(false) : undefined}
         />
-        <Settings />
+        {account}
+        <Settings onClearData={onClearData} />
       </div>
     )
   }
@@ -315,7 +320,8 @@ export function Profile({ profile, rating, today }: Props) {
           </div>
         </Card>
       </section>
-      <Settings />
+      {account}
+      <Settings onClearData={onClearData} />
     </div>
   )
 }

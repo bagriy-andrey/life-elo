@@ -19,12 +19,12 @@ No CSS-in-JS and no style props. Components carry their own classes. For your ow
 | `pos` / `neg` / `zero` | signed-value colors (green / red-orange / grey) |
 
 Tokens (all in `styles.css` → `_ds_bundle.css`):
-- Color: `--bg`, `--card`, `--text`, `--muted`, `--border`, `--accent`, `--accent-text`, `--pos`, `--neg`, `--zero`
+- Color: `--bg`, `--card`, `--text`, `--muted`, `--border`, `--accent`, `--accent-text`, `--pos`, `--neg`, `--warn`, `--zero`
 - Type: `--font-sans`, `--text-xs`, `--text-sm`, `--text-md`, `--text-lg`, `--text-display`, `--line-height`
 - Spacing: `--space-2`, `-4`, `-6`, `-8`, `-10`, `-12`, `-14`, `-16`, `-28`
 - Radius: `--radius-sm` (12px, buttons), `--radius-md` (16px, cards), `--radius-full` (pills)
 
-Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A native `<input>` is pre-styled globally (bordered, `--radius-sm`). For labeled form fields wrap it in `Field` (below).
+Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A native `<input>` is pre-styled globally (bordered, `--radius-sm`). For labeled form fields wrap it in `Field` (below). Use `Notice tone="success"|"error"` for inline status messages and `PasswordField` for passwords. Tokens also include `--warn` (amber).
 
 ## Conventions
 
@@ -32,7 +32,7 @@ Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A nati
 - `Card` is the generic surface. Give it a layout class: `className="row"` for list rows, `className="stack-sm"` for stacked content. `inactive` dims it.
 - `Button variant="primary"` is the main action (one per screen). Default buttons are secondary/inline actions.
 - `SegmentedControl` options use `tone: "pos"` for good outcomes and `"neg"` for violations. Omit `tone` for neutral choices (accent color).
-- Text inputs: wrap a native `<input>` in `Field` (`label`, `required`, `prefix="@"`, `hint`, `error`); the input gets `aria-invalid` automatically.
+- Text inputs: wrap a native `<input>` in `Field` (`label`, `required`, `prefix="@"`, `hint`, `error`, `trailing`); the input gets `aria-invalid` automatically. `PasswordField` is built on `Field`.
 - `Button variant="danger"` is a destructive confirm (filled `--neg`); `variant="quiet"` is text-only (add `className="neg"` for destructive text actions).
 - `Avatar name src`: photo or initials on an accent tint (`size` defaults to 96). With `onClick` it becomes a button: always pass `label`.
 - `Dialog open title onClose`: confirm modal. Children = `<p className="dialog-body">` + `<div className="dialog-actions">`; put `autoFocus` on the safe action.

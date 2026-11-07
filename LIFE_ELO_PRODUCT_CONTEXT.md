@@ -336,6 +336,7 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 - Goal: correlate and, when possible, align rating with real subjective wellbeing without confusing the two.
 - User selects habits from suggestions and can add their own.
 - Scoring ruleset v1 (§6.5): 60/20/20 day budget, zoned habits, weekly quotas, streak rules, review window, Elo formula.
+- Accounts and sync (2026-11-04): Supabase backend; sign-in required (email + password or Google); no email confirmation; password reset by email via Resend SMTP on the user's own domain; offline-first sync with background push/pull of raw records only (rating and streaks are never stored on the server); deployment on Vercel. Revised 2026-11-07: the server is the source of truth and the device only caches the signed-in account; on sign-in anything not cached for that account (another account's data, or pre-account local data) is dropped and the account's data is pulled — local data is never uploaded into an account and there is no keep-which-copy choice.
 
 ### Open / requires discussion
 
@@ -343,6 +344,7 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 - Quota habit after a weekly overrun (deferred 2026-11-03, rule kept as is for now): once the cumulative weekly count exceeds the (reduced) limit, every later day that week is *bad* even with zero, with growing ×1.25/×1.5 multipliers and no clean-day bonus. Worked example: masturbation 1 on Thu after sex on Wed → Fri–Sun bad with 0. Alternative: *bad* only on days with count > 0 that push the total over. Revisit after real use.
   - Second case (2026-11-04, deferred again): a reducer day makes the *current* day bad. Mon masturbation 1, Tue 1 (limit 2, ok), Wed sex + 0 → limit 1 < total 2 → Wed–Sun *bad*. A good action (sex, meant to "replace" masturbation) triggers bad days, against the user's intent: sex unlimited and "more is better", masturbation up to 2/week when there is no sex, each sex day replaces one. Also open: whether several sex times in one day should count more (now: per day only).
 - Overall algorithm fit (user, 2026-11-04): the user feels v1.1 does not yet capture habit-specific nuances (weekly minimum goals, reducer/quota interplay, per-day vs per-occurrence counting). Plan a dedicated review of the scoring model with real usage data before v2.
+- All-unknown reviewed day at negative rating (deferred 2026-11-07, rule kept as is): a confirmed review where every answer is *unknown* scores S = 0 and goes through the normal formula, so a negative R moves toward 0, while a skipped (unreviewed) day leaves a negative R frozen (§6.5). Confirming an empty review is thus slightly better than skipping. Revisit in the v2 scoring review.
 - Habits scheduled on specific days / "N times per week" goals (v1 treats all habits as daily).
   - Concrete case (2026-11-04): "Спорт ≥5 times per week (Mon–Sun)". Interim: daily yes/no habit, planned rest days marked *not applicable*. To decide for a real weekly target: points per workout day vs at week end; what is *bad* (week below target vs target no longer reachable); streak counted in days or weeks.
 - Reward Coins earning rates, redemption prices, unlock conditions and surprise mechanics.
@@ -361,5 +363,3 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 6. Keep the optional questionnaire optional, and separate self-reported wellbeing from behavioral metrics.
 7. Ask before choosing numerical coefficients or declaring a final algorithm.
 8. Optimize for a sustainable, motivating product, not a system that induces guilt, compulsive tracking or rigid abstinence from normal life.
-
-вообще в идеале я хотел бы сделать это мобильное приложение, например, для iOS. Нюанс в том что для начала я хотел бы его запустить для себя и попробовать его для себя. Но я не знаю, например, как и могу ли я устанавливать Приложение на телефоне в dev mode или просто как страничку на сайте, на которой будет просто иконка из iPhone. Будет сразу открывать эту страницу в браузере, но чтобы там отображался вид, как будто бы это приложение. Что бы ты посоветовал?

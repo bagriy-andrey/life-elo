@@ -92,7 +92,7 @@ Flow
 
 Data mapping (pure modules, Vitest)
 - `src/domain/reviewFlow.ts`: `buildCards(habits, day): ReviewCard[]` with `ReviewCard = {habitId, stage:'boolean'|'numeric'|'time', direction, quota?, weekly?}` (uses `settingsOn(h, day)`; ordered boolean-first then by `createdAt`); `entryForYesNo(direction, 'good'|'bad')`; `parseNumeric(text, unit)` → `{ok, value}` | `{ok:false, error:'empty'|'invalid'|'max'}` (max: steps 100000, minutes 1440, count 1000); `parseTime(text)`; `stepFor(unit)` (steps 500, minutes 5, count 1); `goalLabelParts(rule)`.
-- `src/domain/reviewDeadline.ts`: `nextMidnight(now)`, `timeLeft(now)` → `{hours, minutes}`, `deadlineCopy(rating)` → whether to append "rating will drop" (`rating > 0`).
+- `src/domain/reviewDeadline.ts`: `nextMidnight(now)`, `timeLeft(now)` → `{hours, minutes}`, `deadlineShowsRating(rating)` → whether to append "rating will drop" (`rating > 0`).
 - `src/engine/quota.ts`: new exported `weeklyQuotaUsage(habit, day, entriesByDay)` → `{used, limit}` for Mon..day−1 (shares `countOf`/`isActive` with `quotaZone`; `limit = max(0, perWeek − reducerActiveDays)`).
 - `src/domain/reviewOutcome.ts`: `reviewOutcome(before: ReplayResult, after: ReplayResult, day)` → `{delta, ratingAfter, dayScore, expected (R/10), streaksGrew: {habitId, pos}[], streaksBroke: {habitId, was}[]}`. Streak grew = `after.pos > before.pos`; broke = `before.pos > 0 && after.pos === 0` (neg-run growth is not "grew"). Only the saved day's ledger entry is read.
 - Show condition helper `shouldShowYesterdayReview({habits, reviews, now, lastSyncedAt})` in `src/domain/reviewFlow.ts`.

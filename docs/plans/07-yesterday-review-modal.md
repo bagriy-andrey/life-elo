@@ -64,7 +64,7 @@ Numeric / time answers
 Weekly quota dots
 - WHEN a destructive habit's settings have `quota.perWeek` THE card SHALL show dots for used-this-week (Mon..yesterday−1, confirmed reviews only) out of the effective weekly limit, in warn color, `neg` when exhausted, with note "Использовано N из L".
 - WHEN the limit is exhausted THE note SHALL read "Лимит исчерпан: ответ «Было» его превысит".
-- THE effective limit SHALL honor `reducedByDaysOf` exactly like `quotaZone` (reducer-active days Mon..yesterday−1, floored at 0).
+- THE effective limit SHALL honor `reducedByDaysOf` exactly like `quotaZone` (reducer-active days Mon..yesterday inclusive, using the answers given so far in the modal for yesterday; floored at 0).
 - THE dots block SHALL NOT be shown for constructive habits (weekly goals for constructive habits are out of scope).
 
 Summary and save

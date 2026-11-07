@@ -70,6 +70,11 @@ describe('weeklyQuotaUsage', () => {
     const w = { [MON]: { m: n(1), sex: n(true) } }
     expect(weeklyQuotaUsage(m, TUE, w)).toEqual({ used: 1, limit: 1 })
   })
+  it('reducer active on day itself lowers the limit, like quotaZone', () => {
+    const w = { [MON]: { m: n(1) }, [TUE]: { sex: n(true) } }
+    expect(weeklyQuotaUsage(m, TUE, w)).toEqual({ used: 1, limit: 1 })
+    expect(quotaZone(m, TUE, { ...w, [TUE]: { sex: n(true), m: n(1) } })).toBe('bad')
+  })
   it('limit floors at 0', () => {
     const w = { [MON]: { sex: n(true) }, [TUE]: { sex: n(2) }, [WED]: { sex: n(true) } }
     expect(weeklyQuotaUsage(m, '2026-11-05', w)).toEqual({ used: 0, limit: 0 })

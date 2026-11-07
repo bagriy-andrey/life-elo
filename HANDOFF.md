@@ -7,7 +7,7 @@ Nothing uncommitted.
 ## Next step (user)
 1. ~~db push~~ done 2026-11-07 (records_profile, reset_tombstones applied to LifeElo).
 2. Clear site data on localhost once (Dexie sync tables are v4; old v3 outbox build breaks otherwise).
-3. Run `/design-sync`, write HEAD hash to `.design-sync/last-sync`, commit.
+3. ~~/design-sync~~ done 2026-11-07 (Notice, PasswordField added; Field updated).
 4. Merge PR #5, then deploy on Vercel (docs/setup/backend.md §7), run the §8 checklist.
 ## Broken / open questions
 - KNOWN ISSUE (deferred): password-reset email does not arrive (Resend test sender). Check Resend → Emails,

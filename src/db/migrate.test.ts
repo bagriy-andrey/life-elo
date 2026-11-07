@@ -68,13 +68,13 @@ describe('migrateHabit', () => {
 describe('buildReview (lock guard)', () => {
   const entries = { a: { kind: 'value' as const, value: true } }
 
-  it('allows yesterday and the day before when now is D+1 / D+2 before 04:00', () => {
+  it('allows the day during all of D+1 (00:00-23:59)', () => {
     expect(buildReview('2026-03-10', entries, new Date(2026, 2, 11, 12)).revision).toBe(1)
-    expect(buildReview('2026-03-10', entries, new Date(2026, 2, 12, 3, 59)).revision).toBe(1)
+    expect(buildReview('2026-03-10', entries, new Date(2026, 2, 11, 23, 59)).revision).toBe(1)
   })
 
-  it('rejects a day from D+2 04:00 on', () => {
-    expect(() => buildReview('2026-03-10', entries, new Date(2026, 2, 12, 4, 0))).toThrow(
+  it('rejects a day from D+2 00:00 on', () => {
+    expect(() => buildReview('2026-03-10', entries, new Date(2026, 2, 12, 0, 0))).toThrow(
       DayLockedError,
     )
   })

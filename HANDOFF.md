@@ -15,4 +15,4 @@ Nothing uncommitted.
 - Unverified: Cyrillic-only password passes our check but Supabase `letters_digits` policy may reject it.
 - Not verified yet: Google in iOS PWA, logout wipe, offline edit, Vercel deploy.
 - User decisions pending: all-unknown review lifts negative rating (§6.5, v2?); A's leftover data → empty account B
-  without confirm; «Не помню текущий пароль» hint vs sign-out hand-off.
+  without confirm.

@@ -196,7 +196,7 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, initial
     if (c.stage === 'boolean') {
       const good = entry.value === true || entry.value === 0
       if (c.quota) return { value: t(good ? 'yr.good.quota' : 'yr.bad.quota'), tone: good ? 'pos' : 'plain' }
-      return { value: t(`yr.${good ? 'good' : 'bad'}.${dir}`), tone: good ? 'pos' : 'neg' }
+      return { value: t(`yr.${good ? 'good' : 'bad'}.${dir}`), tone: good ? 'pos' : dir === 'destructive' ? 'neg' : 'plain' }
     }
     const s = settingsOn(h, day)
     const zone = c.quota

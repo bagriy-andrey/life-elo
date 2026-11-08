@@ -16,7 +16,11 @@
     "Avatar": "/** Photo URL or data URL. Initials of name are shown when absent. */\n  src?: string;\n  /** Used for the initials fallback. */\n  name: string;\n  /** Diameter in px (default 96). */\n  size?: number;\n  /** Makes the avatar a button (edit mode) with a dashed border. */\n  onClick?: () => void;\n  /** Accessible name of the button, e.g. \"Выбрать фото\". Only used with onClick. */\n  label?: string;\n  /** Disables the button. Only used with onClick. */\n  disabled?: boolean;\n  className?: string;",
     "Dialog": "/** Renders nothing when false. */\n  open: boolean;\n  /** Bold heading; also the accessible name (aria-labelledby). */\n  title: string;\n  /** Called on Escape and on overlay click. */\n  onClose: () => void;\n  /** Body text (<p className=\"dialog-body\">) and actions (<div className=\"dialog-actions\"> with full-width Buttons; put autoFocus on the safe one). */\n  children: React.ReactNode;",
     "Notice": "/** success = green, role=status; error = red, role=alert. */\n  tone: \"success\" | \"error\";\n  children: React.ReactNode;",
-    "PasswordField": "/** Label shown above the input and associated with it. */\n  label: string;\n  /** Controlled: true shows the password as plain text, false masks it. */\n  visible: boolean;\n  onToggleVisible: () => void;\n  /** Strength meter level (0 = hidden). Shown only when > 0 and there is no error. */\n  strength?: 0 | 1 | 2 | 3;\n  /** Toggle button texts (the component has no built-in language). */\n  showLabel: string;\n  hideLabel: string;\n  /** Meter texts for strength 1..3: [weak, fair, strong]. */\n  strengthLabels?: readonly [string, string, string];\n  /** Error text below the input (--neg); sets aria-invalid and hides the meter. */\n  error?: string;\n  className?: string;\n  /** Any other native <input> attribute (value, onChange, autoComplete...) is forwarded; type is managed by `visible`. */\n  [attr: string]: unknown;"
+    "PasswordField": "/** Label shown above the input and associated with it. */\n  label: string;\n  /** Controlled: true shows the password as plain text, false masks it. */\n  visible: boolean;\n  onToggleVisible: () => void;\n  /** Strength meter level (0 = hidden). Shown only when > 0 and there is no error. */\n  strength?: 0 | 1 | 2 | 3;\n  /** Toggle button texts (the component has no built-in language). */\n  showLabel: string;\n  hideLabel: string;\n  /** Meter texts for strength 1..3: [weak, fair, strong]. */\n  strengthLabels?: readonly [string, string, string];\n  /** Error text below the input (--neg); sets aria-invalid and hides the meter. */\n  error?: string;\n  className?: string;\n  /** Any other native <input> attribute (value, onChange, autoComplete...) is forwarded; type is managed by `visible`. */\n  [attr: string]: unknown;",
+    "FullScreenModal": "/** Accessible name of the dialog (aria-label). */\n  label: string;\n  /** Modal content. Full-screen, non-closable (no Esc, no backdrop, no close button); focus is trapped and returns to the opener on unmount. The caller unmounts it. */\n  children: React.ReactNode;",
+    "ProgressSegments": "/** Number of cards (one segment each). */\n  total: number;\n  /** Zero-based index of the current card: earlier segments are done, later ones pending. */\n  current: number;\n  /** Counter text shown above the segments, e.g. \"2 из 5\" (the component has no built-in language). */\n  counterLabel: string;\n  className?: string;",
+    "QuotaDots": "/** Occurrences already used this week. */\n  used: number;\n  /** Effective weekly limit (one dot each). Warn tone, neg when used >= limit. */\n  limit: number;\n  /** Note under the dots, e.g. \"Использовано 2 из 3\" (the component has no built-in language). */\n  note: string;\n  className?: string;",
+    "SwipeCard": "/** Small uppercase caption on the card, e.g. \"Привычка\". */\n  typeLabel: string;\n  /** Big card title (habit name). */\n  title: string;\n  /** Question under the title, e.g. \"Сделали вчера?\". */\n  question: string;\n  /** Right / ✓ answer text (the component has no built-in language). */\n  goodLabel: string;\n  /** Left / ✕ answer text. */\n  badLabel: string;\n  /** Muted line at the card bottom, e.g. \"Свайп вправо — сделал, влево — не сделал\". */\n  hint: string;\n  /** Text of the quiet \"not applicable\" button; hidden when omitted. */\n  notApplicableLabel?: string;\n  /** Called once per card after the swipe/button/ArrowLeft/ArrowRight answer. Remount with a new key per card. */\n  onAnswer: (answer: \"good\" | \"bad\" | \"not_applicable\") => void;\n  /** Extra card content under the title (e.g. a QuotaDots block). */\n  children?: React.ReactNode;\n  /** Shows a card-shaped peek behind (a next card exists). */\n  peek?: boolean;"
   },
   "overrides": {
     "TabBar": {
@@ -60,6 +64,20 @@
     },
     "PasswordField": {
       "cardMode": "column"
+    },
+    "FullScreenModal": {
+      "cardMode": "single",
+      "viewport": "420x420"
+    },
+    "ProgressSegments": {
+      "cardMode": "column"
+    },
+    "QuotaDots": {
+      "cardMode": "column"
+    },
+    "SwipeCard": {
+      "cardMode": "single",
+      "viewport": "420x560"
     }
   },
   "readmeHeader": ".design-sync/conventions.md"

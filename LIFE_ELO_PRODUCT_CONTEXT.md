@@ -176,7 +176,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 
 **Period quotas.** A habit may have a limit per calendar week (Mon–Sun) and per day. Example: masturbation ≤1/day and ≤2/week; the weekly limit is reduced by 1 for each day with sex so far this week (not below 0). Sex is a constructive habit with no limit. A day is *bad* if the cumulative count so far this week exceeds the limit as of that day (no retroactive changes to earlier days); otherwise *ok*.
 
-**Review window and unknown days.** A day can be reviewed or corrected until the end of the following day (by the app's day boundary); then it locks. A day with no review is `unknown`: no direct penalty, all streaks break, and for Elo it counts as `S = 0` **only when R > 0** (rating at or below 0 stays frozen — a skip can never raise it).
+**Review window and unknown days.** A day can be reviewed or corrected until 23:59 of the following calendar day (yesterday can be reviewed all of today); it locks at 00:00. A day with no review is `unknown`: no direct penalty, all streaks break, and for Elo it counts as `S = 0` **only when R > 0** (rating at or below 0 stays frozen — a skip can never raise it).
 
 **Clarifications (2026-11-03).**
 
@@ -198,7 +198,7 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 - Only confirmed data should drive final rating updates. Unconfirmed days remain pending and are not assumed clean.
 - Skipping a review should not incur a rating penalty. (v1: no direct penalty, but streaks break and a positive Elo decays toward 0 — see §6.5.)
 - Corrections to earlier days should be supported with recalculation and idempotent reward handling.
-- A bedtime after midnight should be associated with the prior evening/night by a clearly defined day-boundary rule.
+- The day boundary is calendar midnight (00:00). A bedtime entered between 00:00 and 03:59 is still compared as late evening (24:00–27:59); this 04:00 wrap applies only to bedtime comparison, not to which day a record belongs to.
 
 ### Illustrative UX
 

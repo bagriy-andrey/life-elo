@@ -25,6 +25,10 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - `PasswordField` is i18n-free: `showLabel`/`hideLabel` (required) and `strengthLabels` come from the app's `t()`;
   its preview passes Russian literals. Keep `dtsPropsFor.PasswordField` in step with the props.
 
+- FullScreenModal / ProgressSegments / QuotaDots / SwipeCard (yesterday-review modal, 2026-11-08) are i18n-free like
+  PasswordField: every text is a prop; previews pass Russian literals. FullScreenModal is `position: fixed` →
+  same `translateZ(0)` frame as Dialog. SwipeCard registers a window ArrowLeft/Right listener per mounted card.
+
 ## Known render warns
 - none
 

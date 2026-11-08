@@ -1,19 +1,16 @@
 # Handoff
-Updated: 2026-11-06 by Claude Code
-Branch: auth-sync (PR #5) — origin/main (PR #4 profile/settings/i18n) merged in
-Plan: docs/plans/06-auth-sync-integration.md — done (7/7). Tests/lint/build green (1 lint warning: src/i18n/index.tsx, from main).
+Updated: 2026-11-08 by Claude Code
+Branch: yesterday-review-modal (PR #6)
+Plan: docs/plans/07-yesterday-review-modal.md — done (14/14), verifier PASS. Tests 289 / lint / build green
+(1 old lint warning: src/i18n/index.tsx:40).
 ## In progress
 Nothing uncommitted.
 ## Next step (user)
-1. ~~db push~~ done 2026-11-07 (records_profile, reset_tombstones applied to LifeElo).
-2. Clear site data on localhost once (Dexie sync tables are v4; old v3 outbox build breaks otherwise).
-3. ~~/design-sync~~ done 2026-11-07 (Notice, PasswordField added; Field updated).
-4. Merge PR #5, then deploy on Vercel (docs/setup/backend.md §7), run the §8 checklist.
+1. ~~Manual browser check~~ done by the user 2026-11-08: all works.
+2. ~~/design-sync~~ done 2026-11-08 (4 new components uploaded; last-sync recorded).
+3. Review and merge PR #6, then deploy.
 ## Broken / open questions
-- KNOWN ISSUE (deferred): password-reset email does not arrive (Resend test sender). Check Resend → Emails,
-  Supabase → Logs → Auth.
-- Unverified: Cyrillic-only password passes our check but Supabase `letters_digits` policy may reject it.
-- Not verified yet: Google in iOS PWA, logout wipe, offline edit, Vercel deploy.
-- 2026-11-07: server is the source of truth; sign-in drops non-matching local data and pulls (no upload, no choice
-  screen). Pre-account data on the user's iPhone is intentionally not migrated.
-  (All-unknown review vs negative rating: kept as is, logged in product context §13 Open.)
+- Day boundary is now calendar midnight (user decision 2026-11-07); 04:00 wrap only for bedtime times.
+- Weekly goals for constructive habits: deferred to a separate feature (needs scoring decisions).
+- Known from before: password-reset email not arriving (Resend test sender); Google sign-in in iOS PWA unverified.
+- `--warn` token has no dark-theme value (tokens.css), cosmetic.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daysInWeekUpTo, eachDay, isDayLocked, timeToMinutes, weekStart } from './day'
+import { dayOf, daysInWeekUpTo, eachDay, isDayLocked, reviewDay, timeToMinutes, weekStart } from './day'
 
 describe('weekStart', () => {
   it('returns Monday for Monday, Sunday and midweek', () => {
@@ -27,13 +27,23 @@ describe('eachDay / daysInWeekUpTo', () => {
 
 describe('isDayLocked', () => {
   const D = '2026-11-03'
-  it('stays open until 03:59 on D+2 and locks at 04:00', () => {
-    expect(isDayLocked(D, new Date(2026, 10, 5, 3, 59))).toBe(false)
-    expect(isDayLocked(D, new Date(2026, 10, 5, 4, 0))).toBe(true)
+  it('stays open until 23:59 on D+1 and locks at 00:00 of D+2', () => {
+    expect(isDayLocked(D, new Date(2026, 10, 4, 23, 59))).toBe(false)
+    expect(isDayLocked(D, new Date(2026, 10, 5, 0, 0))).toBe(true)
   })
   it('yesterday and today are open', () => {
     expect(isDayLocked(D, new Date(2026, 10, 4, 12, 0))).toBe(false)
     expect(isDayLocked(D, new Date(2026, 10, 3, 12, 0))).toBe(false)
+  })
+})
+
+describe('dayOf / reviewDay (calendar midnight)', () => {
+  it('dayOf keeps 00:30 on the same calendar day', () => {
+    expect(dayOf(new Date(2026, 0, 2, 0, 30))).toBe('2026-01-02')
+  })
+  it('reviewDay is yesterday at 00:30 and at 23:59', () => {
+    expect(reviewDay(new Date(2026, 0, 2, 0, 30))).toBe('2026-01-01')
+    expect(reviewDay(new Date(2026, 0, 2, 23, 59))).toBe('2026-01-01')
   })
 })
 
@@ -44,7 +54,7 @@ describe('timeToMinutes', () => {
     expect(timeToMinutes('23:00')).toBeLessThan(timeToMinutes('00:30'))
     expect(timeToMinutes('01:00')).toBe(1500)
   })
-  it('boundary hour itself is a normal time', () => {
+  it('04:00 itself is a normal time', () => {
     expect(timeToMinutes('03:59')).toBe(24 * 60 + 239)
     expect(timeToMinutes('04:00')).toBe(240)
   })

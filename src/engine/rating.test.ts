@@ -269,8 +269,8 @@ describe('quota and entries', () => {
 })
 
 describe('day boundary', () => {
-  it('assigns a 00:30 bedtime to the previous evening', () => {
-    expect(dayOf(new Date(2026, 0, 2, 0, 30))).toBe('2026-01-01')
+  it('uses the calendar day at 00:30', () => {
+    expect(dayOf(new Date(2026, 0, 2, 0, 30))).toBe('2026-01-02')
   })
 
   it('reviews yesterday in the morning', () => {

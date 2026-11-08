@@ -1,7 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { db } from './db/db'
 import { addDays, reviewDay, toDayKey } from './domain/day'
+import { nextMidnight } from './domain/reviewDeadline'
+import { decideModal } from './domain/reviewFlow'
 import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
@@ -16,11 +18,13 @@ import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { Account } from './ui/Account'
 import { TabBar } from './ui/components'
+import { setBackgroundInert } from './ui/components/focus'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
 import { ProfilePassword } from './ui/ProfilePassword'
 import { Review } from './ui/Review'
+import { YesterdayReview } from './ui/YesterdayReview'
 
 type Tab = 'home' | 'review' | 'habits' | 'profile'
 
@@ -31,19 +35,24 @@ function MainApp() {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>('home')
   const [passwordOpen, setPasswordOpen] = useState(false)
-  const [yesterday, setYesterday] = useState(() => reviewDay(new Date()))
-  const [today, setToday] = useState(() => toDayKey(new Date()))
+  const [now, setNow] = useState(() => new Date())
+  const yesterday = reviewDay(now)
+  const today = toDayKey(now)
   const [reviewing, setReviewing] = useState(yesterday)
 
-  // The PWA may stay open across midnight: re-evaluate when it comes back.
+  // The PWA may stay open across midnight: re-read the clock when it comes back and at midnight.
   useEffect(() => {
-    const refresh = () => {
-      setYesterday(reviewDay(new Date()))
-      setToday(toDayKey(new Date()))
+    const refresh = () => setNow(new Date())
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh()
     }
-    document.addEventListener('visibilitychange', refresh)
-    return () => document.removeEventListener('visibilitychange', refresh)
-  }, [])
+    document.addEventListener('visibilitychange', onVisible)
+    const timer = setTimeout(refresh, Math.max(1000, nextMidnight(new Date()).getTime() - Date.now() + 500))
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      clearTimeout(timer)
+    }
+  }, [now])
 
   const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
@@ -55,6 +64,41 @@ function MainApp() {
   const pendingDay =
     hasYesterdayHabits && !reviews.some((r) => r.day === yesterday) ? yesterday : undefined
 
+  // Mandatory yesterday review. `reviewDay` is fixed while the modal is open; once opened it stays
+  // mounted until onClose (saving flips the show condition, the done screen must not vanish).
+  const lastSyncedAt = useLiveQuery(async () => (await getSyncState()).lastSyncedAt, [])
+  const [modalDay, setModalDay] = useState<string | null>(null)
+  const savedHere = useRef(false)
+  const lastSavedDay = useRef<string | null>(null)
+  const closeModal = () => {
+    savedHere.current = false
+    setModalDay(null)
+    // A locked/stale day must not re-open forever: re-read the clock.
+    setNow(new Date())
+  }
+  useEffect(() => {
+    const d = decideModal({
+      modalDay,
+      savedHere: savedHere.current,
+      lastSavedDay: lastSavedDay.current,
+      habits,
+      reviews,
+      now,
+      lastSyncedAt,
+    })
+    if (d.action === 'open') setModalDay(d.day)
+    else if (d.action === 'close') closeModal()
+  }, [modalDay, habits, reviews, now, lastSyncedAt])
+
+  const mainRef = useRef<HTMLElement>(null)
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const modalOpen = modalDay !== null
+  useEffect(() => {
+    if (!modalOpen) return
+    const undo = [setBackgroundInert(mainRef.current), setBackgroundInert(tabsRef.current)]
+    return () => undo.forEach((u) => u())
+  }, [modalOpen])
+
   const openReview = () => {
     setReviewing(yesterday)
     setTab('review')
@@ -62,7 +106,7 @@ function MainApp() {
 
   return (
     <div className="app">
-      <main>
+      <main ref={mainRef}>
         {tab === 'home' && (
           <Home result={result} habits={habits} pendingDay={pendingDay} onReview={openReview} />
         )}
@@ -90,6 +134,7 @@ function MainApp() {
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
+      <div ref={tabsRef}>
       <TabBar
         active={tab}
         onSelect={(id) => {
@@ -104,6 +149,21 @@ function MainApp() {
           { id: 'profile', label: t('tab.profile') },
         ]}
       />
+      </div>
+      {modalDay !== null && (
+        <YesterdayReview
+          day={modalDay}
+          habits={habits}
+          reviews={reviews}
+          rating={result.rating}
+          onClose={closeModal}
+          onSaving={(active) => {
+            savedHere.current = active
+            // `false` only follows a failed save: the day may open again.
+            lastSavedDay.current = active ? modalDay : null
+          }}
+        />
+      )}
     </div>
   )
 }

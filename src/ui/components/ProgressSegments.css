@@ -1,0 +1,22 @@
+.progress-segments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.progress-counter {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+.progress-bar {
+  display: flex;
+  gap: var(--space-4);
+}
+.progress-segment {
+  flex: 1;
+  height: var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--border);
+}
+.progress-done { background: var(--accent); }
+.progress-current { background: color-mix(in srgb, var(--accent) 50%, var(--border)); }

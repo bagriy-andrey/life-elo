@@ -54,7 +54,7 @@ type DayEntries = Record<string, HabitEntry | undefined>
  * Deterministically rebuilds the whole rating history from confirmed reviews
  * (LIFE_ELO_PRODUCT_CONTEXT.md §6.5). Pure: the same inputs always produce the
  * same ledger, so correcting a past day is just "save the review, replay".
- * `today` is a day-boundary-aware key (`dayOf(now)`); it decides which
+ * `today` is a calendar day key (`dayOf(now)`); it decides which
  * unreviewed days are already locked (unknown) and which are still pending.
  */
 export function replay(

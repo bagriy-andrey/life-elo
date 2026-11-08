@@ -1,0 +1,114 @@
+.swipe {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.swipe-stage {
+  flex: 1;
+  position: relative;
+  min-height: 300px;
+}
+.swipe-peek,
+.swipe-card {
+  position: absolute;
+  inset: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.swipe-peek {
+  transform: translateY(var(--space-12)) scale(0.94);
+  opacity: 0.7;
+}
+.swipe-card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.swipe-card:active { cursor: grabbing; }
+.swipe-type {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.swipe-stamp {
+  position: absolute;
+  top: 18px;
+  padding: var(--space-6) var(--space-12);
+  border: 2px solid var(--stamp-color);
+  color: var(--stamp-color);
+  border-radius: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--card);
+  opacity: 0;
+  pointer-events: none;
+}
+.swipe-stamp-good { --stamp-color: var(--pos); left: 18px; transform: rotate(-10deg); }
+.swipe-stamp-bad { --stamp-color: var(--neg); right: 18px; transform: rotate(10deg); }
+.swipe-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-8);
+  text-align: center;
+}
+.swipe-title {
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.swipe-question { color: var(--muted); }
+.swipe-hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.swipe-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-12);
+}
+.swipe-btn {
+  --btn-color: var(--neg);
+  min-height: 64px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--btn-color) 10%, var(--card));
+  border: 1.5px solid color-mix(in srgb, var(--btn-color) 40%, var(--border));
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--text-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  cursor: pointer;
+}
+.swipe-btn-good { --btn-color: var(--pos); }
+.swipe-mark {
+  color: var(--btn-color);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.swipe-na {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .swipe-card { transition: none !important; }
+}

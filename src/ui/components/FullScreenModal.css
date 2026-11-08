@@ -1,0 +1,13 @@
+.fullscreen-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--bg);
+  color: var(--text);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.fullscreen-modal:focus {
+  outline: none;
+}

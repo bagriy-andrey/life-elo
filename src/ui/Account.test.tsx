@@ -14,7 +14,7 @@ describe('AccountSection login email', () => {
     expect(html).toContain('Сменить')
     expect(html).toContain('a@b.co')
     expect(html).not.toContain('Вход через Google')
-    expect(html).not.toContain('role="dialog"')
+    expect(html).not.toContain('alertdialog')
   })
   it('Google-only user sees the caption and no change action', () => {
     const html = renderToString(withAuth(<AccountSection engine={engine} />, { user: googleUser, googleOnly: true }))

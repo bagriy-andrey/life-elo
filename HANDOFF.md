@@ -7,7 +7,7 @@ Plan: docs/plans/08-home-chart.md — done (5/5), verifier PASS on every step. T
 Nothing uncommitted. `stash@{0}` "home-chart draft" = pre-plan draft, obsolete; drop after merge.
 ## Next step (user)
 1. Manual check in `npm run dev`: tap points/tiles, 10 days ↔ all-time toggle, scroll, light/dark, ru/en/uk, 375px.
-2. Run `/design-sync` (HistoryEntry got `defaultOpen`; dtsPropsFor already updated), then record last-sync.
+2. ~~/design-sync~~ done 2026-11-08 (HistoryEntry defaultOpen uploaded; last-sync recorded).
 3. Push + open PR for home-chart.
 ## Broken / open questions
 - Header Pill tone for delta exactly 0 is green (Pill has no neutral tone), same as the mockup.

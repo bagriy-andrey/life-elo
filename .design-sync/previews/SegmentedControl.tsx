@@ -64,3 +64,20 @@ export const Unanswered = () => (
     />
   </div>
 )
+
+export const ImportanceBars = () => {
+  const [v, setV] = useState('medium')
+  return (
+    <div style={{ width: 340 }}>
+      <SegmentedControl
+        value={v}
+        onChange={setV}
+        options={[
+          { value: 'weak', label: 'Слабая', bars: 1 },
+          { value: 'medium', label: 'Средняя', bars: 2 },
+          { value: 'strong', label: 'Сильная', bars: 3 },
+        ]}
+      />
+    </div>
+  )
+}

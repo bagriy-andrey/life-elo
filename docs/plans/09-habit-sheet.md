@@ -152,7 +152,7 @@ None.
   `.design-sync/config.json` (`dtsPropsFor`: `BottomSheet` props), `src/ui/components/BottomSheet.test.tsx`
   (`renderToString` smoke). Tokens only from `src/ui/tokens.css`; if a new token is needed, add it here.
   Verify: `npm test`, `npm run lint`, `npm run build`.
-- [ ] 6. [design-sync] New small form components used by the sheet: `Stepper` (− value +, min/max, aria labels
+- [x] 6. [design-sync] New small form components used by the sheet: `Stepper` (− value +, min/max, aria labels
   from props), `WeekDots` (7 dots Mon–Sun, first `value` filled; display only), `ChipGroup` (single-select chips
   for «Как отмечать», same options shape as `SegmentOption`), `TypeCards` (two selectable cards for Тип, with
   disabled state for the locked direction) — if `SegmentedControl` can render the importance bars via an optional
@@ -162,6 +162,7 @@ None.
   `.design-sync/config.json` (`dtsPropsFor` for every new/changed component),
   `src/ui/components/forms.test.tsx` (`renderToString` smoke for each).
   Verify: `npm test`, `npm run lint`, `npm run build`.
+  Note: importance bars via optional `SegmentOption.bars` (1-3) on SegmentedControl (no new component); `TypeCards` options are `{value,title,description,tone}`; `WeekDots` takes `direction`.
 - [ ] 7. i18n for the sheet and list (ru is the key source, then en, uk).
   Files: `src/i18n/ru.ts`, `src/i18n/en.ts`, `src/i18n/uk.ts`. Keys: sheet titles «Новая привычка» /
   «Изменить привычку», field labels (Название, Тип, Важность, Как отмечать, Цель / Норма), period switch

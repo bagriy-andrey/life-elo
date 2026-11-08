@@ -1,0 +1,26 @@
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+.stepper-label { color: var(--muted); font-size: var(--text-sm); }
+.stepper-controls { display: flex; align-items: center; gap: var(--space-4); }
+.stepper-controls button {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+.stepper-controls button:disabled { opacity: 0.4; cursor: default; }
+.stepper-value {
+  min-width: 56px;
+  text-align: center;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}

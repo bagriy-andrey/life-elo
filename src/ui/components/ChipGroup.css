@@ -1,0 +1,18 @@
+.chip-group { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+.chip {
+  min-height: 40px;
+  padding: 0 var(--space-16);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.chip.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--text);
+  font-weight: 600;
+}

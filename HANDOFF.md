@@ -7,8 +7,7 @@ Plan: docs/plans/07-yesterday-review-modal.md — done (14/14), verifier PASS. T
 Nothing uncommitted.
 ## Next step (user)
 1. ~~Manual browser check~~ done by the user 2026-11-08: all works.
-2. Run `/design-sync` (new: FullScreenModal, ProgressSegments, QuotaDots, SwipeCard), then write HEAD to
-   `.design-sync/last-sync` and commit.
+2. ~~/design-sync~~ done 2026-11-08 (4 new components uploaded; last-sync recorded).
 3. Push the branch and open a PR.
 ## Broken / open questions
 - Day boundary is now calendar midnight (user decision 2026-11-07); 04:00 wrap only for bedtime times.

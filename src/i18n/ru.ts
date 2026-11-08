@@ -268,7 +268,6 @@ export const ru = {
   'sync.never': 'Ещё не синхронизировано',
   'sync.syncedAt': 'Синхронизировано · {time}',
   'sync.syncedOn': 'Синхронизировано · {date}, {time}',
-  'sync.retry': 'Повторить',
   'sync.notConfigured': 'Вход не настроен: добавьте ключи Supabase в .env (см. docs/setup/backend.md)',
   'account.title': 'Аккаунт',
   'account.loginEmail': 'Почта для входа',

@@ -255,7 +255,6 @@ export const en: Dict = {
   'sync.never': 'Not synced yet',
   'sync.syncedAt': 'Synced · {time}',
   'sync.syncedOn': 'Synced · {date}, {time}',
-  'sync.retry': 'Retry',
   'sync.notConfigured': 'Sign-in is not set up: add the Supabase keys to .env (see docs/setup/backend.md)',
   'account.title': 'Account',
   'account.loginEmail': 'Sign-in email',

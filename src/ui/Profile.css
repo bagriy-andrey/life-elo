@@ -61,18 +61,6 @@
 }
 .profile-photo-actions { display: flex; gap: 4px; }
 .profile-save { width: 100%; min-height: 48px; }
-.settings-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 14px 16px;
-}
-.settings-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-.settings-label { font-size: var(--text-sm); font-weight: 600; }
 .clear-btn { width: 100%; min-height: 48px; }
 .clear-hint { font-size: var(--text-xs); }
 .clear-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }

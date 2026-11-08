@@ -258,7 +258,6 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
             <span className="neg">{t('settings.clear')}</span>
             <span className="muted clear-hint">{t('settings.clearHint')}</span>
           </span>
-          <span className="muted">›</span>
         </button>
       </Card>
       {exportState === 'error' && <Notice tone="error">{t('settings.exportError')}</Notice>}

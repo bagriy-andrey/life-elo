@@ -32,7 +32,7 @@ describe('Profile smoke render', () => {
     expect(html).toContain('JSON')
     expect(html).toContain('Очистить все данные')
     expect(html).toContain('Удалит профиль, привычки, историю и рейтинг везде')
-    expect(html).not.toContain('role="dialog"')
+    expect(html).not.toContain('role="alertdialog"')
     expect(html).toContain('Аккаунт')
     expect(html).toContain('Язык')
     expect(html).toContain('Тема')
@@ -40,7 +40,7 @@ describe('Profile smoke render', () => {
     expect(html).toContain('Анна')
     expect(html).toContain('версия 0.9.0')
     expect(html).toContain('pos')
-    expect(html).not.toContain('role="dialog"')
+    expect(html).not.toContain('role="alertdialog"')
   })
 
   it('colors a negative rating', () => {

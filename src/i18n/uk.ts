@@ -269,7 +269,6 @@ export const uk: Dict = {
   'sync.never': 'Ще не синхронізовано',
   'sync.syncedAt': 'Синхронізовано · {time}',
   'sync.syncedOn': 'Синхронізовано · {date}, {time}',
-  'sync.retry': 'Повторити',
   'sync.notConfigured': 'Вхід не налаштовано: додайте ключі Supabase у .env (див. docs/setup/backend.md)',
   'account.title': 'Обліковий запис',
   'account.loginEmail': 'Пошта для входу',

@@ -114,7 +114,7 @@ None.
   (pass `RULESET_V2`; `replay` result for non-goal habits must not change).
   Verify: `npm test` (existing engine tests untouched and green = v1.1 parity), `npm run lint`.
   Note: added optional `RulesetConfig.baseVersion` (v2 -> `v1.1`) for per-day ledger labelling; П7 implemented (N/A answer = not done, activeDays unchanged); weekly tests land in step 2.
-- [ ] 2. Engine tests with worked examples + destructive weekly yes/no pin.
+- [x] 2. Engine tests with worked examples + destructive weekly yes/no pin.
   Files: `src/engine/weeklyGoal.test.ts` (new), `src/engine/rating.test.ts` (add v2 cases),
   `src/engine/quota.test.ts` (add a destructive yes/no case: answers 0/1, `perWeek: 2`, third «yes» day → bad,
   «no» days ok).
@@ -126,6 +126,7 @@ None.
   3 → 1, of 1 → 0; (f) unreviewed / unknown day counts as not done and does not break the streak; (g) done day
   5 of 4 still excellent; (h) a replay without weekly goals equals v1.1 output (parity snapshot).
   Verify: `npm test`.
+  Note: quota test pins «no» days before the exceeding day only: `quotaZone` is cumulative, so a «no» day after the limit was exceeded is still bad (existing behaviour, not changed). Also done: `goalOf` helper, untracked-week skip pinned, `daysLeftInWeek` removed.
 - [ ] 3. Sync: pin the new field round-trip (no schema change).
   Files: `src/sync/merge.test.ts` or `src/sync/engine.test.ts` (habit with `versions[0].weeklyGoal` survives
   outbox → remote record → pull → `migrateHabit`), `src/db/migrate.test.ts` (new or existing: `migrateHabit`

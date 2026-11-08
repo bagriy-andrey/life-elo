@@ -1,6 +1,6 @@
 import { addDays, eachDay, weekStart } from '../domain/day'
 import { settingsOn } from '../domain/settings'
-import type { DayKey, DayReview, Habit, HabitEntry } from '../domain/types'
+import type { DayKey, DayReview, Habit, HabitEntry, HabitVersion } from '../domain/types'
 import type { RulesetConfig } from './config'
 import { scoreDay } from './dayScore'
 import type { DayHabit, DayZone } from './dayScore'
@@ -92,9 +92,15 @@ export function replay(
     const e = byDay.get(d)?.entries
     return h.effectiveFrom <= d && (byDay.has(d) ? h.active || h.id in (e ?? {}) : h.active)
   }
+  /** Weekly goal of a habit on a day: only constructive yes/no habits can have one. */
+  const goalOf = (h: Habit, s: HabitVersion) =>
+    h.direction === 'constructive' && s.rule.kind === 'boolean' ? s.weeklyGoal : undefined
   const versionOf = (anyWeekly: boolean) => (anyWeekly ? cfg.version : (cfg.baseVersion ?? cfg.version))
 
-  /** Enters `day` for a weekly-goal habit: finalizes the previous week, refreshes target and remaining days. */
+  /**
+   * Enters `day` for a weekly-goal habit: finalizes the previous week, refreshes target and remaining days.
+   * Weeks in which the habit was not tracked at all (paused / not yet created) are skipped: neither counted nor decayed.
+   */
   const enterWeek = (h: Habit, day: DayKey, perWeek: number) => {
     const wk = weekStart(day)
     let st = weekly[h.id]
@@ -125,7 +131,7 @@ export function replay(
       let anyWeekly = false
       const after: Record<string, StreakState> = {}
       for (const h of tracked) {
-        const goal = settingsOn(h, day).weeklyGoal
+        const goal = goalOf(h, settingsOn(h, day))
         if (goal) {
           anyWeekly = true
           const { st } = enterWeek(h, day, goal.perWeek)
@@ -156,7 +162,7 @@ export function replay(
     for (const h of tracked) {
       const s = settingsOn(h, day)
       const entry = entries[h.id]
-      const goal = h.direction === 'constructive' && s.rule.kind === 'boolean' ? s.weeklyGoal : undefined
+      const goal = goalOf(h, s)
       const dh: DayHabit = {
         id: h.id,
         tier: s.tier,

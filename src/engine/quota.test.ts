@@ -85,3 +85,22 @@ describe('weeklyQuotaUsage', () => {
     expect(weeklyQuotaUsage(plain, WED, { [MON]: { m: n(1) } })).toEqual({ used: 1, limit: 2 })
   })
 })
+
+describe('destructive yes/no weekly quota (answers 0/1)', () => {
+  const yn = { id: 'y', quota: { perWeek: 2 } }
+  it('perWeek 2: two yes days ok, third yes day bad, no days before it ok', () => {
+    const w = {
+      [MON]: { y: n(1) },
+      [TUE]: { y: n(0) },
+      [WED]: { y: n(1) },
+      '2026-11-05': { y: n(1) },
+    }
+    expect(quotaZone(yn, MON, w)).toBe('ok')
+    expect(quotaZone(yn, TUE, w)).toBe('ok')
+    expect(quotaZone(yn, WED, w)).toBe('ok')
+    expect(quotaZone(yn, '2026-11-05', w)).toBe('bad')
+  })
+  it('perWeek 0: any yes day is bad', () => {
+    expect(quotaZone({ id: 'y', quota: { perWeek: 0 } }, MON, { [MON]: { y: n(1) } })).toBe('bad')
+  })
+})

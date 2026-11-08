@@ -37,9 +37,3 @@ export function weeklyGoalProgress(perWeek: number, activeDays: number, doneDays
 export function finalizeWeek(base: number, met: boolean, cfg: Pick<RulesetConfig, 'softDecayFactor'>): number {
   return met ? base + 1 : Math.floor(base * cfg.softDecayFactor)
 }
-
-/** Days from `day` to the end of its week (Sunday), exclusive of `day`. */
-export function daysLeftInWeek(day: DayKey): number {
-  return 6 - (daysInWeekUpTo(day).length - 1)
-}
-

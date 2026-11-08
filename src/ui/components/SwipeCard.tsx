@@ -86,6 +86,8 @@ export function SwipeCard({
 
   const onDown = (e: PointerEvent<HTMLDivElement>) => {
     if (done.current || (e.pointerType === 'mouse' && e.button !== 0)) return
+    // Interactive children keep their own clicks.
+    if ((e.target as HTMLElement).closest('button, input, a, select, textarea')) return
     e.currentTarget.setPointerCapture?.(e.pointerId)
     drag.current = { id: e.pointerId, x0: e.clientX, t: e.timeStamp, lastX: e.clientX, lastT: e.timeStamp, v: 0 }
     if (cardRef.current) cardRef.current.style.transition = 'none'

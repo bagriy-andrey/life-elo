@@ -76,6 +76,7 @@ export const uk: Dict = {
   'home.forDay': 'за {day}',
   'home.chartTitle': 'Динаміка',
   'home.chartAria': 'Графік рейтингу по днях',
+  'home.point': '{day}: {delta}, рейтинг {rating}',
   'home.period10': '10 днів',
   'home.periodAll': 'Весь час',
   'home.periodLabel10': 'за 10 днів',

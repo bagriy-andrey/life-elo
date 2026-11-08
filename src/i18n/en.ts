@@ -68,6 +68,7 @@ export const en: Dict = {
   'home.forDay': 'for {day}',
   'home.chartTitle': 'Trend',
   'home.chartAria': 'Rating chart by day',
+  'home.point': '{day}: {delta}, rating {rating}',
   'home.period10': '10 days',
   'home.periodAll': 'All time',
   'home.periodLabel10': 'over 10 days',

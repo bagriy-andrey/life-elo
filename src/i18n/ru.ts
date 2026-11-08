@@ -75,6 +75,7 @@ export const ru = {
   'home.forDay': 'за {day}',
   'home.chartTitle': 'Динамика',
   'home.chartAria': 'График рейтинга по дням',
+  'home.point': '{day}: {delta}, рейтинг {rating}',
   'home.period10': '10 дней',
   'home.periodAll': 'Всё время',
   'home.periodLabel10': 'за 10 дней',

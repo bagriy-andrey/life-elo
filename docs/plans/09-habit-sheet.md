@@ -199,3 +199,4 @@ None.
   mention v2), `AGENTS.md` (only if a rule changes: e.g. the Layout line for `src/engine/` mentions
   `weeklyGoal.ts`; Gotchas stay ≤10 lines), `docs/plans/09-habit-sheet.md` (Status: done).
   Verify: read-through; `npm test` and `npm run lint` green.
+  Note: Status left for the orchestrator; also added `weeklyGoalNote` unit test and replaced the IIFE in `Review.tsx` (step-9 verifier).

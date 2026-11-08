@@ -163,13 +163,14 @@ None.
   `src/ui/components/forms.test.tsx` (`renderToString` smoke for each).
   Verify: `npm test`, `npm run lint`, `npm run build`.
   Note: importance bars via optional `SegmentOption.bars` (1-3) on SegmentedControl (no new component); `TypeCards` options are `{value,title,description,tone}`; `WeekDots` takes `direction`.
-- [ ] 7. i18n for the sheet and list (ru is the key source, then en, uk).
+- [x] 7. i18n for the sheet and list (ru is the key source, then en, uk).
   Files: `src/i18n/ru.ts`, `src/i18n/en.ts`, `src/i18n/uk.ts`. Keys: sheet titles «Новая привычка» /
   «Изменить привычку», field labels (Название, Тип, Важность, Как отмечать, Цель / Норма), period switch
   («За день» / «За неделю»), stepper labels, week-dots hint, empty state, «Добавить», meta-line parts,
   `habitError.weeklyTarget`, review note «На этой неделе: {done} из {target}». Remove keys that become unused
   (the `better` labels), if any i18n test checks key parity run it.
   Verify: `npm test` (i18n parity test if present), `npm run lint`.
+  Note: `better.*` keys kept (still used by `Habits.tsx` until step 8, which removes them and `betterLabels`); `habitError.weeklyTarget` unchanged; plural keys for stepper hints and meta-line (`habits.metaWeekGoal/Limit`), measured meta lines are `habits.metaMin*/Max*`; `habits.meta` joins kind · tier · norm; `review.weekProgress` added.
 - [ ] 8. Habits screen: header «Привычки» + «Добавить», empty state, list cards (dot + meta line
   «Тип · Важность · норма», existing grouping by direction and tier kept, paused cards dimmed), `HabitSheet`
   (create/edit per the mockup: Название, Тип cards, Важность, Как отмечать chips, Цель/Норма block: period switch +

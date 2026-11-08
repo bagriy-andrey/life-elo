@@ -17,7 +17,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - `src/auth/` — Supabase client, `AuthProvider`, `context.ts` (`useAuth`), validation, error texts.
 - `src/sync/` — outbox, merge rules, remote calls, sync engine (raw records only: reviews, wellbeing, profile, tombstones).
 - `supabase/` — SQL migrations and email templates (the whole backend).
-- `src/ui/` — screens.
+- `src/ui/` — screens; `YesterdayReview.tsx` is the mandatory next-morning review modal (mounted from `App.tsx`).
 
 ## Rules that must hold
 - Rating starts at 0 and is signed. Only three tiers: weak / medium / strong.
@@ -35,7 +35,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
 - `src/ui/components/` is mirrored in Claude Design: props of Button (variants), Card, SegmentedControl,
-  TabBar, HistoryEntry, Field, Avatar, Dialog, Notice, PasswordField are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+  TabBar, HistoryEntry, Field, Avatar, Dialog, Notice, PasswordField, FullScreenModal, ProgressSegments, QuotaDots, SwipeCard are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
   Text inputs go through `Field` (global input styles live in `src/index.css`).
 - Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).

@@ -16,7 +16,7 @@ import { supabaseRemote } from './sync/remote'
 import { wipeAccountData } from './sync/wipe'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
-import { Account } from './ui/Account'
+import { AccountActions, AccountSection } from './ui/Account'
 import { TabBar } from './ui/components'
 import { setBackgroundInert } from './ui/components/focus'
 import { Habits } from './ui/Habits'
@@ -129,7 +129,8 @@ function MainApp() {
             rating={result.rating}
             today={today}
             onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
-            account={<Account engine={syncEngine} onPassword={() => setPasswordOpen(true)} />}
+            accountSection={<AccountSection engine={syncEngine} />}
+            accountActions={<AccountActions engine={syncEngine} onPassword={() => setPasswordOpen(true)} />}
           />
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}

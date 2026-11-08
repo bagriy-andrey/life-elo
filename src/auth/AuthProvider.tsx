@@ -119,6 +119,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const { error } = await supabase!.auth.updateUser({ password, data: { password_set: true } })
           return error ? fail(error) : {}
         }),
+      changeEmail: (email) =>
+        run(async () => {
+          const { error } = await supabase!.auth.updateUser({ email })
+          return error ? fail(error) : {}
+        }),
       signOut: () =>
         run(async () => {
           const { error } = await endSession(supabase!.auth)

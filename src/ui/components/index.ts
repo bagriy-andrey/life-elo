@@ -1,5 +1,6 @@
 export { Avatar } from './Avatar'
 export { Banner } from './Banner'
+export { BottomSheet } from './BottomSheet'
 export { Button } from './Button'
 export { Card } from './Card'
 export { Dialog } from './Dialog'

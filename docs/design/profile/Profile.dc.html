@@ -1,0 +1,174 @@
+<!-- @template name="Профиль" description="Экран профиля: шапка, рейтинг, аккаунт и синхронизация, язык, тема, экспорт и очистка данных" -->
+<div style="min-height:100dvh;background:var(--bg);color:var(--text);font:var(--text-md)/var(--line-height) var(--font-sans)">
+<main style="max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px 96px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px">
+<h2 style="margin:0;font-size:var(--text-lg)">Профиль</h2>
+<sc-if value="{{ viewing }}"><Button onClick="{{ startEdit }}">Изменить</Button></sc-if>
+<sc-if value="{{ canCancel }}"><Button onClick="{{ cancelEdit }}">Отмена</Button></sc-if>
+</div>
+<input type="file" accept="image/*" ref="{{ fileRef }}" onChange="{{ onPhoto }}" style="display:none">
+
+<!-- ===== VIEW MODE ===== -->
+<sc-if value="{{ viewing }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 8px;text-align:center">
+<div style="width:88px;height:88px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--accent) 15%, var(--card));color:var(--accent);font-size:2rem;font-weight:700;margin-bottom:10px">
+<sc-if value="{{ hasPhoto }}"><img src="{{ profile.photo }}" alt="" style="width:100%;height:100%;object-fit:cover"></sc-if>
+<sc-if value="{{ noPhoto }}">{{ initials }}</sc-if>
+</div>
+<strong style="font-size:1.35rem;line-height:1.2">{{ profile.name }}</strong>
+<sc-if value="{{ hasNick }}"><span style="color:var(--muted);font-size:var(--text-sm)">@{{ profile.nick }}</span></sc-if>
+<sc-if value="{{ hasBirth }}"><span style="color:var(--muted);font-size:var(--text-sm)">{{ birthLabel }}</span></sc-if>
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px">
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;display:flex;flex-direction:column;gap:4px">
+<span style="color:var(--muted);font-size:var(--text-sm)">Рейтинг</span>
+<strong style="font-size:1.6rem;line-height:1.2;color:var(--pos);font-variant-numeric:tabular-nums;letter-spacing:-0.02em">+87.4</strong>
+</div>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;display:flex;flex-direction:column;gap:4px">
+<span style="color:var(--muted);font-size:var(--text-sm)">С нами с</span>
+<strong style="font-size:var(--text-lg);line-height:1.2;margin-top:auto">7 ноября 2026</strong>
+</div>
+</div>
+
+<h3 style="margin:16px 0 0;font-size:var(--text-md);font-weight:600">Аккаунт</h3>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:0 16px">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 0;border-bottom:1px solid var(--border)">
+<span style="color:var(--muted);font-size:var(--text-sm)">Почта для входа</span>
+<span style="overflow-wrap:anywhere">{{ account.email }}</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="color:var(--muted);font-size:var(--text-sm)">Синхронизация</span>
+<span style="display:flex;align-items:center;gap:8px">
+<sc-if value="{{ dotOk }}"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:var(--pos)"></span></sc-if>
+<sc-if value="{{ dotErr }}"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:var(--neg)"></span></sc-if>
+<sc-if value="{{ syncing }}"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:var(--muted)"></span></sc-if>
+{{ syncLabel }}</span>
+</div>
+<button type="button" onClick="{{ doSync }}" disabled="{{ syncing }}" aria-label="Синхронизировать заново" style="flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--accent);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ syncIcon }}</button>
+</div>
+</div>
+
+<h3 style="margin:16px 0 0;font-size:var(--text-md);font-weight:600">Настройки</h3>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:0 16px">
+<button type="button" onClick="{{ openLang }}" style="width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0;background:none;border:0;border-bottom:1px solid var(--border);color:var(--text);font:inherit;text-align:left;cursor:pointer">
+<span>Язык</span>
+<span style="display:flex;align-items:center;gap:8px;color:var(--muted)">{{ langLabel }}<span aria-hidden="true" style="font-size:18px;line-height:1">›</span></span>
+</button>
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px 0 14px">
+<span>Тема</span>
+<SegmentedControl options="{{ themeOptions }}" value="{{ theme }}" onChange="{{ setTheme }}" />
+</div>
+</div>
+
+<h3 style="margin:16px 0 0;font-size:var(--text-md);font-weight:600">Данные</h3>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:0 16px">
+<button type="button" onClick="{{ doExport }}" style="width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0;background:none;border:0;border-bottom:1px solid var(--border);color:var(--text);font:inherit;text-align:left;cursor:pointer">
+<span>Экспорт данных</span>
+<span style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:var(--text-sm)">{{ exportHint }}<span aria-hidden="true" style="font-size:18px;line-height:1">›</span></span>
+</button>
+<button type="button" onClick="{{ openClear }}" style="width:100%;min-height:52px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:10px 0;background:none;border:0;color:var(--neg);font:inherit;text-align:left;cursor:pointer">
+<span>Очистить все данные</span>
+<span style="color:var(--muted);font-size:var(--text-xs)">Удалит профиль, привычки, историю и рейтинг везде</span>
+</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:24px">
+<Button style="min-height:48px">Сменить пароль</Button>
+<Button style="min-height:48px">Выйти</Button>
+</div>
+<span style="margin-top:12px;text-align:center;color:var(--muted);font-size:var(--text-xs)">Life Elo · версия 1.4.0</span>
+</sc-if>
+
+<!-- ===== EDIT MODE ===== -->
+<sc-if value="{{ editing }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0">
+<button type="button" onClick="{{ pickPhoto }}" aria-label="Выбрать фото" style="width:88px;height:88px;border-radius:50%;overflow:hidden;padding:0;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--accent) 15%, var(--card));color:var(--accent);font-size:2rem;font-weight:700;cursor:pointer">
+<sc-if value="{{ hasDraftPhoto }}"><img src="{{ draft.photo }}" alt="" style="width:100%;height:100%;object-fit:cover"></sc-if>
+<sc-if value="{{ noDraftPhoto }}">{{ draftInitials }}</sc-if>
+</button>
+<div style="display:flex;gap:4px">
+<button type="button" onClick="{{ pickPhoto }}" style="background:none;border:0;color:var(--accent);font-size:var(--text-sm);padding:6px 10px;min-height:44px;cursor:pointer">{{ photoAction }}</button>
+<sc-if value="{{ hasDraftPhoto }}"><button type="button" onClick="{{ removePhoto }}" style="background:none;border:0;color:var(--muted);font-size:var(--text-sm);padding:6px 10px;min-height:44px;cursor:pointer">Удалить</button></sc-if>
+</div>
+</div>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;gap:16px">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:var(--text-sm);font-weight:600">Имя</span>
+<input value="{{ draft.name }}" onChange="{{ onName }}" onBlur="{{ touchName }}" placeholder="Как вас зовут" autoComplete="name" style="min-height:44px" aria-invalid="{{ nameInvalid }}">
+<sc-if value="{{ nameErr }}"><span style="color:var(--neg);font-size:var(--text-xs)">{{ nameErr }}</span></sc-if>
+</label>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;justify-content:space-between;gap:8px;font-size:var(--text-sm)"><span style="font-weight:600">Ник</span><span style="color:var(--muted)">необязательно</span></span>
+<div style="position:relative;display:flex">
+<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none">@</span>
+<input value="{{ draft.nick }}" onChange="{{ onNick }}" onBlur="{{ touchNick }}" placeholder="nickname" autoCapitalize="none" autoCorrect="off" style="flex:1;min-height:44px;padding-left:28px" aria-invalid="{{ nickInvalid }}">
+</div>
+<sc-if value="{{ nickErr }}"><span style="color:var(--neg);font-size:var(--text-xs)">{{ nickErr }}</span></sc-if>
+<sc-if value="{{ nickHint }}"><span style="color:var(--muted);font-size:var(--text-xs)">Латиница, цифры и _, от 3 до 20 символов</span></sc-if>
+</label>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;justify-content:space-between;gap:8px;font-size:var(--text-sm)"><span style="font-weight:600">Дата рождения</span><span style="color:var(--muted)">необязательно</span></span>
+<input type="date" value="{{ draft.birth }}" onChange="{{ onBirth }}" onBlur="{{ touchBirth }}" max="{{ todayIso }}" style="min-height:44px" aria-invalid="{{ birthInvalid }}">
+<sc-if value="{{ birthErr }}"><span style="color:var(--neg);font-size:var(--text-xs)">{{ birthErr }}</span></sc-if>
+<sc-if value="{{ draftAge }}"><span style="display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:var(--text-xs)"><span>{{ draftAge }}</span><button type="button" onClick="{{ clearBirth }}" style="background:none;border:0;padding:0;color:var(--accent);font-size:var(--text-xs);cursor:pointer">Убрать</button></span></sc-if>
+</label>
+</div>
+<Button variant="primary" onClick="{{ save }}" style="min-height:48px;margin-top:4px">Сохранить</Button>
+</sc-if>
+</main>
+<TabBar items="{{ tabs }}" active="profile" />
+
+<!-- Language bottom sheet -->
+<sc-if value="{{ langOpen }}">
+<div onClick="{{ closeLang }}" style="position:fixed;inset:0;z-index:20;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;justify-content:center">
+<div role="dialog" aria-modal="true" aria-label="Язык" onClick="{{ stop }}" style="width:100%;max-width:560px;background:var(--card);border:1px solid var(--border);border-bottom:0;border-radius:var(--radius-md) var(--radius-md) 0 0;padding:8px 16px calc(env(safe-area-inset-bottom) + 16px);display:flex;flex-direction:column">
+<span style="align-self:center;width:36px;height:4px;border-radius:2px;background:var(--border);margin-bottom:12px"></span>
+<strong style="font-size:var(--text-lg);margin-bottom:4px">Язык</strong>
+<sc-for list="{{ langList }}" as="l">
+<button type="button" onClick="{{ l.pick }}" aria-pressed="{{ l.active }}" style="min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0;background:none;border:0;border-bottom:1px solid var(--border);color:var(--text);font:inherit;text-align:left;cursor:pointer">
+<span>{{ l.label }}</span>
+<sc-if value="{{ l.active }}"><span style="color:var(--accent);font-weight:700">✓</span></sc-if>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<!-- Clear-all confirm -->
+<sc-if value="{{ confirmOpen }}">
+<div onClick="{{ closeClear }}" style="position:fixed;inset:0;z-index:20;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;padding:16px">
+<div role="alertdialog" aria-modal="true" onClick="{{ stop }}" style="width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 16px 16px;display:flex;flex-direction:column;gap:8px">
+<strong style="font-size:var(--text-lg)">Удалить все данные?</strong>
+<p style="margin:0 0 8px;color:var(--muted);font-size:var(--text-sm);text-wrap:pretty">Профиль, привычки, история дней и рейтинг будут удалены на всех устройствах. Перед этим можно сделать экспорт. Действие нельзя отменить.</p>
+<button type="button" onClick="{{ doClear }}" style="min-height:48px;border:0;border-radius:var(--radius-sm);background:var(--neg);color:#fff;font-weight:600;cursor:pointer">Удалить</button>
+<Button onClick="{{ closeClear }}" style="min-height:48px">Отмена</Button>
+</div>
+</div>
+</sc-if>
+</div>
+
+<script>
+// Behavior-defining parts of the mockup script.
+const LANGS = [{ value: 'ru', label: 'Русский' }, { value: 'en', label: 'English' }, { value: 'uk', label: 'Українська' }];
+function initialsOf(name) { /* first letters of first two words, else '?' */ }
+// birthLabel: `${day} ${monthGenitive} ${year} · ${age} лет` (e.g. "20 августа 1995 · 31 год")
+// validate(draft):
+//   name: required ('Введите имя'), ≤40 chars ('Не длиннее 40 символов')
+//   nick: optional, /^[A-Za-z0-9_]{3,20}$/ ('Только латиница, цифры и _, от 3 до 20 символов'); leading '@' stripped on input
+//   birth: optional; future → 'Дата в будущем'; age > 120 → 'Проверьте год'
+// errors show after blur ("touched"), after a failed save ("tried"), or immediately for a non-empty nick.
+// View/edit: page starts in view mode when the profile has a name, else in edit mode (no «Отмена» then).
+//   «Изменить» → edit with draft = profile; «Отмена» → back to view, draft discarded;
+//   «Сохранить» → validate; on success profile = draft (name trimmed), back to view.
+//   Photo: tap avatar or «Добавить фото»/«Сменить фото» opens file picker; «Удалить» clears draft photo.
+//   Birth: under the field shows draft age + «Убрать» (clears birth).
+// Sync row: dot green (ok) / red (error) / grey (syncing); label 'Синхронизировано · HH:MM' / 'Не удалось · HH:MM' /
+//   'Синхронизация…'; round ↻ button (44px) runs sync, spins while syncing, disabled while syncing.
+// Language: row shows current language label + ›; opens bottom sheet with 3 languages, ✓ on current; pick closes sheet.
+// Theme: SegmentedControl Системная / Светлая / Тёмная.
+// Export: row hint 'JSON', after export 'Файл сохранён'; downloads life-elo-export.json.
+// Clear all: red row with sub-caption; opens confirm dialog (red «Удалить» + «Отмена»); after clearing → empty profile in edit mode.
+// Bottom: «Сменить пароль», «Выйти» (full width), then 'Life Elo · версия X.Y.Z'.
+</script>

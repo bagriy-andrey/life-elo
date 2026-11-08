@@ -1,6 +1,6 @@
 # 07 — Yesterday review modal
 
-Status: approved
+Status: done
 Design input: `docs/design/yesterday-review/YesterdayReview.dc.html` (+ `README.md`). The mockup is a visual/interaction reference; decisions in this plan override it (deadline, weekly goals, N/A button, copy).
 
 ## Why

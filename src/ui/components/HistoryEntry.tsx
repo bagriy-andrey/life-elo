@@ -9,6 +9,8 @@ interface Props {
   entry: LedgerEntry
   /** habitId -> name and the direction/tier in effect on the entry's day, used to group habit lines. */
   habits: Map<string, { name: string; direction: 'constructive' | 'destructive'; tier: 'weak' | 'medium' | 'strong' }>
+  /** Starts expanded (still collapsible). Remount with a new key to re-apply. */
+  defaultOpen?: boolean
 }
 
 type Contribution = LedgerEntry['contributions'][number]
@@ -27,7 +29,7 @@ function entryLabel(
 }
 
 /** One reviewed day: total delta, expandable into score, usual-day comparison and grouped lines. */
-export function HistoryEntry({ entry, habits }: Props) {
+export function HistoryEntry({ entry, habits, defaultOpen }: Props) {
   const { t, locale } = useI18n()
   const ZONE_LABEL = zoneLabels(t)
   const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
@@ -60,7 +62,7 @@ export function HistoryEntry({ entry, habits }: Props) {
   const onlyUnknownDay = otherLines.length === 1 && otherLines[0].c.source.kind === 'unknown_day'
 
   return (
-    <details className="card history-entry">
+    <details className="card history-entry" open={defaultOpen}>
       <summary className="row">
         <span>{formatDay(entry.day, locale)}</span>
         <span className={entry.delta >= 0 ? 'pos' : 'neg'}>{formatSigned(entry.delta)}</span>

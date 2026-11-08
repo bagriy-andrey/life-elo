@@ -98,7 +98,7 @@ semantics). Applies to constructive **yes/no** habits with period «За нед�
 None.
 
 ## Steps
-- [ ] 1. Engine: domain type + ruleset v2 + weekly-goal scoring.
+- [x] 1. Engine: domain type + ruleset v2 + weekly-goal scoring.
   Files: `src/domain/types.ts` (add `WeeklyGoal { perWeek: number }`, `HabitVersion.weeklyGoal?`),
   `src/engine/config.ts` (add `weeklyStreakFraction: Record<ImpactTier, number[]>` = strong `[1]`, medium
   `[0.5, 1]`, weak `[0, 1]` (index `min(week, len) - 1`, week 0 → 0) to `RulesetConfig`; v1.1 gets the same
@@ -113,6 +113,7 @@ None.
   break weekly-habit streaks; per-day `rulesetVersion` as in Findings), `src/App.tsx` + `src/ui/YesterdayReview.tsx`
   (pass `RULESET_V2`; `replay` result for non-goal habits must not change).
   Verify: `npm test` (existing engine tests untouched and green = v1.1 parity), `npm run lint`.
+  Note: added optional `RulesetConfig.baseVersion` (v2 -> `v1.1`) for per-day ledger labelling; П7 implemented (N/A answer = not done, activeDays unchanged); weekly tests land in step 2.
 - [ ] 2. Engine tests with worked examples + destructive weekly yes/no pin.
   Files: `src/engine/weeklyGoal.test.ts` (new), `src/engine/rating.test.ts` (add v2 cases),
   `src/engine/quota.test.ts` (add a destructive yes/no case: answers 0/1, `perWeek: 2`, third «yes» day → bad,

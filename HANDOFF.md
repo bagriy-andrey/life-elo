@@ -6,9 +6,7 @@ Plan: docs/plans/07-yesterday-review-modal.md — done (14/14), verifier PASS. T
 ## In progress
 Nothing uncommitted.
 ## Next step (user)
-1. Manual browser check (`npm run dev`): swipe/fling/keys, focus trap, no Esc/backdrop, background inert;
-   fresh sign-in → modal only after first sync; save → done screen until «Продолжить», Home rating matches;
-   correct the day on «Обзор дня» (no double credit); remote review while open closes it.
+1. ~~Manual browser check~~ done by the user 2026-11-08: all works.
 2. Run `/design-sync` (new: FullScreenModal, ProgressSegments, QuotaDots, SwipeCard), then write HEAD to
    `.design-sync/last-sync` and commit.
 3. Push the branch and open a PR.

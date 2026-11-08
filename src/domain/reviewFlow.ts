@@ -1,4 +1,5 @@
-import { isDayLocked, reviewDay } from './day'
+import { eachDay, addDays, isDayLocked, reviewDay, weekStart } from './day'
+import { weeklyGoalProgress } from '../engine/weeklyGoal'
 import { settingsOn } from './settings'
 import type { DayKey, DayReview, Habit, HabitDirection, HabitEntry, Quota, ZonedRule } from './types'
 
@@ -137,4 +138,26 @@ export function decideModal(input: ModalInput): ModalDecision {
   // Nothing left to ask (e.g. remote wipe).
   if (buildCards(habits, modalDay).length === 0) return { action: 'close' }
   return { action: 'none' }
+}
+
+/**
+ * «This week: X of N» for a constructive yes/no habit with a weekly goal, `null` otherwise.
+ * `byDay` holds entries per day (saved reviews plus in-progress answers for `day`).
+ */
+export function weeklyGoalNote(
+  h: Habit,
+  day: DayKey,
+  byDay: Record<string, Record<string, HabitEntry>>,
+): { done: number; target: number } | null {
+  const s = settingsOn(h, day)
+  if (h.direction !== 'constructive' || s.rule.kind !== 'boolean' || !s.weeklyGoal) return null
+  const wk = weekStart(day)
+  const tracked = eachDay(wk, addDays(wk, 6)).filter(
+    (d) => h.effectiveFrom <= d && (h.active || h.id in (byDay[d] ?? {})),
+  ).length
+  const doneDays = Object.keys(byDay).filter((d) => {
+    const e = byDay[d]?.[h.id]
+    return e?.kind === 'value' && e.value === true
+  })
+  return weeklyGoalProgress(s.weeklyGoal.perWeek, tracked, doneDays, day)
 }

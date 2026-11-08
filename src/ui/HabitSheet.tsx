@@ -59,6 +59,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const weekValue = clamp(Number(form.weeklyTarget) || range.def, range.min, range.max)
 
   const pickDirection = (next: HabitDirection) => {
+    // Resetting `better` is intended: a stored `better` could contradict the new direction (it only changes on habits with no answers).
     setDirection(next)
     const r = weekRange(next)
     // `better` is derived from the direction again; the weekly target must stay in the new range.

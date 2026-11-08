@@ -6,6 +6,7 @@ import {
   buildCards,
   entryForYesNo,
   goalLabelParts,
+  weeklyGoalNote,
   type NumericUnit,
   type ReviewCard,
 } from '../domain/reviewFlow'
@@ -131,6 +132,8 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
     const kind = c.quota ? 'quota' : c.direction
     const dir = c.direction === 'constructive' ? 'constructive' : 'destructive'
     const usage = quotaFor(c)
+    const h = habits.find((x) => x.id === c.habitId)
+    const goal = h ? weeklyGoalNote(h, day, byDayWith(answers)) : null
     return (
       <SwipeCard
         key={c.habitId}
@@ -151,6 +154,7 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
             note={usage.used >= usage.limit ? t('yr.quota.exhausted') : t('yr.quota.used', { n: usage.used, limit: usage.limit })}
           />
         )}
+        {goal && <p className="yr-week-note">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>}
       </SwipeCard>
     )
   }

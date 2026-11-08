@@ -184,12 +184,13 @@ None.
   Verify: `npm test`, `npm run lint`, `npm run build`; manual: create constructive 4/week, destructive weekly
   yes/no, measured with 3 thresholds, edit/pause/delete in the dev server.
   Note: `better.*`, `betterLabels` and unused habits i18n keys removed; `form.better` cleared on direction/kind change; sheet state in `HabitSheet` (mounted by `Habits`), smoke tests render `HabitSheet` directly; `labels.ts` gets `normSummary`/`habitMeta`; styles for list + sheet in `HabitSheet.css`; manual dev-server check not done.
-- [ ] 9. Review screens: weekly-goal progress note.
+- [x] 9. Review screens: weekly-goal progress note.
   Files: `src/ui/YesterdayReview.tsx` (show «На этой неделе: X из N» on a weekly-goal card via
   `weeklyGoalProgress` including the answers given so far for `day`), `src/ui/Review.tsx` (same note, or a plain
   no-crash path), `src/domain/reviewFlow.ts` only if the card needs the goal (`card.weeklyGoal`),
   `src/ui/YesterdayReview.test.tsx` (smoke with a weekly-goal habit).
   Verify: `npm test`; manual: answer yesterday for a weekly-goal habit.
+  Note: helper `weeklyGoalNote` in `reviewFlow.ts` (no `card.weeklyGoal`; reads `settingsOn`); note shown in both screens; manual check not done. Also removed unused keys `habits.metaMinWeek`/`habits.fieldPeriod` and commented `pickDirection` in `HabitSheet.tsx` (step-8 verifier cleanups).
 - [ ] 10. Docs: product context + cleanup.
   Files: `LIFE_ELO_PRODUCT_CONTEXT.md` (§6.5: new subsection «Ruleset v2 — constructive weekly goal (agreed
   2026-11-08)» with П1–П6, the tier table for `f(weekStreak)` and the destructive-weekly-yes/no mapping, plus a

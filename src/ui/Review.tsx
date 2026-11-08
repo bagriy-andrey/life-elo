@@ -3,6 +3,7 @@ import { confirmDay } from '../db/db'
 import { DayLockedError } from '../db/confirm'
 import { addDays, dayOf, isDayLocked } from '../domain/day'
 import { settingsOn } from '../domain/settings'
+import { weeklyGoalNote } from '../domain/reviewFlow'
 import type { DayReview, Habit, HabitEntry, Zone } from '../domain/types'
 import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
@@ -96,6 +97,13 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
     }
   }
 
+  const byDayWithEntries = () => {
+    const byDay: Record<string, Entries> = {}
+    for (const r of reviews) byDay[r.day] = r.entries
+    byDay[day] = entries
+    return byDay
+  }
+
   const control = (h: Habit) => {
     const s = settingsOn(h, day)
     const entry = entries[h.id]
@@ -186,6 +194,10 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
                     <fieldset className="plain" disabled={locked}>
                       {control(h)}
                     </fieldset>
+                    {(() => {
+                      const goal = weeklyGoalNote(h, day, byDayWithEntries())
+                      return goal && <p className="muted">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>
+                    })()}
                   </Card>
                 )
               })}

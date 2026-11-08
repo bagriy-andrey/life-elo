@@ -1,10 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
-import { buildCards, entryForYesNo, type ReviewCard } from '../domain/reviewFlow'
+import { confirmDay } from '../db/db'
+import { buildReview, DayLockedError } from '../db/confirm'
+import { dayOf } from '../domain/day'
+import {
+  buildCards,
+  entryForYesNo,
+  goalLabelParts,
+  type NumericUnit,
+  type ReviewCard,
+} from '../domain/reviewFlow'
 import { deadlineShowsRating, timeLeft } from '../domain/reviewDeadline'
+import { reviewOutcome, type ReviewOutcome } from '../domain/reviewOutcome'
+import { settingsOn } from '../domain/settings'
 import type { DayKey, DayReview, Habit, HabitEntry } from '../domain/types'
-import { weeklyQuotaUsage } from '../engine/quota'
+import { RULESET_V1 } from '../engine/config'
+import { quotaZone, weeklyQuotaUsage } from '../engine/quota'
+import { replay } from '../engine/rating'
+import { classifyZone } from '../engine/zones'
 import { useI18n } from '../i18n'
-import { Button, FullScreenModal, ProgressSegments, QuotaDots, SwipeCard, type SwipeAnswer } from './components'
+import { Button, FullScreenModal, Notice, ProgressSegments, QuotaDots, SwipeCard, type SwipeAnswer } from './components'
+import { YesterdayDone } from './YesterdayDone'
+import { YesterdayNumeric } from './YesterdayNumeric'
 import './YesterdayReview.css'
 
 interface Props {
@@ -15,7 +31,14 @@ interface Props {
   reviews: DayReview[]
   /** Current rating (replay of confirmed reviews); decides whether the header mentions the rating. */
   rating: number
+  /** Closes the modal: "Продолжить" on the done screen, or "Закрыть" when the day got locked. */
+  onClose: () => void
+  /** Preview/test seam: start from given answers/screen (e.g. the summary). */
+  initialState?: { answers?: Record<string, HabitEntry>; screen?: Screen; index?: number }
 }
+
+type Screen = 'cards' | 'summary' | 'done'
+type Tone = 'pos' | 'neg' | 'plain'
 
 const TICK_MS = 30_000
 
@@ -36,16 +59,22 @@ function useNow(): Date {
 
 /**
  * Mandatory yesterday review (renders its own FullScreenModal).
- * State: `answers` (habitId -> entry, survives back/forward), `index` into `cards`,
- * `editing` (habitId fixed from the summary; added in step 12). Stage A = leading 'boolean' cards.
+ * State: `answers` (habitId -> entry, survives back/forward), `index` into `cards` (stage A = leading
+ * 'boolean' cards), `screen` ('cards' | 'summary' | 'done') and `editing` (habitId fixed from the
+ * summary: answering returns to the summary). The parent must keep it mounted until `onClose`
+ * (saving makes the review appear in `reviews`, which must not unmount the done screen).
  */
-export function YesterdayReview({ day, habits, reviews, rating }: Props) {
-  const { t } = useI18n()
+export function YesterdayReview({ day, habits, reviews, rating, onClose, initialState }: Props) {
+  const { t, locale } = useI18n()
   const now = useNow()
   const cards = useMemo(() => buildCards(habits, day), [habits, day])
-  const [answers, setAnswers] = useState<Record<string, HabitEntry>>({})
-  const [index, setIndex] = useState(0)
-  // Step 12 adds `editing` (habitId fixed from the summary) next to these.
+  const [answers, setAnswers] = useState<Record<string, HabitEntry>>(initialState?.answers ?? {})
+  const [index, setIndex] = useState(initialState?.index ?? 0)
+  const [screen, setScreen] = useState<Screen>(initialState?.screen ?? 'cards')
+  const [editing, setEditing] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<'closed' | 'save' | null>(null)
+  const [outcome, setOutcome] = useState<ReviewOutcome | null>(null)
 
   const left = timeLeft(now)
   const deadline =
@@ -54,23 +83,46 @@ export function YesterdayReview({ day, habits, reviews, rating }: Props) {
     (deadlineShowsRating(rating) ? t('yr.deadlineRating') : '') +
     '.'
 
-  const card = cards[index] as ReviewCard | undefined
+  const card = (editing ? cards.find((c) => c.habitId === editing) : cards[index]) as ReviewCard | undefined
   const habit = card && habits.find((h) => h.id === card.habitId)
 
   const answer = (c: ReviewCard, entry: HabitEntry) => {
     setAnswers((prev) => ({ ...prev, [c.habitId]: entry }))
-    setIndex((i) => i + 1)
+    if (editing) {
+      setEditing(null)
+      setScreen('summary')
+    } else if (index + 1 >= cards.length) {
+      setScreen('summary')
+    } else {
+      setIndex((i) => i + 1)
+    }
+  }
+
+  const back = () => {
+    if (editing) {
+      setEditing(null)
+      setScreen('summary')
+    } else if (screen === 'summary') {
+      setIndex(cards.length - 1)
+      setScreen('cards')
+    } else {
+      setIndex((i) => Math.max(0, i - 1))
+    }
   }
 
   const onSwipe = (c: ReviewCard, a: SwipeAnswer) =>
     answer(c, a === 'not_applicable' ? { kind: 'not_applicable' } : entryForYesNo(c, a))
 
-  const quotaFor = (c: ReviewCard) => {
-    if (!c.weekly) return null
+  const byDayWith = (entries: Record<string, HabitEntry>) => {
     const byDay: Record<string, Record<string, HabitEntry>> = {}
     for (const r of reviews) byDay[r.day] = r.entries
-    byDay[day] = answers // in-progress answers for yesterday count (reducer habit)
-    return weeklyQuotaUsage({ id: c.habitId, quota: c.weekly }, day, byDay)
+    byDay[day] = entries // in-progress answers for yesterday count (reducer habit)
+    return byDay
+  }
+
+  const quotaFor = (c: ReviewCard) => {
+    if (!c.weekly) return null
+    return weeklyQuotaUsage({ id: c.habitId, quota: c.weekly }, day, byDayWith(answers))
   }
 
   const renderYesNo = (c: ReviewCard, name: string) => {
@@ -87,7 +139,7 @@ export function YesterdayReview({ day, habits, reviews, rating }: Props) {
         badLabel={t(`yr.bad.${kind === 'quota' ? 'quota' : dir}`)}
         hint={t('yr.swipeHint')}
         notApplicableLabel={t('yr.notApplicable')}
-        peek={index < cards.length - 1}
+        peek={!editing && index < cards.length - 1}
         onAnswer={(a) => onSwipe(c, a)}
       >
         {usage && (
@@ -101,22 +153,152 @@ export function YesterdayReview({ day, habits, reviews, rating }: Props) {
     )
   }
 
+  const fmtNum = (n: number) => n.toLocaleString(locale)
+
+  const goalText = (h: Habit): string | undefined => {
+    const parts = goalLabelParts(settingsOn(h, day).rule)
+    if (!parts) return undefined
+    if (parts.unit === 'time') {
+      return t(parts.better === 'lower' ? 'yr.goalTimeLower' : 'yr.goalTimeHigher', { value: String(parts.value) })
+    }
+    const value = Number(parts.value)
+    return t(parts.better === 'lower' ? 'yr.goalLower' : 'yr.goal', {
+      value: fmtNum(value),
+      unit: t(`unit.${parts.unit}`, { count: value }),
+    })
+  }
+
+  const renderNumeric = (c: ReviewCard, h: Habit) => {
+    const s = settingsOn(h, day)
+    const unit: NumericUnit | 'time' = c.stage === 'time' ? 'time' : c.quota ? 'count' : s.rule.kind === 'measured' && s.rule.unit !== 'time' ? s.rule.unit : 'count'
+    const prev = answers[c.habitId]
+    const initial = prev?.kind === 'value' && typeof prev.value !== 'boolean' ? prev.value : undefined
+    return (
+      <YesterdayNumeric
+        key={c.habitId}
+        unit={unit}
+        title={h.name}
+        typeLabel={t(unit === 'time' ? 'yr.type.time' : 'yr.type.numeric')}
+        question={t(unit === 'time' ? 'yr.q.time' : c.quota || unit === 'count' ? 'yr.howMany' : 'yr.num.label')}
+        goal={c.quota ? undefined : goalText(h)}
+        initial={initial}
+        onConfirm={(value) => answer(c, { kind: 'value', value })}
+        onNotApplicable={() => answer(c, { kind: 'not_applicable' })}
+      />
+    )
+  }
+
+  /** Summary row text and tone (see plan 07 step 12 for the colour rules). */
+  const rowOf = (c: ReviewCard, h: Habit): { value: string; tone: Tone } => {
+    const entry = answers[c.habitId]
+    if (!entry || entry.kind !== 'value') return { value: t('yr.notApplicable'), tone: 'plain' }
+    const dir = c.direction === 'constructive' ? 'constructive' : 'destructive'
+    if (c.stage === 'boolean') {
+      const good = entry.value === true || entry.value === 0
+      if (c.quota) return { value: t(good ? 'yr.good.quota' : 'yr.bad.quota'), tone: good ? 'pos' : 'plain' }
+      return { value: t(`yr.${good ? 'good' : 'bad'}.${dir}`), tone: good ? 'pos' : 'neg' }
+    }
+    const s = settingsOn(h, day)
+    const zone = c.quota
+      ? quotaZone({ id: c.habitId, quota: c.quota }, day, byDayWith(answers))
+      : classifyZone({ direction: h.direction, rule: s.rule }, entry)
+    const tone: Tone = zone === 'excellent' || zone === 'ok' ? 'pos' : 'plain'
+    if (typeof entry.value === 'string') return { value: entry.value, tone }
+    const unit = c.quota ? 'count' : s.rule.kind === 'measured' ? s.rule.unit : 'count'
+    return { value: `${fmtNum(Number(entry.value))} ${t(`unit.${unit}`, { count: Number(entry.value) })}`, tone }
+  }
+
+  const save = async () => {
+    if (saving || cards.some((c) => !answers[c.habitId])) return
+    setSaving(true)
+    setError(null)
+    const full = Object.fromEntries(cards.map((c) => [c.habitId, answers[c.habitId]]))
+    const at = new Date()
+    try {
+      await confirmDay(day, full, at)
+      const existing = reviews.find((r) => r.day === day)
+      const saved = buildReview(day, full, at, existing)
+      const today = dayOf(at)
+      const before = replay(habits, reviews, RULESET_V1, today)
+      const after = replay(habits, [...reviews.filter((r) => r.day !== day), saved], RULESET_V1, today)
+      setOutcome(reviewOutcome(before, after, day))
+      setScreen('done')
+    } catch (e) {
+      setError(e instanceof DayLockedError ? 'closed' : 'save')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const showCards = screen === 'cards' || editing !== null
+  const counter = editing
+    ? t('yr.counterEdit')
+    : t('yr.counter', { n: Math.min(index + 1, cards.length), total: cards.length })
+
   return (
     <FullScreenModal label={t('yr.title')}>
       <div className="yr">
         <header className="yr-head">
-          <h1 className="yr-title">{t('yr.title')}</h1>
+          <h2 className="yr-title">{screen === 'summary' && !editing ? t('yr.summary.title') : t('yr.title')}</h2>
           <p className="yr-deadline">{deadline}</p>
-          <ProgressSegments total={cards.length} current={index} counterLabel={t('yr.counter', { n: Math.min(index + 1, cards.length), total: cards.length })} />
-          <div className="yr-back">
-            <Button variant="quiet" disabled={index === 0} onClick={() => setIndex((i) => Math.max(0, i - 1))}>
-              {t('yr.back')}
-            </Button>
-          </div>
+          {showCards && screen !== 'done' &&
+            (editing ? (
+              <p className="progress-counter">{counter}</p>
+            ) : (
+              <ProgressSegments total={cards.length} current={index} counterLabel={counter} />
+            ))}
+          {screen !== 'done' && error !== 'closed' && (
+            <div className="yr-back">
+              <Button variant="quiet" disabled={!editing && screen === 'cards' && index === 0} onClick={back}>
+                {t('yr.back')}
+              </Button>
+            </div>
+          )}
         </header>
         <div className="yr-body">
-          {card && habit && card.stage === 'boolean' && renderYesNo(card, habit.name)}
-          {/* Step 12: numeric/time stage, summary, done. */}
+          {showCards && card && habit && (card.stage === 'boolean' ? renderYesNo(card, habit.name) : renderNumeric(card, habit))}
+          {screen === 'summary' && !editing && (
+            <div className="yr-summary">
+              <p className="yr-summary-hint">{t('yr.summary.hint')}</p>
+              <div className="yr-rows">
+                {cards.map((c) => {
+                  const h = habits.find((x) => x.id === c.habitId)
+                  if (!h) return null
+                  const row = rowOf(c, h)
+                  return (
+                    <button
+                      key={c.habitId}
+                      type="button"
+                      className="yr-row"
+                      aria-label={`${h.name}: ${row.value}. ${t('yr.summary.edit')}`}
+                      disabled={saving || error === 'closed'}
+                      onClick={() => setEditing(c.habitId)}
+                    >
+                      <strong className="yr-row-name">{h.name}</strong>
+                      <span className={`yr-row-value yr-tone-${row.tone}`}>{row.value}</span>
+                      <span className="yr-row-chev" aria-hidden="true">›</span>
+                    </button>
+                  )
+                })}
+              </div>
+              {error === 'closed' ? (
+                <>
+                  <Notice tone="error">{t('review.dayClosedError')}</Notice>
+                  <Button variant="primary" className="yr-confirm" onClick={onClose}>
+                    {t('yr.closedClose')}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {error === 'save' && <Notice tone="error">{t('review.saveError')}</Notice>}
+                  <Button variant="primary" className="yr-confirm" disabled={saving} onClick={save}>
+                    {saving ? t('yr.saving') : t('yr.save')}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+          {screen === 'done' && outcome && <YesterdayDone outcome={outcome} habits={habits} onContinue={onClose} />}
         </div>
       </div>
     </FullScreenModal>

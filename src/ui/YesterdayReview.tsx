@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { confirmDay } from '../db/db'
 import { buildReview, DayLockedError } from '../db/confirm'
-import { dayOf } from '../domain/day'
+import { addDays } from '../domain/day'
 import {
   buildCards,
   entryForYesNo,
@@ -216,15 +216,23 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, initial
     const at = new Date()
     try {
       await confirmDay(day, full, at)
-      const existing = reviews.find((r) => r.day === day)
-      const saved = buildReview(day, full, at, existing)
-      const today = dayOf(at)
-      const before = replay(habits, reviews, RULESET_V1, today)
-      const after = replay(habits, [...reviews.filter((r) => r.day !== day), saved], RULESET_V1, today)
-      setOutcome(reviewOutcome(before, after, day))
-      setScreen('done')
     } catch (e) {
       setError(e instanceof DayLockedError ? 'closed' : 'save')
+      setSaving(false)
+      return
+    }
+    try {
+      // Same `asOf` as App's replay, so the done screen matches the home rating.
+      const existing = reviews.find((r) => r.day === day)
+      const saved = buildReview(day, full, at, existing)
+      const asOf = addDays(day, 1)
+      const before = replay(habits, reviews, RULESET_V1, asOf)
+      const after = replay(habits, [...reviews.filter((r) => r.day !== day), saved], RULESET_V1, asOf)
+      setOutcome(reviewOutcome(before, after, day))
+      setScreen('done')
+    } catch {
+      // The day is saved; without an outcome there is nothing to show, so just close.
+      onClose()
     } finally {
       setSaving(false)
     }
@@ -249,7 +257,7 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, initial
             ))}
           {screen !== 'done' && error !== 'closed' && (
             <div className="yr-back">
-              <Button variant="quiet" disabled={!editing && screen === 'cards' && index === 0} onClick={back}>
+              <Button variant="quiet" disabled={saving || (!editing && screen === 'cards' && index === 0)} onClick={back}>
                 {t('yr.back')}
               </Button>
             </div>

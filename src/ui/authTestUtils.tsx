@@ -19,6 +19,7 @@ export function fakeAuth(over: Partial<AuthValue> = {}): AuthValue {
     setNewPassword: ok,
     changePassword: ok,
     setPassword: ok,
+    changeEmail: ok,
     signOut: ok,
     dismissRecovery: () => {},
     ...over,

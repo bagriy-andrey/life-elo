@@ -28,6 +28,8 @@ export interface AuthValue {
   changePassword(current: string, next: string): Promise<ChangePasswordResult>
   /** Password for a Google-only account (no current password). */
   setPassword(password: string): Promise<ActionResult>
+  /** Starts a login-email change; the new address must confirm via the mailed link. */
+  changeEmail(email: string): Promise<ActionResult>
   signOut(): Promise<ActionResult>
   /** Leaves the recovery flow (e.g. to the forgot screen). */
   dismissRecovery(): void

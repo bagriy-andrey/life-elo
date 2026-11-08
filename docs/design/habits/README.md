@@ -37,6 +37,8 @@ habits with period «За неделю» (stepper 1–7). Calendar week Mon–Su
   break the week streak (the streak only changes at week end / when the target is reached).
 - П6.2 Partial week (habit created mid-week or paused part of the week): target is pro-rated,
   `ceil(N × activeDays / 7)` (e.g. 4/7 from Thursday → ceil(4×4/7) = 3).
+- П7 A per-habit *not applicable* answer on a weekly-goal habit counts as «not done» (like П6.1); it does not
+  reduce `activeDays` / pro-rate the target.
 
 Destructive yes/no with «За неделю» + stepper (0–6) maps onto the existing weekly quota (`quota.perWeek`, each
 «yes» day counts 1) — no new scoring.

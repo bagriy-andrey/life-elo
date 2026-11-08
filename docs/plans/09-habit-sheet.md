@@ -45,6 +45,8 @@ semantics). Applies to constructive **yes/no** habits with period «За нед�
   `ceil(N × activeDays / 7)` (e.g. 4/7 from Thursday → ceil(4×4/7) = 3).
 - Destructive yes/no with «За неделю» + stepper (0–6) maps onto the existing weekly quota (`quota.perWeek`, each
   «yes» day counts 1) — no new scoring.
+- П7 (user, 2026-11-08): a per-habit *not applicable* answer on a weekly-goal habit counts as «not done» (like
+  П6.1); it does NOT reduce `activeDays`, the target is not pro-rated for it.
 
 ## Findings from code reading (planning defaults, not user decisions)
 - `replay(habits, reviews, cfg, today)` takes ONE `RulesetConfig` (`src/engine/config.ts`, `RULESET_V1`, version
@@ -93,9 +95,6 @@ semantics). Applies to constructive **yes/no** habits with period «За нед�
   answering.
 
 ## Open questions
-- Per-habit *not applicable* answer for a weekly-goal habit: default chosen (implementer follows it unless the
-  user changes it) — the day is excluded from `activeDays` for pro-rating (like a paused day) and is neither done
-  nor missed. Needs the user's confirmation; it is not a coefficient.
 - Everything else (all of UI and scoring П1–П6) is decided above; no new coefficients are introduced
   (week-streak `f` values are exactly П4.1).
 

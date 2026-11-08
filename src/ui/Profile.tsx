@@ -34,7 +34,7 @@ interface Props {
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
 
-function ProfileEdit({ profile, today, onDone, onCancel }: {
+export function ProfileEdit({ profile, today, onDone, onCancel }: {
   profile: ProfileData | null
   today: DayKey
   onDone: () => void
@@ -110,7 +110,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
       </div>
       <div className="profile-id">
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
-        <Avatar name={form.name} src={shownPhoto} size={96} onClick={pickPhoto} label={t('profile.photoLabel')} disabled={processing} />
+        <Avatar name={form.name} src={shownPhoto} size={88} onClick={pickPhoto} label={t('profile.photoLabel')} disabled={processing} />
         <Button type="button" variant="quiet" onClick={pickPhoto} disabled={processing}>
           {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
         </Button>
@@ -158,11 +158,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
             onBlur={blur('email')}
           />
         </Field>
-        <Field
-          label={t('profile.birth')}
-          hint={birthValid ? t('profile.age', { count: ageOn(form.birth, today) }) : undefined}
-          error={errorText('birth')}
-        >
+        <Field label={t('profile.birth')} error={errorText('birth')}>
           <input
             type="date"
             max={today}
@@ -171,6 +167,14 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
             onBlur={blur('birth')}
           />
         </Field>
+        {form.birth !== '' && (
+          <div className="profile-birth-row">
+            <span className="muted">{birthValid ? t('profile.age', { count: ageOn(form.birth, today) }) : ''}</span>
+            <button type="button" className="profile-birth-clear" onClick={() => set('birth', '')}>
+              {t('profile.birthClear')}
+            </button>
+          </div>
+        )}
       </Card>
       {failed && <p className="neg">{t('profile.saveError')}</p>}
       <Button type="submit" variant="primary" className="profile-save" disabled={saving || processing}>

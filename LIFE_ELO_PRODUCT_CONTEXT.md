@@ -189,6 +189,31 @@ Supersedes the "open math" above where they overlap. Numbers are agreed starting
 
 **Life Elo on top of day scores.** `R₀ = 0`, `R ← R + 0.1 × (10 × S − R)`, range ≈ −1000…+1000 (half-way to a new level in ~7 days). A positive day below the user's usual form can lower R; the UI must show the expectation ("your usual day: +30, today: +10") so the move is explainable.
 
+### 6.5 (v2) Ruleset v2 — constructive weekly goal (agreed 2026-11-08)
+
+v2 keeps every v1.1 number and adds one thing: a constructive **yes/no** habit may have a weekly goal «N days per week» (N = 1–7, calendar week Mon–Sun). It applies only to days of habits that have such a goal; every other habit and all earlier history score exactly as in v1.1.
+
+- **П1 Missed day.** While the target is still reachable this week (remaining tracked days ≥ remaining days needed), a not-done day is *not applicable*: removed from Σ weights, streak paused. Once the target is unreachable, each further not-done day is *tolerable* (0).
+- **П2 Never bad.** A missed weekly goal only means fewer points.
+- **П3 Beyond the target.** Days over the target (5th of 4) are still *excellent* (full points).
+- **П4 Streak in weeks.** The streak counts consecutive weeks with the target met; the current week counts as soon as the target is reached. The bonus is paid on each done day with the usual `20 × (weight / Σ weights) × f(weekStreak)`. A week that ends below target halves the week streak (floor), like *tolerable*; a met week adds 1.
+- **П5 Scope.** Weekly period only for yes/no habits. Measured habits (number/minutes/steps/time) have no weekly goal; destructive «number» keeps its per-day / per-week limits.
+- **П6.1 Unknown.** An unreviewed day or per-habit *unknown* counts as «not done» for the target; it does not by itself break the week streak.
+- **П6.2 Partial week.** A habit created mid-week or paused part of the week gets a pro-rated target `ceil(N × activeDays / 7)` (4/7 from Thursday: ceil(4×4/7) = 3).
+- **П7 Not applicable.** A per-habit *not applicable* answer counts as «not done» (like П6.1); it does not reduce `activeDays`, so the target is not pro-rated for it.
+
+`f(weekStreak)` by tier (week 0 = no completed week yet and the target not yet met):
+
+| Tier | week 1 | week 2+ |
+|---|---|---|
+| strong | full | full |
+| medium | ½ | full |
+| weak | 0 | full |
+
+**Destructive yes/no with «per week».** No new scoring: it maps onto the existing weekly quota (§6.5 *Period quotas*, `perWeek` 0–6); each «yes» (did the bad thing) day counts 1, and the third «yes» with `perWeek = 2` is *bad*.
+
+**Worked example.** «Sport», strong, N = 4. Mon–Thu done: four *excellent* days, the week streak is 1 from Thursday (target met), so Thu already earns the full bonus. Fri–Sun not done: target met, so those days are neutral (*not applicable* while reachable, never bad). Another week, N = 5: Mon and Tue missed is still reachable (5 days left, 5 needed), both days neutral; Wed missed makes it unreachable, so Wed is *tolerable* (0), never negative. If the week ends with 3 of 5, a streak of 3 becomes floor(3 × ½) = 1.
+
 ## 7. Next-morning daily review — explicitly agreed
 
 - Users can record provisional actions during the day.
@@ -335,7 +360,7 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
 - Wishlist, Unlock Rewards, Surprise Reward.
 - Goal: correlate and, when possible, align rating with real subjective wellbeing without confusing the two.
 - User selects habits from suggestions and can add their own.
-- Scoring ruleset v1 (§6.5): 60/20/20 day budget, zoned habits, weekly quotas, streak rules, review window, Elo formula.
+- Scoring ruleset v1 (§6.5): 60/20/20 day budget, zoned habits, weekly quotas, streak rules, review window, Elo formula. Ruleset v2 (2026-11-08): constructive yes/no weekly goal «N days per week» with week streaks (§6.5 v2); everything else stays v1.1.
 - Accounts and sync (2026-11-04): Supabase backend; sign-in required (email + password or Google); no email confirmation; password reset by email via Resend SMTP on the user's own domain; offline-first sync with background push/pull of raw records only (rating and streaks are never stored on the server); deployment on Vercel. Revised 2026-11-07: the server is the source of truth and the device only caches the signed-in account; on sign-in anything not cached for that account (another account's data, or pre-account local data) is dropped and the account's data is pulled — local data is never uploaded into an account and there is no keep-which-copy choice.
 
 ### Open / requires discussion
@@ -345,8 +370,7 @@ Store rating changes in an auditable ledger with references to confirmed day, ru
   - Second case (2026-11-04, deferred again): a reducer day makes the *current* day bad. Mon masturbation 1, Tue 1 (limit 2, ok), Wed sex + 0 → limit 1 < total 2 → Wed–Sun *bad*. A good action (sex, meant to "replace" masturbation) triggers bad days, against the user's intent: sex unlimited and "more is better", masturbation up to 2/week when there is no sex, each sex day replaces one. Also open: whether several sex times in one day should count more (now: per day only).
 - Overall algorithm fit (user, 2026-11-04): the user feels v1.1 does not yet capture habit-specific nuances (weekly minimum goals, reducer/quota interplay, per-day vs per-occurrence counting). Plan a dedicated review of the scoring model with real usage data before v2.
 - All-unknown reviewed day at negative rating (deferred 2026-11-07, rule kept as is): a confirmed review where every answer is *unknown* scores S = 0 and goes through the normal formula, so a negative R moves toward 0, while a skipped (unreviewed) day leaves a negative R frozen (§6.5). Confirming an empty review is thus slightly better than skipping. Revisit in the v2 scoring review.
-- Habits scheduled on specific days / "N times per week" goals (v1 treats all habits as daily).
-  - Concrete case (2026-11-04): "Спорт ≥5 times per week (Mon–Sun)". Interim: daily yes/no habit, planned rest days marked *not applicable*. To decide for a real weekly target: points per workout day vs at week end; what is *bad* (week below target vs target no longer reachable); streak counted in days or weeks.
+- Habits scheduled on *specific weekdays* (v1/v2 treat all habits as daily; «N days per week» is settled in §6.5 v2).
 - Reward Coins earning rates, redemption prices, unlock conditions and surprise mechanics.
 - Whether wellbeing directly modifies Elo or is only used for calibration/validation (recommend latter initially).
 - How to treat missing/unknown data and very long gaps.

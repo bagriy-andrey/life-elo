@@ -8,6 +8,7 @@ import {
   parseTime,
   shouldShowYesterdayReview,
   stepFor,
+  weeklyGoalNote,
 } from './reviewFlow'
 import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
@@ -225,5 +226,21 @@ describe('decideModal', () => {
     const reviews: DayReview[] = [{ day: reviewDay(now), entries: {}, confirmedAt: 1, revision: 0 }]
     expect(decideModal({ ...base, reviews, modalDay: reviewDay(now) })).toEqual({ action: 'close' })
     expect(decideModal({ ...base, reviews, savedHere: true, modalDay: reviewDay(now) })).toEqual({ action: 'none' })
+  })
+})
+
+describe('weeklyGoalNote', () => {
+  // 2026-05-10 is a Sunday; its week is Mon 05-04 .. Sun 05-10.
+  const yes = { kind: 'value', value: true } as const
+  it('counts a done day against the full target', () => {
+    const h = habit('g', 1, { weeklyGoal: { perWeek: 4 } })
+    expect(weeklyGoalNote(h, '2026-05-06', { '2026-05-06': { g: yes } })).toEqual({ done: 1, target: 4 })
+  })
+  it('pro-rates the target for a habit created mid-week', () => {
+    const h = habit('g', 1, { from: '2026-05-07', weeklyGoal: { perWeek: 4 } }, { effectiveFrom: '2026-05-07' })
+    expect(weeklyGoalNote(h, '2026-05-07', {})).toEqual({ done: 0, target: 3 })
+  })
+  it('is null without a weekly goal', () => {
+    expect(weeklyGoalNote(habit('g', 1), '2026-05-06', {})).toBeNull()
   })
 })

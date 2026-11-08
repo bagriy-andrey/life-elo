@@ -185,6 +185,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
               </span>
               {tg.items.map((h) => {
                 const zone = zoneOf(h)
+                const goal = weeklyGoalNote(h, day, byDayWithEntries())
                 return (
                   <Card key={h.id} className="stack-sm" style={{ borderLeft: `4px solid ${TIER_COLOR[tg.tier]}` }}>
                     <div className="row">
@@ -194,10 +195,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
                     <fieldset className="plain" disabled={locked}>
                       {control(h)}
                     </fieldset>
-                    {(() => {
-                      const goal = weeklyGoalNote(h, day, byDayWithEntries())
-                      return goal && <p className="muted">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>
-                    })()}
+                    {goal && <p className="muted">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>}
                   </Card>
                 )
               })}

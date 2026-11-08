@@ -1,7 +1,7 @@
 import { renderToString } from 'react-dom/server'
 import { afterEach, describe, expect, it } from 'vitest'
 import { syncStatusStore, type SyncEngine } from '../sync/engine'
-import { Account } from './Account'
+import { AccountActions, AccountSection } from './Account'
 import { AuthScreen } from './auth/AuthScreen'
 import { NewPassword } from './auth/NewPassword'
 import { withAuth } from './authTestUtils'
@@ -36,7 +36,13 @@ describe('auth screens smoke render', () => {
 
 describe('Account smoke render', () => {
   afterEach(() => syncStatusStore.set({ kind: 'idle', lastSyncedAt: undefined }))
-  const render = () => renderToString(withAuth(<Account engine={engine} onPassword={() => {}} />))
+  const render = () => renderToString(withAuth(
+      <>
+        <h2>Аккаунт</h2>
+        <AccountSection engine={engine} />
+        <AccountActions engine={engine} onPassword={() => {}} />
+      </>,
+    ))
 
   it('shows email, heading and status for idle / offline / error', () => {
     let html = render()

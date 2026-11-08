@@ -191,20 +191,3 @@ export function AccountActions({ engine, onPassword }: { engine: SyncEngine; onP
     </div>
   )
 }
-
-interface Props {
-  engine: SyncEngine
-  onPassword: () => void
-}
-
-/** Account block of the profile tab (kept until the Profile rewrite). */
-export function Account({ engine, onPassword }: Props) {
-  const { t } = useI18n()
-  return (
-    <section className="stack">
-      <h2 className="settings-title">{t('account.title')}</h2>
-      <AccountSection engine={engine} />
-      <AccountActions engine={engine} onPassword={onPassword} />
-    </section>
-  )
-}

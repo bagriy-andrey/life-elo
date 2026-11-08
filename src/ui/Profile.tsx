@@ -8,7 +8,8 @@ import { useI18n } from '../i18n'
 import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
-import { Avatar, Button, Card, Dialog, Field, SegmentedControl } from './components'
+import { APP_VERSION } from '../appVersion'
+import { Avatar, BottomSheet, Button, Card, Dialog, Field, SegmentedControl } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
@@ -21,8 +22,12 @@ interface Props {
   rating: number
   /** Calendar date (toDayKey), not the review day. */
   today: DayKey
-  /** Account block (sign-in, sync, logout), shown above the settings. */
-  account?: ReactNode
+  /** Rows of the Account section (login email, sync). */
+  accountSection?: ReactNode
+  /** Password + logout buttons, shown under the sections (and alone while there is no profile). */
+  accountActions?: ReactNode
+  /** App version for the footer. */
+  version?: string
   /** Deletes all data (server + device); rejects if it could not. */
   onClearData: () => Promise<void>
 }
@@ -227,8 +232,9 @@ function ClearData({ onClear }: { onClear: () => Promise<void> }) {
   )
 }
 
-function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
+function Settings() {
   const { t, lang, setLang } = useI18n()
+  const [sheet, setSheet] = useState(false)
   // localStorage prefs are the single source of truth; this is the only place theme changes.
   const [theme, setThemeState] = useState<Theme>(() => loadPrefs().theme)
   const setTheme = (next: Theme) => {
@@ -237,19 +243,15 @@ function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
     savePrefs({ theme: next })
   }
   return (
-    <section className="stack">
-      <h2 className="settings-title">{t('settings.title')}</h2>
-      <Card className="settings-card">
-        <div className="settings-group">
-          <span className="settings-label">{t('settings.language')}</span>
-          <SegmentedControl
-            options={LANGS.map((l) => ({ value: l, label: LANG_NAMES[l] }))}
-            value={lang}
-            onChange={setLang}
-          />
-        </div>
-        <div className="settings-group">
-          <span className="settings-label">{t('settings.theme')}</span>
+    <section className="profile-section">
+      <h3 className="profile-section-title">{t('settings.title')}</h3>
+      <Card className="profile-list">
+        <button type="button" className="profile-listrow" onClick={() => setSheet(true)}>
+          <span>{t('settings.language')}</span>
+          <span className="muted">{LANG_NAMES[lang]} ›</span>
+        </button>
+        <div className="profile-listrow static">
+          <span>{t('settings.theme')}</span>
           <SegmentedControl
             options={THEMES.map((v) => ({ value: v, label: t(`settings.theme.${v}`) }))}
             value={theme}
@@ -257,12 +259,28 @@ function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
           />
         </div>
       </Card>
-      <ClearData onClear={onClearData} />
+      <BottomSheet open={sheet} title={t('settings.languageTitle')} onClose={() => setSheet(false)}>
+        {LANGS.map((l) => (
+          <button
+            key={l}
+            type="button"
+            className="sheet-option"
+            aria-pressed={l === lang}
+            onClick={() => {
+              setLang(l)
+              setSheet(false)
+            }}
+          >
+            {LANG_NAMES[l]}
+            {l === lang && <span className="sheet-check">✓</span>}
+          </button>
+        ))}
+      </BottomSheet>
     </section>
   )
 }
 
-export function Profile({ profile, rating, today, account, onClearData }: Props) {
+export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -274,8 +292,7 @@ export function Profile({ profile, rating, today, account, onClearData }: Props)
           onDone={() => setEditing(false)}
           onCancel={profile ? () => setEditing(false) : undefined}
         />
-        {account}
-        <Settings onClearData={onClearData} />
+        {!profile && accountActions}
       </div>
     )
   }
@@ -293,9 +310,11 @@ export function Profile({ profile, rating, today, account, onClearData }: Props)
           <Button onClick={() => setEditing(true)}>{t('profile.edit')}</Button>
         </div>
         <div className="profile-id">
-          <Avatar src={profile.photo} name={profile.name} size={96} />
+          <Avatar src={profile.photo} name={profile.name} size={88} />
           <strong className="profile-name">{profile.name}</strong>
           {profile.nick && <span className="muted">@{profile.nick}</span>}
+          {profile.birth && <span className="muted">{formatBirth(profile.birth, today, t, locale)}</span>}
+          {profile.email && <span className="muted profile-email">{profile.email}</span>}
         </div>
         <div className="profile-grid">
           <Card className="profile-stat">
@@ -307,21 +326,15 @@ export function Profile({ profile, rating, today, account, onClearData }: Props)
             <strong className="profile-stat-date">{since}</strong>
           </Card>
         </div>
-        <Card className="profile-rows">
-          <div className="profile-row">
-            <span className="muted">{t('profile.email')}</span>
-            <span className="profile-row-value">{profile.email || '—'}</span>
-          </div>
-          <div className="profile-row">
-            <span className="muted">{t('profile.birth')}</span>
-            <span className="profile-row-value">
-              {profile.birth ? formatBirth(profile.birth, today, t, locale) : '—'}
-            </span>
-          </div>
-        </Card>
       </section>
-      {account}
-      <Settings onClearData={onClearData} />
+      <section className="profile-section">
+        <h3 className="profile-section-title">{t('account.title')}</h3>
+        {accountSection}
+      </section>
+      <Settings />
+      <ClearData onClear={onClearData} />
+      {accountActions}
+      <p className="muted profile-version">{t('app.version', { version })}</p>
     </div>
   )
 }

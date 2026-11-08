@@ -14,10 +14,10 @@ const profile = {
   createdAt: Date.UTC(2026, 0, 5),
 } as unknown as ProfileData
 
-const render = (p: ProfileData | null) =>
+const render = (p: ProfileData | null, rating = 12.3) =>
   renderToString(
     <I18nProvider>
-      <Profile profile={p} rating={12.3} today={today} onClearData={async () => {}} />
+      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} />
     </I18nProvider>,
   )
 
@@ -27,15 +27,24 @@ describe('Profile smoke render', () => {
     expect(html).toContain('Профиль')
     expect(html).toContain('Изменить')
     expect(html.split('Настройки')).toHaveLength(2)
+    expect(html).toContain('Аккаунт')
+    expect(html).toContain('Язык')
+    expect(html).toContain('Тема')
     expect(html).toContain('Очистить все данные')
     expect(html).toContain('Анна')
+    expect(html).toContain('версия 0.9.0')
+    expect(html).toContain('pos')
+    expect(html).not.toContain('role="dialog"')
   })
 
-  it('renders edit form without profile, plus settings', () => {
+  it('colors a negative rating', () => {
+    expect(render(profile, -3)).toContain('profile-stat-value neg')
+  })
+
+  it('renders edit form without profile and without sections', () => {
     const html = render(null)
     expect(html).toContain('Профиль')
-    expect(html.split('Настройки')).toHaveLength(2)
-    expect(html).toContain('Очистить все данные')
+    expect(html).not.toContain('Настройки')
   })
 
   it('renders in English when the stored lang is en', () => {

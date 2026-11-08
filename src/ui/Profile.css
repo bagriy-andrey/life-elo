@@ -43,7 +43,6 @@
   padding: 14px 16px;
 }
 .profile-save { width: 100%; min-height: 48px; }
-.settings-title { margin-top: var(--space-16); }
 .settings-card {
   display: flex;
   flex-direction: column;
@@ -97,3 +96,25 @@
 .login-caption { font-size: var(--text-xs); }
 .login-email-value { display: inline-flex; align-items: center; gap: var(--space-6); min-width: 0; }
 .login-email-btn { min-height: 44px; }
+.profile-email { overflow-wrap: anywhere; }
+.profile-section { display: flex; flex-direction: column; gap: var(--space-8); }
+.profile-section-title { font-size: var(--text-sm); color: var(--muted); font-weight: 600; }
+.profile-list { padding-block: 0; }
+.profile-listrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-8) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.profile-listrow.static { cursor: default; }
+.profile-listrow + .profile-listrow { border-top: 1px solid var(--border); }
+.profile-version { text-align: center; font-size: var(--text-xs); }

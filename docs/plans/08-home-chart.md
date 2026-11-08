@@ -1,6 +1,6 @@
 # 08 — Home chart + stats
 
-Status: draft
+Status: approved
 Design input: `docs/design/home/Home.dc.html` + `docs/design/home/README.md` (Claude Design export; user decisions in the README win over the mockup)
 
 ## Why

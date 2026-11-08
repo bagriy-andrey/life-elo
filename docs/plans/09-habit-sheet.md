@@ -145,7 +145,7 @@ None.
   step 8).
   Verify: `npm test` (derive-better table, mismatched stored `better` preserved, weekly target bounds, destructive
   quota mapping).
-- [ ] 5. [design-sync] New component `BottomSheet` (modal sheet sliding from the bottom, title, close button,
+- [x] 5. [design-sync] New component `BottomSheet` (modal sheet sliding from the bottom, title, close button,
   scrollable body, sticky footer slot; focus trap/restore and Escape like `Dialog`; reuse `FullScreenModal`
   focus logic if practical).
   Files: `src/ui/components/BottomSheet.tsx`, `src/ui/components/BottomSheet.css`, `src/ui/components/index.ts`,

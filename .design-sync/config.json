@@ -20,7 +20,8 @@
     "FullScreenModal": "/** Accessible name of the dialog (aria-label). */\n  label: string;\n  /** Modal content. Full-screen, non-closable (no Esc, no backdrop, no close button); focus is trapped and returns to the opener on unmount. The caller unmounts it. */\n  children: React.ReactNode;",
     "ProgressSegments": "/** Number of cards (one segment each). */\n  total: number;\n  /** Zero-based index of the current card: earlier segments are done, later ones pending. */\n  current: number;\n  /** Counter text shown above the segments, e.g. \"2 из 5\" (the component has no built-in language). */\n  counterLabel: string;\n  className?: string;",
     "QuotaDots": "/** Occurrences already used this week. */\n  used: number;\n  /** Effective weekly limit (one dot each). Warn tone, neg when used >= limit. */\n  limit: number;\n  /** Note under the dots, e.g. \"Использовано 2 из 3\" (the component has no built-in language). */\n  note: string;\n  className?: string;",
-    "SwipeCard": "/** Small uppercase caption on the card, e.g. \"Привычка\". */\n  typeLabel: string;\n  /** Big card title (habit name). */\n  title: string;\n  /** Question under the title, e.g. \"Сделали вчера?\". */\n  question: string;\n  /** Right / ✓ answer text (the component has no built-in language). */\n  goodLabel: string;\n  /** Left / ✕ answer text. */\n  badLabel: string;\n  /** Muted line at the card bottom, e.g. \"Свайп вправо — сделал, влево — не сделал\". */\n  hint: string;\n  /** Text of the quiet \"not applicable\" button; hidden when omitted. */\n  notApplicableLabel?: string;\n  /** Called once per card after the swipe/button/ArrowLeft/ArrowRight answer. Remount with a new key per card. */\n  onAnswer: (answer: \"good\" | \"bad\" | \"not_applicable\") => void;\n  /** Extra card content under the title (e.g. a QuotaDots block). */\n  children?: React.ReactNode;\n  /** Shows a card-shaped peek behind (a next card exists). */\n  peek?: boolean;"
+    "SwipeCard": "/** Small uppercase caption on the card, e.g. \"Привычка\". */\n  typeLabel: string;\n  /** Big card title (habit name). */\n  title: string;\n  /** Question under the title, e.g. \"Сделали вчера?\". */\n  question: string;\n  /** Right / ✓ answer text (the component has no built-in language). */\n  goodLabel: string;\n  /** Left / ✕ answer text. */\n  badLabel: string;\n  /** Muted line at the card bottom, e.g. \"Свайп вправо — сделал, влево — не сделал\". */\n  hint: string;\n  /** Text of the quiet \"not applicable\" button; hidden when omitted. */\n  notApplicableLabel?: string;\n  /** Called once per card after the swipe/button/ArrowLeft/ArrowRight answer. Remount with a new key per card. */\n  onAnswer: (answer: \"good\" | \"bad\" | \"not_applicable\") => void;\n  /** Extra card content under the title (e.g. a QuotaDots block). */\n  children?: React.ReactNode;\n  /** Shows a card-shaped peek behind (a next card exists). */\n  peek?: boolean;",
+    "BottomSheet": "/** Renders nothing when false. */\n  open: boolean;\n  /** Heading in the sheet header; also the accessible name (aria-labelledby). */\n  title: string;\n  /** Called on Escape, overlay click and the close button. */\n  onClose: () => void;\n  /** Accessible name of the round close button (the component has no built-in language). */\n  closeLabel: string;\n  /** Sticky footer under the scrollable body (e.g. the primary action); hidden when omitted. */\n  footer?: React.ReactNode;\n  /** Scrollable sheet body. */\n  children: React.ReactNode;"
   },
   "overrides": {
     "TabBar": {
@@ -78,6 +79,10 @@
     "SwipeCard": {
       "cardMode": "single",
       "viewport": "420x560"
+    },
+    "BottomSheet": {
+      "cardMode": "single",
+      "viewport": "420x520"
     }
   },
   "readmeHeader": ".design-sync/conventions.md"

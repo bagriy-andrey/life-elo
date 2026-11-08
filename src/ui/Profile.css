@@ -93,3 +93,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sync-btn.spinning { animation: none; }
 }
+.login-email { display: flex; flex-direction: column; min-width: 0; }
+.login-caption { font-size: var(--text-xs); }
+.login-email-value { display: inline-flex; align-items: center; gap: var(--space-6); min-width: 0; }
+.login-email-btn { min-height: 44px; }

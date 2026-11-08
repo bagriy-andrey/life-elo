@@ -1,16 +1,17 @@
 # Handoff
 Updated: 2026-11-08 by Claude Code
-Branch: yesterday-review-modal (PR #6)
-Plan: docs/plans/07-yesterday-review-modal.md — done (14/14), verifier PASS. Tests 289 / lint / build green
+Branch: home-chart (from main, not pushed)
+Plan: docs/plans/08-home-chart.md — done (5/5), verifier PASS on every step. Tests 310 / lint / build green
 (1 old lint warning: src/i18n/index.tsx:40).
 ## In progress
-Nothing uncommitted.
+Nothing uncommitted. `stash@{0}` "home-chart draft" = pre-plan draft, obsolete; drop after merge.
 ## Next step (user)
-1. ~~Manual browser check~~ done by the user 2026-11-08: all works.
-2. ~~/design-sync~~ done 2026-11-08 (4 new components uploaded; last-sync recorded).
-3. Review and merge PR #6, then deploy.
+1. Manual check in `npm run dev`: tap points/tiles, 10 days ↔ all-time toggle, scroll, light/dark, ru/en/uk, 375px.
+2. Run `/design-sync` (HistoryEntry got `defaultOpen`; dtsPropsFor already updated), then record last-sync.
+3. Push + open PR for home-chart.
 ## Broken / open questions
-- Day boundary is now calendar midnight (user decision 2026-11-07); 04:00 wrap only for bedtime times.
-- Weekly goals for constructive habits: deferred to a separate feature (needs scoring decisions).
-- Known from before: password-reset email not arriving (Resend test sender); Google sign-in in iOS PWA unverified.
+- Header Pill tone for delta exactly 0 is green (Pill has no neutral tone), same as the mockup.
+- Day boundary is calendar midnight; 04:00 wrap only for bedtime times.
+- Weekly goals for constructive habits: deferred (needs scoring decisions).
+- Known: password-reset email not arriving (Resend test sender); Google sign-in in iOS PWA unverified.
 - `--warn` token has no dark-theme value (tokens.css), cosmetic.

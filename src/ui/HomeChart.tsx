@@ -4,6 +4,7 @@ import { useI18n } from '../i18n'
 import { cx } from './components/cx'
 import { smoothPath, chartGeometry, periodStats, TEN_DAYS, type HomeRange } from './homeStats'
 import { formatDay, formatSigned } from './labels'
+import './components/Card.css'
 import './HomeChart.css'
 
 interface Props {
@@ -80,7 +81,7 @@ export function HomeChart({ ledger, selected, onSelect, range, onRangeChange }: 
   const line = smoothPath(geo.points)
   const first = geo.points[0]
   const last = geo.points.at(-1)!
-  const area = `${line} L${last[0]},${geo.height} L${first[0]},${geo.height} Z`
+  const area = `${line} L${last[0]},${geo.zeroY} L${first[0]},${geo.zeroY} Z`
 
   return (
     <section className="card home-chart">
@@ -93,7 +94,7 @@ export function HomeChart({ ledger, selected, onSelect, range, onRangeChange }: 
           </span>
         </div>
         {hasRanges && (
-          <div role="tablist" className="home-range">
+          <div role="tablist" aria-label={t('home.rangeLabel')} className="home-range">
             {(['ten', 'all'] as const).map((r) => (
               <button
                 key={r}

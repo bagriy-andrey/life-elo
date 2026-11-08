@@ -250,7 +250,7 @@ function Settings() {
           <span>{t('settings.language')}</span>
           <span className="muted">{LANG_NAMES[lang]} ›</span>
         </button>
-        <div className="profile-listrow static">
+        <div className="profile-listrow static theme-row">
           <span>{t('settings.theme')}</span>
           <SegmentedControl
             options={THEMES.map((v) => ({ value: v, label: t(`settings.theme.${v}`) }))}

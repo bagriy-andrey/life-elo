@@ -23,5 +23,8 @@ Codex: perform the same loop yourself, following each role file instead of dispa
    reported "Design re-sync: needed" or a `[design-sync]` step was built, put
    "Run `/design-sync`" in Next step and tell the user. Rewrite `HANDOFF.md` in the
    `handoff` skill's format and commit it separately as `handoff: <state>`.
+   When the last step of the plan is checked and verified, bump `package.json` and
+   `package-lock.json` to `0.NN.0` (NN = plan number) and commit `chore: version 0.NN.0`;
+   a fix round within a plan bumps the patch (`0.NN.1`, ...).
 
 Report: steps done, verdicts, commits, anything blocking. Keep it short.

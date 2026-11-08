@@ -50,6 +50,7 @@ Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude w
 Skills in `.claude/skills/` (Codex: open the SKILL.md and follow it yourself):
 `build-plan` (implement → verify → ≤1 fix round), `handoff`, `workflow-retro`.
 Plan checkboxes are the progress source of truth; scoring decisions always go to the user.
+App version: `0.NN.0` per finished plan, patch for fix rounds; commit `chore: version 0.NN.0`.
 
 ## Claude Design
 Components/tokens are synced to Claude Design by the user-run `/design-sync` (reads `.design-sync/`,

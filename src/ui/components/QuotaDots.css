@@ -1,0 +1,25 @@
+.quota-dots {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.quota-warn { --quota-color: var(--warn); }
+.quota-neg { --quota-color: var(--neg); }
+.quota-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.quota-dot {
+  width: var(--space-12);
+  height: var(--space-12);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--quota-color);
+  box-sizing: border-box;
+}
+.quota-dot-used { background: var(--quota-color); }
+.quota-note {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--quota-color);
+}

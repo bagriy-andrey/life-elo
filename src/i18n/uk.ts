@@ -185,6 +185,7 @@ export const uk: Dict = {
   'profile.photoLabel': "Обрати фото",
   'profile.saveError': "Не вдалося зберегти профіль. Спробуйте ще раз.",
   'settings.title': "Налаштування",
+  'settings.data': "Дані",
   'settings.language': "Мова",
   'settings.theme': "Тема",
   'settings.theme.system': "Системна",

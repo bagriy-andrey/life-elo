@@ -184,6 +184,7 @@ export const ru = {
   'profile.photoLabel': "Выбрать фото",
   'profile.saveError': "Не удалось сохранить профиль. Попробуйте ещё раз.",
   'settings.title': "Настройки",
+  'settings.data': "Данные",
   'settings.language': "Язык",
   'settings.theme': "Тема",
   'settings.theme.system': "Системная",

@@ -1,15 +1,18 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
+import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
 import { saveProfile } from '../db/profile'
+import { addDays, reviewDay, toDayKey } from '../domain/day'
 import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
-import type { DayKey } from '../domain/types'
+import type { DayKey, DayReview, Habit } from '../domain/types'
+import { RULESET_V1 } from '../engine/config'
 import { useI18n } from '../i18n'
 import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
 import { APP_VERSION } from '../appVersion'
-import { Avatar, BottomSheet, Button, Card, Dialog, Field, SegmentedControl } from './components'
+import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, SegmentedControl } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
@@ -188,11 +191,13 @@ export function ProfileEdit({ profile, today, onDone, onCancel }: {
 
 const LANG_NAMES = { ru: 'Русский', en: 'English', uk: 'Українська' } as const
 
-function ClearData({ onClear }: { onClear: () => Promise<void> }) {
+function DataSection({ onClear, version }: { onClear: () => Promise<void>; version: string }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [clearing, setClearing] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportState, setExportState] = useState<'idle' | 'done' | 'error'>('idle')
   const close = () => {
     if (clearing) return
     setOpen(false)
@@ -216,12 +221,47 @@ function ClearData({ onClear }: { onClear: () => Promise<void> }) {
     }
     location.reload()
   }
+  const doExport = async () => {
+    if (exporting) return
+    setExporting(true)
+    setExportState('idle')
+    try {
+      const now = new Date()
+      // One Dexie read: the exported tables and the replay input are the same snapshot.
+      const tables = await readExportTables()
+      // Same `today` as App/Home replay: the day after the review day.
+      const ledger = exportLedger(
+        tables.habits as Habit[],
+        tables.reviews as DayReview[],
+        RULESET_V1,
+        addDays(reviewDay(now), 1),
+      )
+      const json = JSON.stringify(buildExport({ tables, ledger }, now, version), null, 2)
+      const result = await deliverExport(json, `life-elo-${toDayKey(now)}.json`)
+      setExportState(result === 'shared' ? 'done' : 'idle')
+    } catch {
+      setExportState('error')
+    } finally {
+      setExporting(false)
+    }
+  }
   return (
-    <div className="clear-data">
-      <Button variant="quiet" className="neg clear-btn" onClick={() => setOpen(true)}>
-        {t('settings.clear')}
-      </Button>
-      <span className="muted clear-hint">{t('settings.clearHint')}</span>
+    <section className="profile-section">
+      <h3 className="profile-section-title">{t('settings.data')}</h3>
+      <Card className="profile-list">
+        <button type="button" className="profile-listrow" onClick={doExport} disabled={exporting}>
+          <span>{t('settings.export')}</span>
+          <span className="muted">{exportState === 'done' ? t('settings.exportDone') : t('settings.exportHint')} ›</span>
+        </button>
+        <button type="button" className="profile-listrow clear-row" onClick={() => setOpen(true)}>
+          <span className="clear-row-text">
+            <span className="neg">{t('settings.clear')}</span>
+            <span className="muted clear-hint">{t('settings.clearHint')}</span>
+          </span>
+          <span className="muted">›</span>
+        </button>
+      </Card>
+      {exportState === 'error' && <Notice tone="error">{t('settings.exportError')}</Notice>}
       <Dialog open={open} title={t('settings.clearTitle')} onClose={close}>
         <p className="dialog-body">{t('settings.clearBody')}</p>
         {failed && <p className="neg" role="alert">{t('settings.clearError')}</p>}
@@ -234,7 +274,7 @@ function ClearData({ onClear }: { onClear: () => Promise<void> }) {
           </Button>
         </div>
       </Dialog>
-    </div>
+    </section>
   )
 }
 
@@ -338,7 +378,7 @@ export function Profile({ profile, rating, today, accountSection, accountActions
         {accountSection}
       </section>
       <Settings />
-      <ClearData onClear={onClearData} />
+      <DataSection onClear={onClearData} version={version} />
       {accountActions}
       <p className="muted profile-version">{t('app.version', { version })}</p>
     </div>

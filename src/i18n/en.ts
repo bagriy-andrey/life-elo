@@ -171,6 +171,7 @@ export const en: Dict = {
   'profile.photoLabel': "Choose photo",
   'profile.saveError': "Could not save the profile. Please try again.",
   'settings.title': "Settings",
+  'settings.data': "Data",
   'settings.language': "Language",
   'settings.theme': "Theme",
   'settings.theme.system': "System",

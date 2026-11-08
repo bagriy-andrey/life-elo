@@ -2,52 +2,55 @@ import { useState } from 'react'
 import { useAuth } from '../auth/context'
 import { AUTH_FALLBACK } from '../auth/errors'
 import { db } from '../db/db'
-import { useI18n, type I18n } from '../i18n'
+import { useI18n } from '../i18n'
 import type { Key } from '../i18n/types'
-import { useSyncStatus, type SyncEngine, type SyncStatus } from '../sync/engine'
+import { useSyncStatus, type SyncEngine } from '../sync/engine'
 import { performLogout } from '../sync/logout'
 import { clearLocalData } from '../sync/outbox'
 import { Button, Card, Notice } from './components'
+import { syncView } from './syncView'
 import './Profile.css'
 
-function formatSynced(at: number, t: I18n['t'], locale: string, now = new Date()): string {
-  const d = new Date(at)
-  const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
-  if (d.toDateString() === now.toDateString()) return t('sync.syncedAt', { time })
-  const date = d.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace(/\.$/, '')
-  return t('sync.syncedOn', { date, time })
-}
-
-function statusText(s: SyncStatus, t: I18n['t'], locale: string): string {
-  switch (s.kind) {
-    case 'syncing':
-      return t('sync.syncing')
-    case 'offline':
-      return t('sync.offline')
-    case 'error':
-      return t('sync.error')
-    case 'update-required':
-      return t('sync.updateRequired')
-    default:
-      return s.lastSyncedAt ? formatSynced(s.lastSyncedAt, t, locale) : t('sync.never')
-  }
-}
-
-interface Props {
-  engine: SyncEngine
-  onPassword: () => void
-}
-
-/** Account block of the profile tab: sign-in identity, sync status, password, logout. */
-export function Account({ engine, onPassword }: Props) {
-  const { user, googleOnly, signOut } = useAuth()
+/** Account rows: login email + sync status with a round resync button. */
+export function AccountSection({ engine }: { engine: SyncEngine }) {
+  const { user } = useAuth()
   const { t, locale } = useI18n()
   const status = useSyncStatus()
+  const { tone, label } = syncView(status, t, locale)
+  const syncing = status.kind === 'syncing'
+  return (
+    <Card className="profile-rows">
+      <div className="profile-row">
+        <span className="muted">{t('account.loginEmail')}</span>
+        <span className="profile-row-value">{user?.email || '—'}</span>
+      </div>
+      <div className="profile-row">
+        <span className="muted">{t('account.sync')}</span>
+        <span className="sync-row">
+          <span className={`sync-dot ${tone}`} aria-hidden="true" />
+          <span className="profile-row-value">{label}</span>
+          <button
+            type="button"
+            className={`sync-btn${syncing ? ' spinning' : ''}`}
+            aria-label={t('account.resync')}
+            disabled={syncing}
+            onClick={() => void engine.resync()}
+          >
+            ↻
+          </button>
+        </span>
+      </div>
+    </Card>
+  )
+}
+
+/** Password + logout buttons (logout confirms when changes are unsynced). */
+export function AccountActions({ engine, onPassword }: { engine: SyncEngine; onPassword: () => void }) {
+  const { googleOnly, signOut } = useAuth()
+  const { t } = useI18n()
   const [busy, setBusy] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState<Key | ''>('')
-
-  const email = user?.email ?? ''
 
   /** Only explicit logout clears local data (never on a SIGNED_OUT event). */
   const finish = async () => {
@@ -86,26 +89,7 @@ export function Account({ engine, onPassword }: Props) {
   }
 
   return (
-    <section className="stack">
-      <h2 className="settings-title">{t('account.title')}</h2>
-      <Card className="profile-rows">
-        <div className="profile-row">
-          <span className="muted">{t('account.loginEmail')}</span>
-          <span className="profile-row-value">{email || '—'}</span>
-        </div>
-        <div className="profile-row">
-          <span className="muted">{t('account.sync')}</span>
-          <span className="profile-row-value">{statusText(status, t, locale)}</span>
-        </div>
-      </Card>
-      {status.kind === 'error' && (
-        <Button className="clear-btn" onClick={() => void engine.run()}>
-          {t('sync.retry')}
-        </Button>
-      )}
-      <Button variant="quiet" className="clear-btn" onClick={() => void engine.resync()}>
-        {t('account.resync')}
-      </Button>
+    <div className="stack">
       {error && <Notice tone="error">{t(error)}</Notice>}
       <Button className="clear-btn" onClick={onPassword}>
         {googleOnly ? t('password.set') : t('account.changePassword')}
@@ -127,6 +111,23 @@ export function Account({ engine, onPassword }: Props) {
           {busy ? t('auth.busy') : t('account.logout')}
         </Button>
       )}
+    </div>
+  )
+}
+
+interface Props {
+  engine: SyncEngine
+  onPassword: () => void
+}
+
+/** Account block of the profile tab (kept until the Profile rewrite). */
+export function Account({ engine, onPassword }: Props) {
+  const { t } = useI18n()
+  return (
+    <section className="stack">
+      <h2 className="settings-title">{t('account.title')}</h2>
+      <AccountSection engine={engine} />
+      <AccountActions engine={engine} onPassword={onPassword} />
     </section>
   )
 }

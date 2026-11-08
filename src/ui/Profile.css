@@ -65,3 +65,31 @@
 }
 .clear-btn { width: 100%; min-height: 48px; }
 .clear-hint { font-size: var(--text-xs); text-align: center; }
+.sync-row { display: inline-flex; align-items: center; gap: var(--space-6); min-width: 0; }
+.sync-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.sync-dot.ok { background: var(--pos); }
+.sync-dot.err { background: var(--neg); }
+.sync-dot.busy { background: var(--muted); opacity: 0.5; }
+.sync-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+.sync-btn:disabled { opacity: 0.6; cursor: default; }
+.sync-btn.spinning { animation: sync-spin 1s linear infinite; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .sync-btn.spinning { animation: none; }
+}

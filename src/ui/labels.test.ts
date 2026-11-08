@@ -4,7 +4,7 @@ import { ru } from '../i18n/ru'
 import { translate } from '../i18n/translate'
 import { LOCALE, type Dict, type Key, type Lang, type Params } from '../i18n/types'
 import { uk } from '../i18n/uk'
-import { booleanOptions, formatBirth, formatDay, quotaSummary, ruleSummary, zoneLabels } from './labels'
+import { booleanOptions, formatBirth, formatDay, habitMeta, quotaSummary, ruleSummary, zoneLabels } from './labels'
 
 const tFor = (lang: Lang) => {
   const dict: Dict = { ru, en, uk }[lang]
@@ -72,5 +72,18 @@ describe('formatBirth', () => {
     expect(formatBirth('1996-05-14', '2026-05-14', tFor('en'), LOCALE.en)).toContain('May 1996 · 30 years old')
     expect(formatBirth('1996-05-14', '2026-05-14', tFor('uk'), LOCALE.uk)).toContain('травня 1996')
     expect(formatBirth('1996-05-14', '2026-05-14', tFor('uk'), LOCALE.uk)).toContain('· 30 років')
+  })
+})
+
+describe('habitMeta', () => {
+  const t = (key: Key, params?: Params) => translate(ru, key, params, LOCALE.ru)
+  const v = (over: object) => ({ from: '2026-01-01', tier: 'strong' as const, rule: { kind: 'boolean' as const }, ...over })
+  it('describes yes/no, weekly goal and measured norms', () => {
+    expect(habitMeta(t, 'constructive', v({}))).toBe('Конструктивная · Сильная · Да/нет')
+    expect(habitMeta(t, 'constructive', v({ weeklyGoal: { perWeek: 4 } }))).toBe('Конструктивная · Сильная · от 4 раз в неделю')
+    expect(habitMeta(t, 'destructive', v({ quota: { perWeek: 1 } }))).toBe('Нежелательная · Сильная · до 1 раза в неделю')
+    const time = v({ rule: { kind: 'measured', unit: 'time', better: 'lower', excellent: '23:00' } })
+    expect(habitMeta(t, 'constructive', time)).toContain('до 23:00')
+    expect(habitMeta(t, 'destructive', time)).toContain('не позже 23:00')
   })
 })

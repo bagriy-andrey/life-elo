@@ -1,4 +1,4 @@
-import type { HabitDirection, ImpactTier, Quota, Zone, ZonedRule } from '../domain/types'
+import type { HabitDirection, HabitVersion, ImpactTier, Quota, Zone, ZonedRule } from '../domain/types'
 import { ageOn } from '../domain/profile'
 import type { RuleChoice } from '../domain/habitSetup'
 import type { I18n } from '../i18n'
@@ -25,7 +25,6 @@ export const zoneLabels = (t: T) => mapOf(ZONES, (k) => t(`zone.${k}`))
 /** Plural-aware: pass the displayed value as `count`. */
 export const unitLabels = (t: T, count = 0) => mapOf(UNITS, (k) => t(`unit.${k}`, { count }))
 export const ruleChoiceLabels = (t: T) => mapOf(RULE_CHOICES, (k) => t(`ruleChoice.${k}`))
-export const betterLabels = (t: T) => ({ lower: t('better.lower'), higher: t('better.higher') })
 export const notApplicableLabel = (t: T) => t('answer.na')
 
 /** Tier color (weight, not good/bad): green/red stay reserved for results (points, zones). */
@@ -94,3 +93,34 @@ export function quotaSummary(t: T, quota: Quota, nameOf: (id: string) => string 
 /** «14 мая 1996 · 30 лет». `today` is a calendar date (toDayKey), not a review day. */
 export const formatBirth = (birth: string, today: string, t: T, locale: string) =>
   `${new Date(`${birth}T12:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} · ${t('profile.age', { count: ageOn(birth, today) })}`
+
+/** Norm part of a habit card meta line: weekly goal/limit, measured threshold or plain yes/no. */
+export function normSummary(t: T, version: Pick<HabitVersion, 'rule' | 'quota' | 'weeklyGoal'>, direction: HabitDirection): string {
+  const { rule, quota, weeklyGoal } = version
+  if (rule.kind === 'boolean') {
+    if (weeklyGoal) return t('habits.metaWeekGoal', { count: weeklyGoal.perWeek })
+    if (quota?.perWeek !== undefined) return t('habits.metaWeekLimit', { count: quota.perWeek })
+    return t('ruleChoice.boolean')
+  }
+  const value = rule.excellent
+  if (rule.unit === 'time') {
+    return t(direction === 'constructive' ? 'habits.metaBy' : 'habits.metaNotLater', { value })
+  }
+  const unit = t(`unit.${rule.unit}`, { count: Number(value) })
+  if (rule.better === 'lower') {
+    if (quota?.perDay === undefined && quota?.perWeek !== undefined) {
+      return t('habits.metaMaxWeek', { value: quota.perWeek, unit: t(`unit.${rule.unit}`, { count: quota.perWeek }) })
+    }
+    return t('habits.metaMaxDay', { value, unit })
+  }
+  return t('habits.metaMinDay', { value, unit })
+}
+
+/** «Тип · Важность · норма» under the habit name. */
+export function habitMeta(t: T, direction: HabitDirection, version: HabitVersion): string {
+  return t('habits.meta', {
+    kind: directionLabels(t)[direction],
+    tier: tierLabels(t)[version.tier],
+    norm: normSummary(t, version, direction),
+  })
+}

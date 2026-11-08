@@ -171,7 +171,7 @@ None.
   (the `better` labels), if any i18n test checks key parity run it.
   Verify: `npm test` (i18n parity test if present), `npm run lint`.
   Note: `better.*` keys kept (still used by `Habits.tsx` until step 8, which removes them and `betterLabels`); `habitError.weeklyTarget` unchanged; plural keys for stepper hints and meta-line (`habits.metaWeekGoal/Limit`), measured meta lines are `habits.metaMin*/Max*`; `habits.meta` joins kind · tier · norm; `review.weekProgress` added.
-- [ ] 8. Habits screen: header «Привычки» + «Добавить», empty state, list cards (dot + meta line
+- [x] 8. Habits screen: header «Привычки» + «Добавить», empty state, list cards (dot + meta line
   «Тип · Важность · норма», existing grouping by direction and tier kept, paused cards dimmed), `HabitSheet`
   (create/edit per the mockup: Название, Тип cards, Важность, Как отмечать chips, Цель/Норма block: period switch +
   stepper + week dots for yes/no, three threshold fields for measured, quota fields + reducer select for
@@ -183,6 +183,7 @@ None.
   `src/ui/Profile.test.tsx`). If `HabitSheet.css` is global-affecting, mark/adjust per design-sync rules.
   Verify: `npm test`, `npm run lint`, `npm run build`; manual: create constructive 4/week, destructive weekly
   yes/no, measured with 3 thresholds, edit/pause/delete in the dev server.
+  Note: `better.*`, `betterLabels` and unused habits i18n keys removed; `form.better` cleared on direction/kind change; sheet state in `HabitSheet` (mounted by `Habits`), smoke tests render `HabitSheet` directly; `labels.ts` gets `normSummary`/`habitMeta`; styles for list + sheet in `HabitSheet.css`; manual dev-server check not done.
 - [ ] 9. Review screens: weekly-goal progress note.
   Files: `src/ui/YesterdayReview.tsx` (show «На этой неделе: X из N» on a weekly-goal card via
   `weeklyGoalProgress` including the answers given so far for `day`), `src/ui/Review.tsx` (same note, or a plain

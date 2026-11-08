@@ -55,7 +55,7 @@ export function Home({ result, habits, pendingDay, onReview }: Props) {
         <div className="home-head-delta">
           {last ? (
             <>
-              <Pill tone={last.delta >= 0 ? 'pos' : 'neg'}>{formatSigned(last.delta, 1)}</Pill>
+              <Pill tone={last.delta >= 0 ? 'pos' : 'neg'}>{formatSigned(last.delta)}</Pill>
               <span>{t('home.forDay', { day: formatDay(last.day, locale) })}</span>
             </>
           ) : (

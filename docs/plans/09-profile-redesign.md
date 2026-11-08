@@ -1,6 +1,6 @@
 # 09 — Profile redesign
 
-Status: approved
+Status: done
 Design input: `docs/design/profile/Profile.dc.html` + `docs/design/profile/README.md` (Claude Design export; the plan wins over the mockup; mockup numbers/dates/version are placeholders for real data)
 
 ## Why

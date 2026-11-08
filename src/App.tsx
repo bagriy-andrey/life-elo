@@ -52,7 +52,7 @@ function MainApp() {
       document.removeEventListener('visibilitychange', onVisible)
       clearTimeout(timer)
     }
-  }, [today])
+  }, [now])
 
   const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
@@ -159,7 +159,8 @@ function MainApp() {
           onClose={closeModal}
           onSaving={(active) => {
             savedHere.current = active
-            if (active) lastSavedDay.current = modalDay
+            // `false` only follows a failed save: the day may open again.
+            lastSavedDay.current = active ? modalDay : null
           }}
         />
       )}

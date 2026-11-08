@@ -112,3 +112,29 @@ export function shouldShowYesterdayReview({ habits, reviews, now, lastSyncedAt }
   if (reviews.some((r) => r.day === day)) return false
   return buildCards(habits, day).length > 0
 }
+
+export interface ModalInput extends ShowInput {
+  /** Day currently shown in the modal, `null` when closed. */
+  modalDay: DayKey | null
+  /** The user is saving / has saved this day in this modal (not a remote review). */
+  savedHere: boolean
+  /** Last day this modal saved; never re-opened (avoids a flicker before `reviews` catches up). */
+  lastSavedDay: DayKey | null
+}
+
+export type ModalDecision = { action: 'open'; day: DayKey } | { action: 'close' } | { action: 'none' }
+
+/** Open/close decision of the yesterday-review modal for the current clock. */
+export function decideModal(input: ModalInput): ModalDecision {
+  const { modalDay, savedHere, lastSavedDay, habits, reviews, now } = input
+  if (modalDay === null) {
+    const day = reviewDay(now)
+    if (day === lastSavedDay) return { action: 'none' }
+    return shouldShowYesterdayReview(input) ? { action: 'open', day } : { action: 'none' }
+  }
+  // Reviewed on another device while answering.
+  if (!savedHere && reviews.some((r) => r.day === modalDay)) return { action: 'close' }
+  // Nothing left to ask (e.g. remote wipe).
+  if (buildCards(habits, modalDay).length === 0) return { action: 'close' }
+  return { action: 'none' }
+}

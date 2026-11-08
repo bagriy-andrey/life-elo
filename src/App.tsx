@@ -2,7 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { db } from './db/db'
 import { addDays, reviewDay, toDayKey } from './domain/day'
-import { shouldShowYesterdayReview } from './domain/reviewFlow'
+import { nextMidnight } from './domain/reviewDeadline'
+import { decideModal } from './domain/reviewFlow'
 import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
@@ -34,19 +35,24 @@ function MainApp() {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>('home')
   const [passwordOpen, setPasswordOpen] = useState(false)
-  const [yesterday, setYesterday] = useState(() => reviewDay(new Date()))
-  const [today, setToday] = useState(() => toDayKey(new Date()))
+  const [now, setNow] = useState(() => new Date())
+  const yesterday = reviewDay(now)
+  const today = toDayKey(now)
   const [reviewing, setReviewing] = useState(yesterday)
 
-  // The PWA may stay open across midnight: re-evaluate when it comes back.
+  // The PWA may stay open across midnight: re-read the clock when it comes back and at midnight.
   useEffect(() => {
-    const refresh = () => {
-      setYesterday(reviewDay(new Date()))
-      setToday(toDayKey(new Date()))
+    const refresh = () => setNow(new Date())
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh()
     }
-    document.addEventListener('visibilitychange', refresh)
-    return () => document.removeEventListener('visibilitychange', refresh)
-  }, [])
+    document.addEventListener('visibilitychange', onVisible)
+    const timer = setTimeout(refresh, Math.max(1000, nextMidnight(new Date()).getTime() - Date.now() + 500))
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      clearTimeout(timer)
+    }
+  }, [today])
 
   const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
@@ -63,24 +69,26 @@ function MainApp() {
   const lastSyncedAt = useLiveQuery(async () => (await getSyncState()).lastSyncedAt, [])
   const [modalDay, setModalDay] = useState<string | null>(null)
   const savedHere = useRef(false)
-  const due = useMemo(
-    () => shouldShowYesterdayReview({ habits, reviews, now: new Date(), lastSyncedAt }),
-    // `yesterday`/`today` change on visibilitychange and re-evaluate the clock-based condition.
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-    [habits, reviews, lastSyncedAt, yesterday, today],
-  )
+  const lastSavedDay = useRef<string | null>(null)
   const closeModal = () => {
     savedHere.current = false
     setModalDay(null)
+    // A locked/stale day must not re-open forever: re-read the clock.
+    setNow(new Date())
   }
   useEffect(() => {
-    if (modalDay === null) {
-      if (due) setModalDay(yesterday)
-    } else if (!savedHere.current && reviews.some((r) => r.day === modalDay)) {
-      // The day was reviewed on another device while the user was still answering.
-      closeModal()
-    }
-  }, [due, modalDay, yesterday, reviews])
+    const d = decideModal({
+      modalDay,
+      savedHere: savedHere.current,
+      lastSavedDay: lastSavedDay.current,
+      habits,
+      reviews,
+      now,
+      lastSyncedAt,
+    })
+    if (d.action === 'open') setModalDay(d.day)
+    else if (d.action === 'close') closeModal()
+  }, [modalDay, habits, reviews, now, lastSyncedAt])
 
   const mainRef = useRef<HTMLElement>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
@@ -151,6 +159,7 @@ function MainApp() {
           onClose={closeModal}
           onSaving={(active) => {
             savedHere.current = active
+            if (active) lastSavedDay.current = modalDay
           }}
         />
       )}

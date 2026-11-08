@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCards,
+  decideModal,
   entryForYesNo,
   goalLabelParts,
   parseNumeric,
@@ -10,6 +11,7 @@ import {
 } from './reviewFlow'
 import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
+import { reviewDay } from './day'
 import type { DayReview, Habit, HabitVersion } from './types'
 
 const DAY = '2026-05-10'
@@ -198,5 +200,30 @@ describe('shouldShowYesterdayReview', () => {
   })
   it('is open through 23:59 of the next day', () => {
     expect(shouldShowYesterdayReview({ ...base, now: new Date(2026, 4, 11, 23, 59) })).toBe(true)
+  })
+})
+
+describe('decideModal', () => {
+  const now = new Date(2026, 5, 10, 12)
+  const base = { habits: [habit('a', 1)], reviews: [] as DayReview[], now, lastSyncedAt: 1, savedHere: false, lastSavedDay: null }
+  it('opens for the current review day', () => {
+    expect(decideModal({ ...base, modalDay: null })).toEqual({ action: 'open', day: reviewDay(now) })
+  })
+  it('does not re-open the day this modal just saved', () => {
+    expect(decideModal({ ...base, modalDay: null, lastSavedDay: reviewDay(now) })).toEqual({ action: 'none' })
+  })
+  it('opens the fresh day after midnight even if a stale day was saved', () => {
+    expect(decideModal({ ...base, modalDay: null, lastSavedDay: '2026-06-01' })).toEqual({
+      action: 'open',
+      day: reviewDay(now),
+    })
+  })
+  it('closes when no cards are left', () => {
+    expect(decideModal({ ...base, habits: [], modalDay: reviewDay(now) })).toEqual({ action: 'close' })
+  })
+  it('closes when reviewed elsewhere, but not when saved here', () => {
+    const reviews: DayReview[] = [{ day: reviewDay(now), entries: {}, confirmedAt: 1, revision: 0 }]
+    expect(decideModal({ ...base, reviews, modalDay: reviewDay(now) })).toEqual({ action: 'close' })
+    expect(decideModal({ ...base, reviews, savedHere: true, modalDay: reviewDay(now) })).toEqual({ action: 'none' })
   })
 })

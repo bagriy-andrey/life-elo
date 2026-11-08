@@ -59,6 +59,7 @@
   font-size: var(--text-xs);
   cursor: pointer;
 }
+.profile-photo-actions { display: flex; gap: 4px; }
 .profile-save { width: 100%; min-height: 48px; }
 .settings-card {
   display: flex;

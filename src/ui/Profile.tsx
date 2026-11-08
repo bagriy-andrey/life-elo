@@ -111,14 +111,16 @@ export function ProfileEdit({ profile, today, onDone, onCancel }: {
       <div className="profile-id">
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
         <Avatar name={form.name} src={shownPhoto} size={88} onClick={pickPhoto} label={t('profile.photoLabel')} disabled={processing} />
-        <Button type="button" variant="quiet" onClick={pickPhoto} disabled={processing}>
-          {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
-        </Button>
-        {shownPhoto && (
-          <Button type="button" variant="quiet" onClick={() => setPhoto(null)} disabled={processing}>
-            {t('profile.removePhoto')}
+        <div className="profile-photo-actions">
+          <Button type="button" variant="quiet" onClick={pickPhoto} disabled={processing}>
+            {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
           </Button>
-        )}
+          {shownPhoto && (
+            <Button type="button" variant="quiet" onClick={() => setPhoto(null)} disabled={processing}>
+              {t('profile.removePhoto')}
+            </Button>
+          )}
+        </div>
         {photoError && <p className="neg" role="alert">{t('profile.photoError')}</p>}
       </div>
       <Card className="profile-form">

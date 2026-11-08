@@ -33,6 +33,8 @@ interface Props {
   rating: number
   /** Closes the modal: "Продолжить" on the done screen, or "Закрыть" when the day got locked. */
   onClose: () => void
+  /** True while this modal's own save is in flight/done; false if it failed. Lets the parent tell our review from a remote one. */
+  onSaving?: (active: boolean) => void
   /** Preview/test seam: start from given answers/screen (e.g. the summary). */
   initialState?: { answers?: Record<string, HabitEntry>; screen?: Screen; index?: number }
 }
@@ -64,7 +66,7 @@ function useNow(): Date {
  * summary: answering returns to the summary). The parent must keep it mounted until `onClose`
  * (saving makes the review appear in `reviews`, which must not unmount the done screen).
  */
-export function YesterdayReview({ day, habits, reviews, rating, onClose, initialState }: Props) {
+export function YesterdayReview({ day, habits, reviews, rating, onClose, onSaving, initialState }: Props) {
   const { t, locale } = useI18n()
   const now = useNow()
   const cards = useMemo(() => buildCards(habits, day), [habits, day])
@@ -215,8 +217,10 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, initial
     const full = Object.fromEntries(cards.map((c) => [c.habitId, answers[c.habitId]]))
     const at = new Date()
     try {
+      onSaving?.(true)
       await confirmDay(day, full, at)
     } catch (e) {
+      onSaving?.(false)
       setError(e instanceof DayLockedError ? 'closed' : 'save')
       setSaving(false)
       return

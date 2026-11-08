@@ -1,7 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { db } from './db/db'
 import { addDays, reviewDay, toDayKey } from './domain/day'
+import { shouldShowYesterdayReview } from './domain/reviewFlow'
 import type { DayReview, Habit } from './domain/types'
 import { RULESET_V1 } from './engine/config'
 import { replay } from './engine/rating'
@@ -16,11 +17,13 @@ import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { Account } from './ui/Account'
 import { TabBar } from './ui/components'
+import { setBackgroundInert } from './ui/components/focus'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
 import { ProfilePassword } from './ui/ProfilePassword'
 import { Review } from './ui/Review'
+import { YesterdayReview } from './ui/YesterdayReview'
 
 type Tab = 'home' | 'review' | 'habits' | 'profile'
 
@@ -55,6 +58,39 @@ function MainApp() {
   const pendingDay =
     hasYesterdayHabits && !reviews.some((r) => r.day === yesterday) ? yesterday : undefined
 
+  // Mandatory yesterday review. `reviewDay` is fixed while the modal is open; once opened it stays
+  // mounted until onClose (saving flips the show condition, the done screen must not vanish).
+  const lastSyncedAt = useLiveQuery(async () => (await getSyncState()).lastSyncedAt, [])
+  const [modalDay, setModalDay] = useState<string | null>(null)
+  const savedHere = useRef(false)
+  const due = useMemo(
+    () => shouldShowYesterdayReview({ habits, reviews, now: new Date(), lastSyncedAt }),
+    // `yesterday`/`today` change on visibilitychange and re-evaluate the clock-based condition.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    [habits, reviews, lastSyncedAt, yesterday, today],
+  )
+  const closeModal = () => {
+    savedHere.current = false
+    setModalDay(null)
+  }
+  useEffect(() => {
+    if (modalDay === null) {
+      if (due) setModalDay(yesterday)
+    } else if (!savedHere.current && reviews.some((r) => r.day === modalDay)) {
+      // The day was reviewed on another device while the user was still answering.
+      closeModal()
+    }
+  }, [due, modalDay, yesterday, reviews])
+
+  const mainRef = useRef<HTMLElement>(null)
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const modalOpen = modalDay !== null
+  useEffect(() => {
+    if (!modalOpen) return
+    const undo = [setBackgroundInert(mainRef.current), setBackgroundInert(tabsRef.current)]
+    return () => undo.forEach((u) => u())
+  }, [modalOpen])
+
   const openReview = () => {
     setReviewing(yesterday)
     setTab('review')
@@ -62,7 +98,7 @@ function MainApp() {
 
   return (
     <div className="app">
-      <main>
+      <main ref={mainRef}>
         {tab === 'home' && (
           <Home result={result} habits={habits} pendingDay={pendingDay} onReview={openReview} />
         )}
@@ -90,6 +126,7 @@ function MainApp() {
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
+      <div ref={tabsRef}>
       <TabBar
         active={tab}
         onSelect={(id) => {
@@ -104,6 +141,19 @@ function MainApp() {
           { id: 'profile', label: t('tab.profile') },
         ]}
       />
+      </div>
+      {modalDay !== null && (
+        <YesterdayReview
+          day={modalDay}
+          habits={habits}
+          reviews={reviews}
+          rating={result.rating}
+          onClose={closeModal}
+          onSaving={(active) => {
+            savedHere.current = active
+          }}
+        />
+      )}
     </div>
   )
 }

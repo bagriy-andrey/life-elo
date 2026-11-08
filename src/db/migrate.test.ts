@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildReview, DayLockedError } from './confirm'
 import { migrateHabit, migrateReview } from './migrate'
+import { toPushItem } from '../sync/merge'
 import type { LegacyHabit, LegacyReview } from './migrate'
 
 const habit = (over: Partial<LegacyHabit> = {}): LegacyHabit => ({
@@ -83,5 +84,15 @@ describe('buildReview (lock guard)', () => {
     const now = new Date(2026, 2, 11, 9)
     const r = buildReview('2026-03-10', entries, now, { revision: 2 })
     expect(r).toEqual({ day: '2026-03-10', entries, confirmedAt: now.getTime(), revision: 3 })
+  })
+
+  it('keeps weeklyGoal on versions through a JSON push/pull round-trip', () => {
+    const h: LegacyHabit = habit({
+      versions: [{ from: '2026-01-05', tier: 'strong', rule: { kind: 'boolean' }, weeklyGoal: { perWeek: 4 } }],
+    })
+    const pushed = toPushItem('habits', h.id, h, 0, 3)
+    const pulled = migrateHabit(JSON.parse(JSON.stringify(pushed.data)) as LegacyHabit)
+    expect(pulled.versions[0].weeklyGoal).toEqual({ perWeek: 4 })
+    expect(migrateHabit(h).versions[0].weeklyGoal).toEqual({ perWeek: 4 })
   })
 })

@@ -156,8 +156,7 @@ describe('worked examples (replay)', () => {
 
   it('weeks in which the habit was not tracked are skipped: neither counted nor decayed', () => {
     const met = days([true, false, false, false, false, false, false])
-    // Weeks 2 and 3 are not reviewed and fall before the lock window only partly; instead pause via a gap:
-    // habit inactive after week 1 with no reviews in week 2-3, then reviewed again in week 4.
+    // The habit is inactive and has no reviews in weeks 2-3; it is reviewed again in week 4.
     const h = { ...habit('strong', 1), active: false }
     const r = run(h, [...met, ...days([true], '2026-11-23')])
     expect(r.streaks.h.pos).toBe(2) // week 1 met (base 1) + week 4 Mon done; weeks 2-3 did not decay it

@@ -127,7 +127,8 @@ None.
   5 of 4 still excellent; (h) a replay without weekly goals equals v1.1 output (parity snapshot).
   Verify: `npm test`.
   Note: quota test pins «no» days before the exceeding day only: `quotaZone` is cumulative, so a «no» day after the limit was exceeded is still bad (existing behaviour, not changed). Also done: `goalOf` helper, untracked-week skip pinned, `daysLeftInWeek` removed.
-- [ ] 3. Sync: pin the new field round-trip (no schema change).
+- [x] 3. Sync: pin the new field round-trip (no schema change).
+  Note: no schema change; round-trip pinned in `src/db/migrate.test.ts` (push item -> JSON -> `migrateHabit`); records.sql `data` is generic JSON.
   Files: `src/sync/merge.test.ts` or `src/sync/engine.test.ts` (habit with `versions[0].weeklyGoal` survives
   outbox → remote record → pull → `migrateHabit`), `src/db/migrate.test.ts` (new or existing: `migrateHabit`
   keeps `weeklyGoal`). Touch `src/sync/*` or `supabase/` only if a test shows the field is dropped.

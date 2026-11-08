@@ -1,6 +1,6 @@
 # 09 — Habit sheet + constructive weekly goal (ruleset v2)
 
-Status: draft
+Status: approved
 Design input: `docs/design/habits/Habits.dc.html` + `docs/design/habits/README.md` (Claude Design export, 2026-11-08)
 
 ## Why
@@ -95,8 +95,7 @@ semantics). Applies to constructive **yes/no** habits with period «За нед�
   answering.
 
 ## Open questions
-- Everything else (all of UI and scoring П1–П6) is decided above; no new coefficients are introduced
-  (week-streak `f` values are exactly П4.1).
+None.
 
 ## Steps
 - [ ] 1. Engine: domain type + ruleset v2 + weekly-goal scoring.

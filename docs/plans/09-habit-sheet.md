@@ -191,7 +191,7 @@ None.
   `src/ui/YesterdayReview.test.tsx` (smoke with a weekly-goal habit).
   Verify: `npm test`; manual: answer yesterday for a weekly-goal habit.
   Note: helper `weeklyGoalNote` in `reviewFlow.ts` (no `card.weeklyGoal`; reads `settingsOn`); note shown in both screens; manual check not done. Also removed unused keys `habits.metaMinWeek`/`habits.fieldPeriod` and commented `pickDirection` in `HabitSheet.tsx` (step-8 verifier cleanups).
-- [ ] 10. Docs: product context + cleanup.
+- [x] 10. Docs: product context + cleanup.
   Files: `LIFE_ELO_PRODUCT_CONTEXT.md` (§6.5: new subsection «Ruleset v2 — constructive weekly goal (agreed
   2026-11-08)» with П1–П6, the tier table for `f(weekStreak)` and the destructive-weekly-yes/no mapping, plus a
   worked example; remove the open-question entry «Habits scheduled on specific days / "N times per week"

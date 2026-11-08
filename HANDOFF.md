@@ -1,17 +1,18 @@
 # Handoff
 Updated: 2026-11-08 by Claude Code
-Branch: home-chart (PR #7)
-Plan: docs/plans/08-home-chart.md — done (5/5), verifier PASS on every step. Tests 310 / lint / build green
-(1 old lint warning: src/i18n/index.tsx:40).
+Branch: profile-redesign (from main, not pushed)
+Plan: docs/plans/09-profile-redesign.md — done (13/13), verifier PASS on every step. Tests 334 / lint / build green
+(1 old lint warning: src/i18n/index.tsx:40). App version 0.9.0.
 ## In progress
-Nothing uncommitted. `stash@{0}` "home-chart draft" = pre-plan draft, obsolete; drop after merge.
+Nothing uncommitted. `stash@{0}` "home-chart draft" is obsolete; drop it.
 ## Next step (user)
-1. Manual check in `npm run dev`: tap points/tiles, 10 days ↔ all-time toggle, scroll, light/dark, ru/en/uk, 375px.
-2. ~~/design-sync~~ done 2026-11-08 (HistoryEntry defaultOpen uploaded; last-sync recorded).
-3. Review and merge PR #7, then deploy.
+1. Manual check in `npm run dev` at 375px: view/edit, language sheet, theme, export (file has a `rating` block),
+   clear-all dialog (cancel only), sync ↻, ru/en/uk, light/dark.
+2. Paste `supabase/templates/email_change.html` into the Supabase dashboard (docs/setup/backend.md §6), then test
+   «Сменить» login email on a real email/password account.
+3. Run `/design-sync` (new BottomSheet), then record HEAD in `.design-sync/last-sync`.
+4. Push and open a PR, then merge and deploy.
 ## Broken / open questions
-- Header Pill tone for delta exactly 0 is green (Pill has no neutral tone), same as the mockup.
-- Day boundary is calendar midnight; 04:00 wrap only for bedtime times.
-- Weekly goals for constructive habits: deferred (needs scoring decisions).
-- Known: password-reset email not arriving (Resend test sender); Google sign-in in iOS PWA unverified.
-- `--warn` token has no dark-theme value (tokens.css), cosmetic.
+- The email-change link uses `{{ .ConfirmationURL }}`, so it opens in Safari, not the installed PWA. The new email shows after the next session refresh.
+- Google-only accounts cannot change their login email (managed by Google); they see the caption «Вход через Google».
+- Known: the Resend test sender limits mail delivery; `--warn` token has no dark value.

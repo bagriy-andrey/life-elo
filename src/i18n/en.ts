@@ -112,6 +112,7 @@ export const en: Dict = {
   'habitError.badThreshold': 'Invalid threshold value',
   'habitError.thresholdOrder': 'Thresholds must go from best to worst',
   'habitError.limitsInteger': 'Limits must be whole numbers from 0',
+  'habitError.weeklyTarget': 'Weekly target must be a whole number of days (goal 1–7, limit 0–6)',
   'habitError.reducerNeedsLimit': 'Set the limit that gets reduced',
   'habitError.reducerSelf': 'A habit cannot be reduced by itself',
   'habitError.reducerMissing': 'Reducer habit not found',

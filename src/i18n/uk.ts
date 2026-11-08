@@ -124,6 +124,7 @@ export const uk: Dict = {
   'habitError.badThreshold': 'Некоректне значення порога',
   'habitError.thresholdOrder': 'Пороги мають іти від найкращого до найгіршого',
   'habitError.limitsInteger': 'Ліміти — цілі числа від 0',
+  'habitError.weeklyTarget': 'Ціль на тиждень — ціле число днів (ціль 1–7, ліміт 0–6)',
   'habitError.reducerNeedsLimit': 'Вкажіть ліміт, який зменшується',
   'habitError.reducerSelf': 'Звичка не може зменшуватися сама собою',
   'habitError.reducerMissing': 'Звичку-зменшувач не знайдено',

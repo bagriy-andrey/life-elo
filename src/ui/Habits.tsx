@@ -5,6 +5,8 @@ import { dayOf } from '../domain/day'
 import {
   buildQuota,
   buildRule,
+  buildWeeklyGoal,
+  deriveBetter,
   EMPTY_FORM,
   editedVersions,
   formOf,
@@ -89,7 +91,7 @@ function RuleFields({ form, onChange, reducers, direction }: FieldsProps) {
       {measured && (
         <>
           <SegmentedControl
-            value={form.better}
+            value={form.better ?? deriveBetter(direction, form.kind)}
             onChange={(better) => set({ better })}
             options={options(BETTER_LABEL)}
           />
@@ -164,22 +166,25 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
   const nameOf = (id: string) => habits.find((h) => h.id === id)?.name
 
   /** Validated settings from a form, or an error message. */
-  const settingsFrom = (f: HabitForm, habitId: string | undefined, day: string) => {
-    const rule = buildRule(f)
+  const settingsFrom = (f: HabitForm, dir: HabitDirection, habitId: string | undefined, day: string) => {
+    const rule = buildRule(f, dir)
     if (!rule.ok) return { error: rule.error }
-    const quota = buildQuota(f)
+    const quota = buildQuota(f, dir)
     if (!quota.ok) return { error: quota.error }
+    const weeklyGoal = buildWeeklyGoal(f, dir)
+    if (!weeklyGoal.ok) return { error: weeklyGoal.error }
     const reducerError = validateReducer(habitId, quota.value, habits, day)
     if (reducerError) return { error: reducerError }
-    return { rule: rule.value, quota: quota.value }
+    return { rule: rule.value, quota: quota.value, weeklyGoal: weeklyGoal.value }
   }
 
   const add = async () => {
     if (!name.trim()) return
-    const s = settingsFrom(form, undefined, effectiveFrom)
+    const s = settingsFrom(form, direction, undefined, effectiveFrom)
     if ('error' in s) return setError(s.error)
     const version: HabitVersion = { from: effectiveFrom, tier, rule: s.rule }
     if (s.quota) version.quota = s.quota
+    if (s.weeklyGoal) version.weeklyGoal = s.weeklyGoal
     await db.habits.add({
       id: newId(),
       name: name.trim(),
@@ -198,7 +203,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
     const cur = settingsOn(h, today())
     setEditingId(h.id)
     setEditTier(cur.tier)
-    setEditForm(formOf(cur.rule, cur.quota))
+    setEditForm(formOf(cur))
     setEditError(undefined)
     setEditName(h.name)
     setEditDirection(h.direction)
@@ -222,9 +227,9 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
     const day = today()
     const newName = editName.trim()
     if (!newName) return setEditError({ key: 'habitError.nameEmpty' })
-    const s = settingsFrom(editForm, h.id, day)
+    const s = settingsFrom(editForm, editDirection, h.id, day)
     if ('error' in s) return setEditError(s.error)
-    const versions = editedVersions(h, { tier: editTier, rule: s.rule, quota: s.quota }, day)
+    const versions = editedVersions(h, { tier: editTier, rule: s.rule, quota: s.quota, weeklyGoal: s.weeklyGoal }, day)
     const canFlip = !hasAnswers(h.id, reviews)
     await db.habits.update(h.id, {
       versions,

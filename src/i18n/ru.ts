@@ -123,6 +123,7 @@ export const ru = {
   'habitError.badThreshold': 'Некорректное значение порога',
   'habitError.thresholdOrder': 'Пороги должны идти от лучшего к худшему',
   'habitError.limitsInteger': 'Лимиты — целые числа от 0',
+  'habitError.weeklyTarget': 'Цель на неделю — целое число дней (цель 1–7, лимит 0–6)',
   'habitError.reducerNeedsLimit': 'Укажите лимит, который уменьшается',
   'habitError.reducerSelf': 'Привычка не может уменьшаться сама собой',
   'habitError.reducerMissing': 'Привычка-уменьшитель не найдена',

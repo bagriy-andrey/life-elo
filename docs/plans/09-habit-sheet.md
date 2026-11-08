@@ -133,7 +133,8 @@ None.
   outbox → remote record → pull → `migrateHabit`), `src/db/migrate.test.ts` (new or existing: `migrateHabit`
   keeps `weeklyGoal`). Touch `src/sync/*` or `supabase/` only if a test shows the field is dropped.
   Verify: `npm test`; manual: read `supabase/migrations/20261104000000_records.sql` confirms generic JSON `data`.
-- [ ] 4. Domain: habit form logic for the sheet.
+- [x] 4. Domain: habit form logic for the sheet.
+  Note: `formOf(version)` takes only the HabitVersion (stored `better` comes from its rule); `buildQuota`/`buildWeeklyGoal` take `(form, direction)`; added `habitError.weeklyTarget` to ru/en/uk now (needed to compile); `Habits.tsx` kept the better switch (falls back to `deriveBetter`) until step 8.
   Files: `src/domain/habitSetup.ts`, `src/domain/habitSetup.test.ts`. `HabitForm` gets `period: 'day' | 'week'`
   and `weeklyTarget: string`; `better` optional; `deriveBetter(direction, kind)`; `buildRule(form, direction)`;
   `buildQuota`: destructive boolean + `period 'week'` → `{ perWeek }` (integer 0–6), count keeps

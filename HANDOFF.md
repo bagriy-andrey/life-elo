@@ -9,7 +9,7 @@ Nothing uncommitted.
 ## Next step (user)
 1. Manual check in `npm run dev` at 375px, light/dark: tiles on the Habits tab (ellipsis, zero rows dimmed),
    HabitSheet importance selector bars look unchanged.
-2. Run `/design-sync` (StatTile, TierBars/SegmentedControl, plus older pending BottomSheet/Button/Select/Skeleton/Spinner).
+2. design-sync done (2026-11-09): 26 components incl. StatTile, Select, Skeleton, Spinner.
 3. Open a PR for habits-summary-tiles, merge, deploy.
 ## Broken / open questions
 - Minor: Habits.test only counts dimmed rows; it doesn't tie per-tier counts to specific rows.

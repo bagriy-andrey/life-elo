@@ -256,7 +256,8 @@ export function heatmapGrid(habit: Habit, reviews: DayReview[], today: DayKey): 
     const week: HeatWeek = {
       weekStart,
       days: col.map((c): HeatCell => {
-        const level = cellLevel(habit, kind, norms, c)
+        // Today is not reviewed yet: no data, not transparent; only days after today are 'future'.
+        const level = c.day === today ? 'nodata' : cellLevel(habit, kind, norms, c)
         return level === 'nodata' || level === 'future' || c.value === undefined
           ? { day: c.day, level }
           : { day: c.day, level, tooltipValue: c.value }

@@ -35,6 +35,18 @@ describe('Habits smoke render', () => {
     expect(html).toContain('Добавьте первую')
     expect(html).toContain('Добавить')
     expect(html).not.toContain('role="dialog"')
+    expect(html).not.toContain('Сводка по привычкам')
+  })
+
+  it('renders summary tiles counting paused habits too', () => {
+    const html = wrap(<Habits habits={[gym, social, steps]} reviews={[]} effectiveFrom="2026-01-01" />)
+    expect(html).toContain('aria-label="Сводка по привычкам"')
+    expect(html).toContain('Конструктивные')
+    expect(html).toContain('Нежелательные')
+    expect(html).toContain('<span class="stat-tile-total">2</span>')
+    expect(html).toContain('<span class="stat-tile-total">1</span>')
+    // zero rows: constructive strong; destructive medium and weak (paused social counted)
+    expect(html.match(/stat-tile-row dim/g)).toHaveLength(3)
   })
 
   it('renders grouped cards with meta lines and dims paused ones', () => {

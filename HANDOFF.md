@@ -1,19 +1,17 @@
 # Handoff
 Updated: 2026-11-09 by Claude Code
-Branch: habit-sheet (PR #9), main (PR #8 profile redesign) merged in.
-Plans: docs/plans/09-profile-redesign.md (on main) and docs/plans/10-habit-sheet.md — both done.
-Merge: the two independent `BottomSheet`s unified (habit-sheet API: closeLabel, footer; main's `sheet-option`/`sheet-check`
-pick-list styles kept, now inside `<div className="sheet-options">`); the profile language sheet now has the ✕ header.
+Branch: habits-summary-tiles (from main after PR #10). Plan: docs/plans/11-habits-summary-tiles.md — done, v0.11.0.
+Built: Habits screen summary tiles (constructive / destructive, totals + strong/medium/weak counts, paused counted);
+shared `StatTile` component (dtsPropsFor added); tier bars extracted into internal `TierBars` (SegmentedControl uses it,
+classes renamed `segmented-bar*` → `tier-bar*`).
 ## In progress
 Nothing uncommitted.
 ## Next step (user)
-1. Manual check in `npm run dev` at 375px, light/dark: habit sheet (constructive 4/week, destructive weekly yes/no,
-   measured thresholds, edit/pause/delete), weekly-goal review, minutes habit scores «more is better»;
-   profile view/edit, language sheet, export, clear-all (cancel only).
-2. Paste `supabase/templates/email_change.html` into the Supabase dashboard (docs/setup/backend.md §6), test «Сменить».
-3. Merge PR #9, deploy (design-sync done after the merge).
+1. Manual check in `npm run dev` at 375px, light/dark: tiles on the Habits tab (ellipsis, zero rows dimmed),
+   HabitSheet importance selector bars look unchanged.
+2. design-sync done (2026-11-09): 26 components incl. StatTile, Select, Skeleton, Spinner.
+3. Open a PR for habits-summary-tiles, merge, deploy.
 ## Broken / open questions
-- SegmentedControl track not restyled to the mockup's pill-in-tray look (only bars added) — ask user.
-- Destructive weekly quota: after an overrun, later 0-days that week stay bad (v1 rule, deferred in product context).
-- Email-change link opens in Safari, not the PWA; Google-only accounts can't change login email.
-- Old: Resend test sender limits mail; Google sign-in in iOS PWA unverified; `--warn` has no dark value.
+- Minor: Habits.test only counts dimmed rows; it doesn't tie per-tier counts to specific rows.
+- Carried over: SegmentedControl track not restyled to pill-in-tray; destructive weekly quota after overrun (v1 rule);
+  email-change link opens in Safari; Resend test sender limits; Google sign-in in iOS PWA unverified; `--warn` no dark value.

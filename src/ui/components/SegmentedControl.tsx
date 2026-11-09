@@ -1,4 +1,5 @@
 import { cx } from './cx'
+import { TierBars } from './TierBars'
 import './SegmentedControl.css'
 
 export interface SegmentOption<T extends string> {
@@ -25,13 +26,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange }:
           className={cx(value === o.value && 'on', value === o.value && o.tone && `tone-${o.tone}`)}
           onClick={() => onChange(o.value)}
         >
-          {o.bars && (
-            <span className="segmented-bars" aria-hidden="true">
-              {[1, 2, 3].map((i) => (
-                <span key={i} className={cx('segmented-bar', `bar-${i}`, i > o.bars! && 'dim')} />
-              ))}
-            </span>
-          )}
+          {o.bars && <TierBars level={o.bars} />}
           {o.label}
         </button>
       ))}

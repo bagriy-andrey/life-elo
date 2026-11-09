@@ -22,3 +22,27 @@ export function groupByDirectionAndTier<T>(
     })).filter((t) => t.items.length > 0),
   })).filter((g) => g.tiers.length > 0)
 }
+
+export interface DirectionCounts {
+  total: number
+  strong: number
+  medium: number
+  weak: number
+}
+
+/** Counts items per direction and tier. Always returns both directions, zeros included. */
+export function countByDirectionAndTier<T>(
+  items: T[],
+  meta: (item: T) => { direction: HabitDirection; tier: ImpactTier },
+): Record<HabitDirection, DirectionCounts> {
+  const out: Record<HabitDirection, DirectionCounts> = {
+    constructive: { total: 0, strong: 0, medium: 0, weak: 0 },
+    destructive: { total: 0, strong: 0, medium: 0, weak: 0 },
+  }
+  for (const item of items) {
+    const { direction, tier } = meta(item)
+    out[direction].total += 1
+    out[direction][tier] += 1
+  }
+  return out
+}

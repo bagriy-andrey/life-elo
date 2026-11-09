@@ -29,6 +29,9 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
   PasswordField: every text is a prop; previews pass Russian literals. FullScreenModal is `position: fixed` →
   same `translateZ(0)` frame as Dialog. SwipeCard registers a window ArrowLeft/Right listener per mounted card.
 
+- Select / Skeleton / Spinner / StatTile previews authored 2026-11-09. Select shows only closed states (the list opens on
+  click, `position: fixed`). StatTile is `cardMode: column`; `TierBars` is internal (not exported, no card).
+
 ## Known render warns
 - none
 

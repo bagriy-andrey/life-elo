@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { db, newId } from '../db/db'
-import { deleteHabit, ReducerInUseError } from '../db/habits'
 import { dayOf } from '../domain/day'
 import {
   buildQuota,
@@ -18,7 +17,7 @@ import {
 import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { useI18n } from '../i18n'
-import { BottomSheet, Button, ChipGroup, Dialog, Field, SegmentedControl, Select, Stepper, TypeCards, WeekDots } from './components'
+import { BottomSheet, Button, ChipGroup, Field, SegmentedControl, Select, Stepper, TypeCards, WeekDots } from './components'
 import { ruleChoiceLabels, tierLabels, unitLabels } from './labels'
 import './HabitSheet.css'
 
@@ -53,7 +52,6 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const [form, setForm] = useState<HabitForm>(current ? formOf(current) : EMPTY_FORM)
   const [error, setError] = useState<SetupError>()
   const [saving, setSaving] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const set = (patch: Partial<HabitForm>) => setForm((f) => ({ ...f, ...patch }))
   const range = weekRange(direction)
@@ -134,25 +132,6 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
     onClose()
   }
 
-  const togglePause = async () => {
-    if (!habit) return
-    await db.habits.update(habit.id, { active: !habit.active })
-    onClose()
-  }
-
-  const remove = async () => {
-    if (!habit) return
-    try {
-      await deleteHabit(habit.id)
-      onClose()
-    } catch (e) {
-      if (!(e instanceof ReducerInUseError)) throw e
-      const names = e.users.map((u) => `«${u.name}»`).join(', ')
-      setError({ key: 'habitError.deleteInUse', params: { names } })
-      setConfirmingDelete(false)
-    }
-  }
-
   const threshold = (key: 'excellent' | 'ok' | 'tolerable', label: string, placeholder: string, err?: string) => (
     <Field label={label} error={err} className="habit-sheet-threshold">
       <input
@@ -171,6 +150,10 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const excellentLabel = isTime
     ? t(direction === 'constructive' ? 'habits.targetBy' : 'habits.targetNotLater')
     : t('habits.excellent')
+  const timeHint =
+    form.excellent && form.tolerable
+      ? t('habits.tolerableHint.with', { excellent: form.excellent, tolerable: form.tolerable })
+      : t('habits.tolerableHint.without')
   const ruleLabels = ruleChoiceLabels(t)
   const tiers = tierLabels(t)
   const stepHint =
@@ -184,8 +167,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const normTitle = direction === 'constructive' ? t('habits.normGoal') : t('habits.normLimit')
 
   return (
-    <>
-      <BottomSheet
+    <BottomSheet
         open
         title={editing ? t('habits.sheetEdit') : t('habits.sheetNew')}
         onClose={onClose}
@@ -195,14 +177,6 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
             <Button variant="primary" onClick={save} loading={saving}>
               {t('common.save')}
             </Button>
-            {editing && (
-              <div className="habit-sheet-secondary">
-                <Button onClick={togglePause}>{habit.active ? t('habits.pause') : t('habits.resume')}</Button>
-                <Button variant="quiet" className="neg" onClick={() => setConfirmingDelete(true)}>
-                  {t('common.delete')}
-                </Button>
-              </div>
-            )}
           </div>
         }
       >
@@ -226,6 +200,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
               value={direction}
               onChange={pickDirection}
               disabled={locked}
+              className={locked ? 'habit-sheet-locked' : undefined}
               options={[
                 { value: 'constructive', title: t('direction.constructive'), description: t('habits.kindHint.constructive'), tone: 'pos' },
                 { value: 'destructive', title: t('direction.destructive'), description: t('habits.kindHint.destructive'), tone: 'neg' },
@@ -296,8 +271,18 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
               <div className="habit-sheet-panel">
                 <span className="habit-sheet-note">{t('habits.thresholdsHint', { unit: unitHint })}</span>
                 {threshold('excellent', excellentLabel, t('habits.threshold'), errorText(['habitError.excellentRequired', 'habitError.badThreshold']))}
-                {threshold('ok', t('habits.ok'), t('habits.threshold'))}
-                {threshold('tolerable', t('habits.tolerable'), emptyTolerable, errorText(['habitError.thresholdOrder']))}
+                {isTime ? (
+                  <>
+                    {threshold('tolerable', t('habits.tolerableUntil'), emptyTolerable, errorText(['habitError.thresholdOrder']))}
+                    <span className="habit-sheet-note">{timeHint}</span>
+                    {threshold('ok', t('habits.ok'), t('habits.threshold'))}
+                  </>
+                ) : (
+                  <>
+                    {threshold('ok', t('habits.ok'), t('habits.threshold'))}
+                    {threshold('tolerable', t('habits.tolerable'), emptyTolerable, errorText(['habitError.thresholdOrder']))}
+                  </>
+                )}
               </div>
             )}
             {form.kind === 'count' && (
@@ -341,17 +326,5 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
           {otherError && <span className="field-error">{otherError}</span>}
         </div>
       </BottomSheet>
-      <Dialog open={confirmingDelete} title={t('common.delete')} onClose={() => setConfirmingDelete(false)}>
-        <p className="dialog-body">{t('habits.deleteConfirm')}</p>
-        <div className="dialog-actions">
-          <Button autoFocus onClick={() => setConfirmingDelete(false)}>
-            {t('common.cancel')}
-          </Button>
-          <Button variant="danger" onClick={remove}>
-            {t('common.delete')}
-          </Button>
-        </div>
-      </Dialog>
-    </>
   )
 }

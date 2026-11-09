@@ -72,8 +72,8 @@ describe('Habits smoke render', () => {
   it('renders the edit sheet for a weekly-goal habit with stepper and week dots', () => {
     const html = sheet(gym)
     expect(html).toContain('Изменить привычку')
-    expect(html).toContain('Пауза')
-    expect(html).toContain('Удалить')
+    expect(html).not.toContain('Пауза')
+    expect(html).not.toContain('Удалить')
     expect(html).toContain('Не меньше, раз в неделю')
     expect(html).toContain('week-dots')
     expect(html).toContain('<strong class="stepper-value">4</strong>')
@@ -83,7 +83,7 @@ describe('Habits smoke render', () => {
   it('locks the direction once the habit has answers and shows Resume when paused', () => {
     const html = sheet(social, [{ day: '2026-01-02', entries: { s: { kind: 'value', value: 1 } } } as unknown as DayReview])
     expect(html).toContain('Направление нельзя поменять')
-    expect(html).toContain('Вернуть')
+    expect(html).not.toContain('Вернуть')
     expect(sheet(gym, answered)).toContain('Направление нельзя поменять')
   })
 

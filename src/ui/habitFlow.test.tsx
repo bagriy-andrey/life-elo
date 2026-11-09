@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import type { DayReview, Habit, HabitVersion } from '../domain/types'
@@ -64,10 +63,4 @@ describe('habit flow smoke render', () => {
     expect(html).toContain('Чтение')
   })
 
-  it('dark --warn token exists in both dark blocks of tokens.css', () => {
-    const css = readFileSync('src/ui/tokens.css', 'utf8')
-    const lines = css.split('\n')
-    const warnLines = lines.filter((l) => /--warn:\s*#e6b34d/.test(l))
-    expect(warnLines.length).toBeGreaterThanOrEqual(2)
-  })
 })

@@ -35,7 +35,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
 - `src/ui/components/` is mirrored in Claude Design: props of Button (variants), Card, SegmentedControl,
-  TabBar, HistoryEntry, Field, Avatar, Dialog, Notice, PasswordField, FullScreenModal, BottomSheet, ProgressSegments, QuotaDots, SwipeCard, Select, Spinner, Skeleton, StatTile are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+  TabBar, HistoryEntry, Field, Avatar, Dialog, Notice, PasswordField, FullScreenModal, BottomSheet, ProgressSegments, QuotaDots, SwipeCard, Select, Spinner, Skeleton, StatTile, Menu are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
   Text inputs go through `Field` (global input styles live in `src/index.css`).
 - Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).

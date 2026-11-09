@@ -1,6 +1,6 @@
 # 12 — Habit menu, habit page, heatmap and charts
 
-Status: approved
+Status: done
 Design input: `docs/specs/12-habit-page.design.html` (Claude Design export of `templates/habits/Habits.dc.html`; markup on top, `buildDetail` in the bottom `<script>` shows the chart/heatmap math). Spec: `docs/specs/12-habit-page.md` (approved, decisions D1–D4 final; every implementer reads it fully).
 
 ## Why

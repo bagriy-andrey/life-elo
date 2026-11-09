@@ -24,37 +24,6 @@
 .habits-empty strong { font-size: var(--text-lg); }
 .habits-empty span { color: var(--muted); font-size: var(--text-sm); max-width: 280px; text-wrap: pretty; }
 
-.habit-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.habit-card-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex: none;
-  background: var(--pos);
-}
-.habit-card-dot.neg { background: var(--neg); }
-.habit-card-text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  flex: 1;
-}
-.habit-card-text strong { overflow-wrap: anywhere; }
-.habit-card-meta { color: var(--muted); font-size: var(--text-sm); }
-
 .habit-sheet-form { display: flex; flex-direction: column; gap: 22px; }
 .habit-sheet-group { display: flex; flex-direction: column; gap: var(--space-8); }
 .habit-sheet-title { font-size: var(--text-sm); font-weight: 600; }

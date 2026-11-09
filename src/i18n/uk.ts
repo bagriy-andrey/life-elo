@@ -7,6 +7,7 @@ export const uk: Dict = {
   'tab.profile': 'Профіль',
   'common.cancel': 'Скасувати',
   'common.save': 'Зберегти',
+  'common.loading': 'Завантаження…',
   'common.delete': 'Видалити',
   'common.cleanDays': {
     one: '{count} чистий день',
@@ -293,7 +294,6 @@ export const uk: Dict = {
   'auth.googleLogin': 'Увійти через Google',
   'auth.googleRegister': 'Продовжити з Google',
   'auth.orEmail': 'або поштою',
-  'auth.busy': 'Зачекайте…',
   'auth.password': 'Пароль',
   'auth.confirm': 'Повторіть пароль',
   'auth.verifying': 'Перевіряємо посилання…',
@@ -382,7 +382,6 @@ export const uk: Dict = {
   'yr.summary.hint': 'Перевірте відповіді. Натисніть на рядок, щоб виправити.',
   'yr.summary.edit': 'Виправити',
   'yr.save': 'Зберегти день',
-  'yr.saving': 'Зберігаємо…',
   'yr.closedClose': 'Закрити',
   'yr.done.title': 'Вчорашній день відмічено',
   'yr.done.subtitle': 'Рейтинг оновлено. Сьогоднішні звички відзначите завтра.',

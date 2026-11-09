@@ -7,6 +7,7 @@ export const en: Dict = {
   'tab.profile': 'Profile',
   'common.cancel': 'Cancel',
   'common.save': 'Save',
+  'common.loading': 'Loading…',
   'common.delete': 'Delete',
   'common.cleanDays': {
     one: '{count} clean day',
@@ -271,7 +272,6 @@ export const en: Dict = {
   'auth.googleLogin': 'Sign in with Google',
   'auth.googleRegister': 'Continue with Google',
   'auth.orEmail': 'or with email',
-  'auth.busy': 'Please wait…',
   'auth.password': 'Password',
   'auth.confirm': 'Repeat password',
   'auth.verifying': 'Checking the link…',
@@ -360,7 +360,6 @@ export const en: Dict = {
   'yr.summary.hint': 'Check your answers. Tap a row to change it.',
   'yr.summary.edit': 'Change',
   'yr.save': 'Save the day',
-  'yr.saving': 'Saving…',
   'yr.closedClose': 'Close',
   'yr.done.title': 'Yesterday is logged',
   'yr.done.subtitle': 'Rating updated. You will log today’s habits tomorrow.',

@@ -3,7 +3,7 @@ import { useAuth } from '../../auth/context'
 import { strength, validate, type AuthErrors, type AuthField, type AuthForm } from '../../auth/validation'
 import { useI18n } from '../../i18n'
 import type { Key } from '../../i18n/types'
-import { Button, Notice, Field, PasswordField } from '../components'
+import { Button, Notice, Field, PasswordField, Spinner } from '../components'
 import { usePasswordLabels } from './passwordLabels'
 import './AuthScreen.css'
 
@@ -55,6 +55,8 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
   const [submitted, setSubmitted] = useState(false)
   const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
+  // Google redirects away on success: keep its spinner until the page unloads.
+  const [googleBusy, setGoogleBusy] = useState(false)
   const [formError, setFormError] = useState<Key | ''>('')
   const [sentTo, setSentTo] = useState('')
   const [resent, setResent] = useState(false)
@@ -113,10 +115,12 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
 
   const google = async () => {
     setBusy(true)
+    setGoogleBusy(true)
     setFormError('')
     const r = await auth.google()
     if (r.error) {
       setBusy(false)
+      setGoogleBusy(false)
       setFormError(r.error)
     }
   }
@@ -142,7 +146,9 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
       {mode !== 'forgot' && (
         <>
           <button type="button" className="auth-google" onClick={google} disabled={busy}>
-            <span className="auth-google-badge" aria-hidden="true">G</span>
+            <span className="auth-google-badge" aria-hidden="true">
+              {googleBusy ? <Spinner size={12} /> : 'G'}
+            </span>
             {mode === 'login' ? t('auth.googleLogin') : t('auth.googleRegister')}
           </button>
           <div className="auth-divider">{t('auth.orEmail')}</div>
@@ -150,8 +156,8 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
       )}
 
       {done ? (
-        <Button className="auth-submit" disabled={busy} onClick={() => send(true)}>
-          {busy ? t('auth.busy') : t('auth.resend')}
+        <Button className="auth-submit" loading={busy} onClick={() => send(true)}>
+          {t('auth.resend')}
         </Button>
       ) : (
         <form className="auth-form" noValidate onSubmit={submit}>
@@ -211,8 +217,8 @@ export function AuthScreen({ initialMode = 'login' }: { initialMode?: Mode }) {
               {...pwLabels}
             />
           )}
-          <Button variant="primary" type="submit" className="auth-submit" disabled={busy}>
-            {busy ? t('auth.busy') : t(copy.submit)}
+          <Button variant="primary" type="submit" className="auth-submit" loading={busy}>
+            {t(copy.submit)}
           </Button>
         </form>
       )}

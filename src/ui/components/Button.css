@@ -28,3 +28,14 @@
 .btn-quiet.neg {
   color: var(--neg);
 }
+.btn-loading {
+  position: relative;
+}
+/* Loading keeps full contrast (not the dimmed :disabled look) and the label's width. */
+.btn-loading:disabled { opacity: 1; cursor: progress; }
+.btn-label { visibility: hidden; }
+.btn-spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}

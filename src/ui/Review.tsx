@@ -62,6 +62,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   // Remounted per day (key), so initial state is the saved review, if any.
   const [entries, setEntries] = useState<Entries>(() => (existing ? { ...existing.entries } : {}))
   const [error, setError] = useState<string>()
+  const [saving, setSaving] = useState(false)
 
   const [now] = useState(currentTime) // fixed at mount; the screen is remounted per day
   const locked = isDayLocked(day, now)
@@ -83,6 +84,8 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   }
 
   const confirm = async () => {
+    if (saving) return
+    setSaving(true)
     setError(undefined)
     const full: Entries = Object.fromEntries(applicable.map((h) => [h.id, entries[h.id] ?? UNKNOWN]))
     try {
@@ -94,6 +97,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
           ? t('review.dayClosedError')
           : t('review.saveError'),
       )
+      setSaving(false)
     }
   }
 
@@ -207,7 +211,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
         <>
           <p className="muted">{t('review.unknownNote')}</p>
           {error && <p className="neg" role="alert">{error}</p>}
-          <Button variant="primary" onClick={confirm}>
+          <Button variant="primary" onClick={confirm} loading={saving}>
             {existing ? t('review.saveFix') : t('review.confirmDay')}
           </Button>
         </>

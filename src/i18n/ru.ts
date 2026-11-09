@@ -6,6 +6,7 @@ export const ru = {
   'tab.profile': 'Профиль',
   'common.cancel': 'Отмена',
   'common.save': 'Сохранить',
+  'common.loading': 'Загрузка…',
   'common.delete': 'Удалить',
   'common.cleanDays': {
     one: '{count} чистый день',
@@ -292,7 +293,6 @@ export const ru = {
   'auth.googleLogin': 'Войти через Google',
   'auth.googleRegister': 'Продолжить с Google',
   'auth.orEmail': 'или по почте',
-  'auth.busy': 'Подождите…',
   'auth.password': 'Пароль',
   'auth.confirm': 'Повторите пароль',
   'auth.verifying': 'Проверяем ссылку…',
@@ -381,7 +381,6 @@ export const ru = {
   'yr.summary.hint': 'Проверьте ответы. Нажмите на строку, чтобы исправить.',
   'yr.summary.edit': 'Исправить',
   'yr.save': 'Сохранить день',
-  'yr.saving': 'Сохраняем…',
   'yr.closedClose': 'Закрыть',
   'yr.done.title': 'Вчерашний день отмечен',
   'yr.done.subtitle': 'Рейтинг обновлён. Сегодняшние привычки отметите завтра.',

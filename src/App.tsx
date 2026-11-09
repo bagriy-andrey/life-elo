@@ -10,20 +10,21 @@ import { replay } from './engine/rating'
 import { useAuth } from './auth/context'
 import { useI18n } from './i18n'
 import { claimDevice, isClaimedBy } from './sync/firstSignIn'
-import { createSyncEngine, startSync } from './sync/engine'
+import { createSyncEngine, startSync, useSyncStatus } from './sync/engine'
 import { getSyncState } from './sync/outbox'
 import { supabaseRemote } from './sync/remote'
 import { wipeAccountData } from './sync/wipe'
 import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { AccountActions, AccountSection } from './ui/Account'
-import { TabBar } from './ui/components'
+import { Spinner, TabBar } from './ui/components'
 import { setBackgroundInert } from './ui/components/focus'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
 import { ProfilePassword } from './ui/ProfilePassword'
 import { Review } from './ui/Review'
+import { ScreenSkeleton } from './ui/ScreenSkeleton'
 import { YesterdayReview } from './ui/YesterdayReview'
 import { useRoute, type Tab } from './ui/route'
 
@@ -55,9 +56,17 @@ function MainApp() {
     }
   }, [now])
 
-  const habits = useLiveQuery(() => db.habits.toArray(), []) ?? NO_HABITS
-  const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
+  const habitsRows = useLiveQuery(() => db.habits.toArray(), [])
+  const reviewsRows = useLiveQuery(() => db.reviews.toArray(), [])
+  const habits = habitsRows ?? NO_HABITS
+  const reviews = reviewsRows ?? NO_REVIEWS
   const profile = useLiveQuery(async () => (await db.profile.get('me')) ?? null, [])
+  const syncState = useLiveQuery(getSyncState, [])
+  const lastSyncedAt = syncState?.lastSyncedAt
+  const dataReady = useDataReady(
+    habitsRows !== undefined && reviewsRows !== undefined && profile !== undefined && syncState !== undefined,
+    !!lastSyncedAt,
+  )
 
   const result = useMemo(() => replay(habits, reviews, RULESET_V2, addDays(yesterday, 1)), [habits, reviews, yesterday])
   const sortedHabits = [...habits].sort((a, b) => a.createdAt - b.createdAt)
@@ -67,7 +76,6 @@ function MainApp() {
 
   // Mandatory yesterday review. `reviewDay` is fixed while the modal is open; once opened it stays
   // mounted until onClose (saving flips the show condition, the done screen must not vanish).
-  const lastSyncedAt = useLiveQuery(async () => (await getSyncState()).lastSyncedAt, [])
   const [modalDay, setModalDay] = useState<string | null>(null)
   const savedHere = useRef(false)
   const lastSavedDay = useRef<string | null>(null)
@@ -106,10 +114,11 @@ function MainApp() {
   return (
     <div className="app">
       <main ref={mainRef}>
-        {tab === 'home' && (
+        {!dataReady && <ScreenSkeleton tab={tab} />}
+        {dataReady && tab === 'home' && (
           <Home result={result} habits={habits} pendingDay={pendingDay} onReview={openReview} />
         )}
-        {tab === 'review' && (
+        {dataReady && tab === 'review' && (
           <Review
             key={reviewing}
             day={reviewing}
@@ -121,8 +130,8 @@ function MainApp() {
             onDone={() => setTab('home')}
           />
         )}
-        {tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => navigate({ tab: 'profile' })} />}
-        {tab === 'profile' && !passwordOpen && profile !== undefined && (
+        {dataReady && tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => navigate({ tab: 'profile' })} />}
+        {dataReady && tab === 'profile' && !passwordOpen && profile !== undefined && (
           <Profile
             profile={profile}
             rating={result.rating}
@@ -132,7 +141,7 @@ function MainApp() {
             accountActions={<AccountActions engine={syncEngine} onPassword={() => navigate({ tab: 'profile', password: true })} />}
           />
         )}
-        {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
+        {dataReady && tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
       </main>
       <div ref={tabsRef}>
       <TabBar
@@ -169,6 +178,24 @@ function MainApp() {
 
 const syncEngine = createSyncEngine({ remote: supabaseRemote })
 
+/** Longest wait for the first pull before showing (possibly empty) local data anyway. */
+const FIRST_PULL_TIMEOUT_MS = 10_000
+
+/**
+ * True once local data can be shown without flashing empty states: Dexie reads are done and,
+ * right after sign-in on this device, the first pull has finished (or failed/offline/timed out).
+ */
+function useDataReady(localRead: boolean, everSynced: boolean): boolean {
+  const status = useSyncStatus()
+  const [timedOut, setTimedOut] = useState(false)
+  useEffect(() => {
+    const id = setTimeout(() => setTimedOut(true), FIRST_PULL_TIMEOUT_MS)
+    return () => clearTimeout(id)
+  }, [])
+  const pulling = !everSynced && (status.kind === 'idle' || status.kind === 'syncing')
+  return localRead && (!pulling || timedOut)
+}
+
 /** Runs background sync while signed in. Stops on sign-out (effect cleanup). */
 function useBackgroundSync(userId: string | undefined) {
   const syncedUserId = useLiveQuery(async () => (await getSyncState()).userId, [])
@@ -190,6 +217,7 @@ async function stopSync() {
  * once the network is back).
  */
 function FirstSignInGate({ userId }: { userId: string }) {
+  const { t } = useI18n()
   const [ready, setReady] = useState(false)
   useEffect(() => {
     let alive = true
@@ -211,6 +239,7 @@ function FirstSignInGate({ userId }: { userId: string }) {
   return (
     <div className="auth auth-splash">
       <AuthLogo />
+      <Spinner className="auth-splash-spinner" label={t('common.loading')} />
     </div>
   )
 }

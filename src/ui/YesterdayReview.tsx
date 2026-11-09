@@ -307,8 +307,8 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
               ) : (
                 <>
                   {error === 'save' && <Notice tone="error">{t('review.saveError')}</Notice>}
-                  <Button variant="primary" className="yr-confirm" disabled={saving} onClick={save}>
-                    {saving ? t('yr.saving') : t('yr.save')}
+                  <Button variant="primary" className="yr-confirm" loading={saving} onClick={save}>
+                    {t('yr.save')}
                   </Button>
                 </>
               )}

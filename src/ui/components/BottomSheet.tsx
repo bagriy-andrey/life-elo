@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import type { KeyboardEvent, ReactNode } from 'react'
+import type { CSSProperties, KeyboardEvent, ReactNode } from 'react'
 import { FOCUSABLE, nextFocusTarget } from './focus'
 import './BottomSheet.css'
 
@@ -43,6 +43,8 @@ function SheetPanel({ title, onClose, closeLabel, footer, children }: Omit<Props
     }
   }, [opener])
 
+  const viewport = useVisualViewport()
+
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Escape') {
       e.stopPropagation()
@@ -63,6 +65,7 @@ function SheetPanel({ title, onClose, closeLabel, footer, children }: Omit<Props
   return (
     <div
       className="bottom-sheet-overlay"
+      style={viewport}
       onClick={(e) => {
         if (e.target === e.currentTarget) onCloseRef.current()
       }}
@@ -85,4 +88,31 @@ function SheetPanel({ title, onClose, closeLabel, footer, children }: Omit<Props
       </div>
     </div>
   )
+}
+
+/**
+ * Pins the overlay to the visible viewport while the sheet is open: iOS keeps the layout viewport
+ * full-height when the keyboard opens, so a `max-height` in dvh alone runs under the keyboard.
+ * Also locks page scroll behind the sheet.
+ */
+function useVisualViewport(): CSSProperties | undefined {
+  const [box, setBox] = useState<CSSProperties>()
+  useEffect(() => {
+    const root = document.documentElement
+    const prevOverflow = root.style.overflow
+    root.style.overflow = 'hidden'
+    const vv = window.visualViewport
+    function update() {
+      if (vv) setBox({ top: vv.offsetTop, height: vv.height, bottom: 'auto' })
+    }
+    update()
+    vv?.addEventListener('resize', update)
+    vv?.addEventListener('scroll', update)
+    return () => {
+      root.style.overflow = prevOverflow
+      vv?.removeEventListener('resize', update)
+      vv?.removeEventListener('scroll', update)
+    }
+  }, [])
+  return box
 }

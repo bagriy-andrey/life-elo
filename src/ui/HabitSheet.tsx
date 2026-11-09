@@ -18,7 +18,7 @@ import {
 import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { useI18n } from '../i18n'
-import { BottomSheet, Button, ChipGroup, Dialog, Field, SegmentedControl, Stepper, TypeCards, WeekDots } from './components'
+import { BottomSheet, Button, ChipGroup, Dialog, Field, SegmentedControl, Select, Stepper, TypeCards, WeekDots } from './components'
 import { ruleChoiceLabels, tierLabels, unitLabels } from './labels'
 import './HabitSheet.css'
 
@@ -315,18 +315,15 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
                     />
                   </Field>
                 </div>
-                <select
-                  aria-label={t('habits.reducedByAria')}
+                <Select
+                  label={t('habits.reducedByAria')}
                   value={form.reducedByDaysOf}
-                  onChange={(e) => set({ reducedByDaysOf: e.target.value })}
-                >
-                  <option value="">{t('habits.notReduced')}</option>
-                  {reducers.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {t('habits.reducedBy', { name: nameOf(h.id) ?? h.name })}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => set({ reducedByDaysOf: v })}
+                  options={[
+                    { value: '', label: t('habits.notReduced') },
+                    ...reducers.map((h) => ({ value: h.id, label: t('habits.reducedBy', { name: nameOf(h.id) ?? h.name }) })),
+                  ]}
+                />
                 {errorText(limitKeys.filter((k) => k !== 'habitError.weeklyTarget')) && (
                   <span className="field-error">{errorText(limitKeys.filter((k) => k !== 'habitError.weeklyTarget'))}</span>
                 )}

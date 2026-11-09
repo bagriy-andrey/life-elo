@@ -25,7 +25,8 @@
     "Stepper": "/** Current value, clamped to min..max by the buttons. */\n  value: number;\n  min: number;\n  max: number;\n  onChange: (value: number) => void;\n  /** Accessible names of the − and + buttons (the component has no built-in language). */\n  decLabel: string;\n  incLabel: string;\n  /** Muted text left of the controls, e.g. \"Дней в неделю\". */\n  label?: string;\n  className?: string;",
     "WeekDots": "/** Days counted this week, 0-7 (7 bars Mon-Sun, display only). */\n  value: number;\n  /** constructive: first `value` green, rest dim. destructive: first `value` muted (allowed), rest red-tinted. */\n  direction: \"constructive\" | \"destructive\";\n  className?: string;",
     "ChipGroup": "/** Single-select pill chips, wrapping. tone is ignored. */\n  options: { value: string; label: string }[];\n  /** Selected option value. */\n  value?: string;\n  onChange: (value: string) => void;\n  /** Accessible name of the radio group. */\n  label: string;\n  className?: string;",
-    "TypeCards": "/** Two selectable cards with a +/− circle. tone pos = green, neg = red (selected state is tinted). */\n  options: { value: string; title: string; description: string; tone: \"pos\" | \"neg\" }[];\n  /** Selected option value. */\n  value?: string;\n  onChange: (value: string) => void;\n  /** Accessible name of the radio group. */\n  label: string;\n  /** Locks the choice (selected card stays highlighted, the other is dimmed). */\n  disabled?: boolean;\n  className?: string;"
+    "TypeCards": "/** Two selectable cards with a +/− circle. tone pos = green, neg = red (selected state is tinted). */\n  options: { value: string; title: string; description: string; tone: \"pos\" | \"neg\" }[];\n  /** Selected option value. */\n  value?: string;\n  onChange: (value: string) => void;\n  /** Accessible name of the radio group. */\n  label: string;\n  /** Locks the choice (selected card stays highlighted, the other is dimmed). */\n  disabled?: boolean;\n  className?: string;",
+    "Select": "/** Custom dropdown: field-like trigger with a chevron; the option list floats over the page (fixed, flips above near the bottom) with a ✓ on the selected row. */\n  options: { value: string; label: string }[];\n  /** Selected option value; placeholder is shown when nothing matches. */\n  value?: string;\n  onChange: (value: string) => void;\n  /** Accessible name of the trigger and the list. */\n  label: string;\n  placeholder?: string;\n  disabled?: boolean;\n  className?: string;"
   },
   "overrides": {
     "TabBar": {
@@ -98,6 +99,9 @@
       "cardMode": "column"
     },
     "TypeCards": {
+      "cardMode": "column"
+    },
+    "Select": {
       "cardMode": "column"
     }
   },

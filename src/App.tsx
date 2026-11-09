@@ -19,6 +19,7 @@ import { NewPassword } from './ui/auth/NewPassword'
 import { AccountActions, AccountSection } from './ui/Account'
 import { Spinner, TabBar } from './ui/components'
 import { setBackgroundInert } from './ui/components/focus'
+import { HabitPage } from './ui/HabitPage'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
@@ -110,6 +111,13 @@ function MainApp() {
 
   const openReview = () => navigate({ tab: 'review' })
   const setTab = (next: Exclude<Tab, 'review'>) => navigate({ tab: next })
+  const habitId = route.tab === 'habits' ? route.id : undefined
+  const openedHabit = habitId ? habits.find((h) => h.id === habitId) : undefined
+
+  // An unknown habit id (deleted, stale link) falls back to the list.
+  useEffect(() => {
+    if (dataReady && habitId && !openedHabit) navigate({ tab: 'habits' }, { replace: true })
+  }, [dataReady, habitId, openedHabit, navigate])
 
   return (
     <div className="app">
@@ -141,14 +149,35 @@ function MainApp() {
             accountActions={<AccountActions engine={syncEngine} onPassword={() => navigate({ tab: 'profile', password: true })} />}
           />
         )}
-        {dataReady && tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
+        {dataReady && tab === 'habits' && !habitId && (
+          <Habits
+            habits={sortedHabits}
+            reviews={reviews}
+            effectiveFrom={yesterday}
+            onOpenHabit={(id) => navigate({ tab: 'habits', id })}
+          />
+        )}
+        {dataReady && tab === 'habits' && openedHabit && (
+          <HabitPage
+            habit={openedHabit}
+            habits={sortedHabits}
+            reviews={reviews}
+            effectiveFrom={yesterday}
+            today={today}
+            onBack={() => navigate({ tab: 'habits' })}
+          />
+        )}
       </main>
       <div ref={tabsRef}>
       <TabBar
         active={tab}
         onSelect={(id) => {
           if (id === 'review') openReview()
-          else setTab(id)
+          else if (id === 'habits') {
+            // The tab always returns to the list, scrolled to the top.
+            navigate({ tab: 'habits' })
+            window.scrollTo(0, 0)
+          } else setTab(id)
         }}
         items={[
           { id: 'home', label: t('tab.home') },

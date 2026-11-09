@@ -70,4 +70,4 @@
 }
 .habit-sheet-limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-12); }
 .habit-sheet-footer { display: flex; flex-direction: column; gap: var(--space-8); }
-.habit-sheet-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
+.habit-sheet-locked .type-card.on { opacity: 0.55; }

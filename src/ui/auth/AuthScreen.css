@@ -77,8 +77,10 @@
 .auth-footer {
   margin-top: auto;
   display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: center;
-  gap: var(--space-6);
+  column-gap: var(--space-6);
   color: var(--muted);
   font-size: var(--text-sm);
 }

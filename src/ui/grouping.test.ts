@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupByDirectionAndTier } from './grouping'
+import { countByDirectionAndTier, groupByDirectionAndTier } from './grouping'
 import type { HabitDirection, ImpactTier } from '../domain/types'
 
 type Item = { id: string; direction: HabitDirection; tier: ImpactTier }
@@ -32,5 +32,34 @@ describe('groupByDirectionAndTier', () => {
     const items = ['x', 'y', 'z'].map((id) => it_(id, 'constructive', 'medium'))
     const out = groupByDirectionAndTier(items, (x) => x)
     expect(out[0].tiers[0].items.map((i) => i.id)).toEqual(['x', 'y', 'z'])
+  })
+})
+
+describe('countByDirectionAndTier', () => {
+  const zero = { total: 0, strong: 0, medium: 0, weak: 0 }
+
+  it('returns both directions with zeros for an empty list', () => {
+    expect(countByDirectionAndTier([], (x: Item) => x)).toEqual({ constructive: zero, destructive: zero })
+  })
+
+  it('counts a mix of directions and tiers', () => {
+    const items = [
+      it_('a', 'constructive', 'strong'),
+      it_('b', 'constructive', 'weak'),
+      it_('c', 'constructive', 'weak'),
+      it_('d', 'destructive', 'medium'),
+    ]
+    expect(countByDirectionAndTier(items, (x) => x)).toEqual({
+      constructive: { total: 3, strong: 1, medium: 0, weak: 2 },
+      destructive: { total: 1, strong: 0, medium: 1, weak: 0 },
+    })
+  })
+
+  it('counts paused items like active ones', () => {
+    const items = [
+      { ...it_('a', 'constructive', 'medium'), active: true },
+      { ...it_('b', 'constructive', 'medium'), active: false },
+    ]
+    expect(countByDirectionAndTier(items, (x) => x).constructive).toEqual({ ...zero, total: 2, medium: 2 })
   })
 })

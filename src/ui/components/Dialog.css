@@ -40,6 +40,12 @@
   flex-direction: column;
   gap: var(--space-8);
 }
+.dialog-actions--row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  padding-top: var(--space-8);
+}
 .dialog-actions .btn {
   width: 100%;
   min-height: 48px;

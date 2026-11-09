@@ -35,7 +35,7 @@ export function HabitDeleteDialog({ habit, onClose, onDeleted }: Props) {
     <Dialog open={!!habit} title={habit ? t('habit.delete.title', { name: habit.name }) : ''} onClose={close}>
       <p className="dialog-body">{t('habit.delete.text')}</p>
       {blockedBy && <p className="field-error">{t('habitError.deleteInUse', { names: blockedBy })}</p>}
-      <div className="dialog-actions">
+      <div className="dialog-actions dialog-actions--row">
         <Button autoFocus onClick={close}>
           {t('common.cancel')}
         </Button>

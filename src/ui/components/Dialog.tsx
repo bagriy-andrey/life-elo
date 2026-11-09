@@ -6,7 +6,7 @@ interface Props {
   open: boolean
   title: string
   onClose: () => void
-  /** Body text (`<p className="dialog-body">`) and actions (`<div className="dialog-actions">`). */
+  /** Body text (`<p className="dialog-body">`) and actions (`<div className="dialog-actions">`, add `dialog-actions--row` for two buttons side by side). */
   children: ReactNode
 }
 

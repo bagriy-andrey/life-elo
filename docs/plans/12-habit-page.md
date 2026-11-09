@@ -72,7 +72,7 @@ See spec «Done when». Short form:
 
 ### Wave 2 (needs wave 1; steps 5–7 are file-disjoint)
 
-- [ ] 5. Chart data — **Wave: 2** — **Depends on:** 1 — files: `src/domain/habitCharts.ts`, `src/domain/habitCharts.test.ts`.
+- [x] 5. Chart data — **Wave: 2** — **Depends on:** 1 — files: `src/domain/habitCharts.ts`, `src/domain/habitCharts.test.ts`.
   Pure data builders mirroring `buildDetail` in the design file (read it), all over `DayCell[]` from step 1:
   `amountSeries(habit, reviews, today)` -> 30 bars `{ day, value, state: 'met' | 'below' | 'within' | 'over' | 'nodata' }`, `target`/`norm`, `total` (sum), `previousTotal`, `delta` + `better: boolean`;
   `monthlyCounts(habit, reviews, today)` -> 12 months `{ month: 'YYYY-MM', count, current }` (done count for constructive, slips for destructive);
@@ -81,11 +81,11 @@ See spec «Done when». Short form:
   `heatmapGrid(habit, reviews, today)` -> `{ weeks: { weekStart; days: HeatCell[] ; weekMet?: boolean | null }[] (53 columns, Mon..Sun), monthLabels }` where `HeatCell = { day; level: 'nodata' | 'future' | 0..4 | 'pos' | 'neg'; tooltipValue }` — levels per spec §5 (constructive % of target: 0, <50, <100, <150, ≥150; destructive inverse; time by deviation ≤−30, ≤0, ≤+30, later; yes/no two colours; weekly: coloured only when the event happened).
   Verify: tests per kind (daily yes/no both directions, amount constructive/destructive incl. delta direction, time with and without tolerable, weekly both directions, 53×7 grid shape and Monday alignment, future days); `npm test`, `npm run lint`.
 
-- [ ] 6. Delete dialog + habit actions — **Wave: 2** — **Depends on:** 4 — files: `src/ui/HabitDeleteDialog.tsx`, `src/ui/HabitDeleteDialog.test.tsx`, `src/ui/habitActions.ts`, `src/ui/habitActions.test.ts`.
+- [x] 6. Delete dialog + habit actions — **Wave: 2** — **Depends on:** 4 — files: `src/ui/HabitDeleteDialog.tsx`, `src/ui/HabitDeleteDialog.test.tsx`, `src/ui/habitActions.ts`, `src/ui/habitActions.test.ts`.
   `habitActions.ts`: `togglePause(habit)` (`db.habits.update(id, { active: !active })`) and `removeHabit(habit): Promise<{ ok: true } | { ok: false; names: string }>` (calls `deleteHabit`; catches `ReducerInUseError` -> `names` = `«A», «B»`, other errors rethrown). `HabitDeleteDialog.tsx`: props `{ habit: Habit | undefined; onClose(); onDeleted() }`; uses `Dialog` with `habit.delete.title`, `habit.delete.text`, «Отмена» (`common.cancel`, `autoFocus`) and `Button variant="danger"` (`habit.delete.confirm`); on `ReducerInUseError` shows the existing `habitError.deleteInUse` text inside the dialog (`<p className="field-error">`) and stays open. Do not touch `HabitSheet.tsx`.
   Verify: renderToString smoke (title with name, text, both buttons, closed = empty) and `habitActions.test.ts` with fake-indexeddb if the repo's db tests already use it, otherwise mock `db`; `npm test`, `npm run lint`.
 
-- [ ] 7. Edit sheet changes — **Wave: 2** — **Depends on:** 4 — files: `src/ui/HabitSheet.tsx`, `src/ui/HabitSheet.css`, `src/ui/HabitSheet.test.tsx` (new smoke test).
+- [x] 7. Edit sheet changes — **Wave: 2** — **Depends on:** 4 — files: `src/ui/HabitSheet.tsx`, `src/ui/HabitSheet.css`, `src/ui/HabitSheet.test.tsx` (new smoke test).
   Remove «Пауза»/«Удалить» (state `confirmingDelete`, `togglePause`, `remove`, the `Dialog`, imports of `deleteHabit`/`ReducerInUseError`/`Dialog`) and `.habit-sheet-secondary` CSS; footer = «Сохранить» only. Keep `habits.directionLocked` note and TypeCards `disabled` look (`opacity .55`; adjust CSS if it does not match), keep «Изменения действуют с сегодняшнего дня». For `time`: tolerable field label = `habits.tolerableUntil`, shown under the target; hint under it `habits.tolerableHint.with` (needs target and tolerable entered; values from the form) or `.without`; `ok` threshold stays. Other units keep `habits.tolerable`. Do not change `habitSetup.ts` (D1: no new field).
   Verify: smoke test (edit mode: no «Удалить»/«Пауза» text, has «Сохранить»; time habit shows «Терпимо до» and hint; locked habit shows the lock note); `npm test`, `npm run lint`; manual check of the sheet.
 

@@ -1,4 +1,4 @@
-# 09 — Habit sheet + constructive weekly goal (ruleset v2)
+# 10 — Habit sheet + constructive weekly goal (ruleset v2)
 
 Status: done
 Design input: `docs/design/habits/Habits.dc.html` + `docs/design/habits/README.md` (Claude Design export, 2026-11-08)

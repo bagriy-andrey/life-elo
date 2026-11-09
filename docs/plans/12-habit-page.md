@@ -115,11 +115,11 @@ See spec «Done when». Short form:
 
 ### Wave 5 (steps 13–14 are file-disjoint)
 
-- [ ] 13. App wiring — **Wave: 5** — **Depends on:** 3, 11, 12 — files: `src/App.tsx`, `src/ui/App.test.tsx`.
+- [x] 13. App wiring — **Wave: 5** — **Depends on:** 3, 11, 12 — files: `src/App.tsx`, `src/ui/App.test.tsx`.
   `route.tab === 'habits' && route.id` → `<HabitPage>` for the matching habit; unknown id → `navigate({ tab: 'habits' }, { replace: true })`; the list gets `onOpenHabit={(id) => navigate({ tab: 'habits', id })}`; back → `navigate({ tab: 'habits' })`. The «Привычки» tab always navigates to the list (`{ tab: 'habits' }`) and `window.scrollTo(0, 0)` when already on the list or coming from the page. TabBar keeps `active="habits"` while on the page. `ScreenSkeleton tab` unaffected.
   Verify: `App.test.tsx` smoke (route `/habits/<id>` renders the page, unknown id handled by the redirect logic extracted as a pure helper if needed); `npm test`, `npm run lint`, `npm run build`; manual flow: list → card → page → ⋮ actions → delete returns to list; reload on `/habits/:id`; back button.
 
-- [ ] 14. Cleanup + cross-screen smoke — **Wave: 5** — **Depends on:** 7, 11, 12 — files: `src/ui/HabitSheet.css` (delete the now-unused `.habit-card*`, `.habit-sheet-secondary` rules; keep `.habits-head`, `.habits-summary`, `.habits-empty`), `src/ui/habitFlow.test.tsx` (new), `.design-sync/NOTES.md` (only if it needs a line about `Menu`).
+- [x] 14. Cleanup + cross-screen smoke — **Wave: 5** — **Depends on:** 7, 11, 12 — files: `src/ui/HabitSheet.css` (delete the now-unused `.habit-card*`, `.habit-sheet-secondary` rules; keep `.habits-head`, `.habits-summary`, `.habits-empty`), `src/ui/habitFlow.test.tsx` (new), `.design-sync/NOTES.md` (only if it needs a line about `Menu`).
   `habitFlow.test.tsx`: renderToString of `Habits` + `HabitPage` over one shared fixture set (all five kinds with sample reviews) asserting no throw and key text; confirms the dark `--warn` token exists in both dark blocks of `tokens.css` (read file, regex). Verify: `npm test`, `npm run lint`, `npm run build`, grep shows no leftover `habit-card` selectors.
 
 The version bump (`0.12.0`), merging, plan checkboxes and PR are done by the integrator, not by a step.

@@ -109,7 +109,7 @@ See spec «Done when». Short form:
 
 ### Wave 4
 
-- [ ] 12. Habit page screen — **Wave: 4** — **Depends on:** 1, 2, 4, 5, 6, 7, 8, 9, 10, 11 — files: `src/ui/HabitPage.tsx`, `src/ui/HabitPage.css`, `src/ui/HabitPage.test.tsx`.
+- [x] 12. Habit page screen — **Wave: 4** — **Depends on:** 1, 2, 4, 5, 6, 7, 8, 9, 10, 11 — files: `src/ui/HabitPage.tsx`, `src/ui/HabitPage.css`, `src/ui/HabitPage.test.tsx`.
   Props `{ habit: Habit | undefined; habits: Habit[]; reviews: DayReview[]; effectiveFrom: string; onBack(): void }`; `habit === undefined` renders nothing (App redirects, step 13). Blocks in spec order: header («‹ Назад» in `--accent`, `Menu` with Изменить/Пауза|Возобновить/Удалить; Изменить opens `HabitSheet`, delete opens `HabitDeleteDialog` and calls `onBack` on success); dot + `<h1>` name + «Пауза» badge; meta line via `habitMeta`; three `StatTile`-style stat tiles built from `src/ui/components/StatTile` is NOT reused if its shape does not fit — use a local `.habit-stat` block instead (no new shared component); values from step 1 (`current` shows «Держусь» label for destructive daily yes/no; units via `habit.unit.day|week`, weekly uses weeks and 12-week %); chart by `chartKind` (`AmountChart` / `MonthlyChart` / `TimeChart` / `WeeklyChart`), then `Heatmap`, then `WeekdayBars`. Compute data with `useMemo` over `habit` + `reviews` + `today`. Min touch target 44px.
   Verify: renderToString smoke for four fixtures (daily yes/no constructive and destructive, minutes, time with tolerable, weekly): h1 name, back link, three stat labels, the matching chart title, heatmap, weekday title; paused badge; `npm test`, `npm run lint`.
 

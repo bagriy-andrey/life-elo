@@ -5,7 +5,7 @@ import { addDays, reviewDay, toDayKey } from './domain/day'
 import { nextMidnight } from './domain/reviewDeadline'
 import { decideModal } from './domain/reviewFlow'
 import type { DayReview, Habit } from './domain/types'
-import { RULESET_V1 } from './engine/config'
+import { RULESET_V2 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/context'
 import { useI18n } from './i18n'
@@ -58,7 +58,7 @@ function MainApp() {
   const reviews = useLiveQuery(() => db.reviews.toArray(), []) ?? NO_REVIEWS
   const profile = useLiveQuery(async () => (await db.profile.get('me')) ?? null, [])
 
-  const result = useMemo(() => replay(habits, reviews, RULESET_V1, addDays(yesterday, 1)), [habits, reviews, yesterday])
+  const result = useMemo(() => replay(habits, reviews, RULESET_V2, addDays(yesterday, 1)), [habits, reviews, yesterday])
   const sortedHabits = [...habits].sort((a, b) => a.createdAt - b.createdAt)
   const hasYesterdayHabits = habits.some((h) => h.active && h.effectiveFrom <= yesterday)
   const pendingDay =

@@ -6,6 +6,8 @@ export interface SegmentOption<T extends string> {
   label: string
   /** Selected color; accent when omitted. */
   tone?: 'pos' | 'neg'
+  /** Importance bars (1-3) shown before the label; the rest of the 3 are dimmed. */
+  bars?: 1 | 2 | 3
 }
 
 interface Props<T extends string> {
@@ -23,6 +25,13 @@ export function SegmentedControl<T extends string>({ options, value, onChange }:
           className={cx(value === o.value && 'on', value === o.value && o.tone && `tone-${o.tone}`)}
           onClick={() => onChange(o.value)}
         >
+          {o.bars && (
+            <span className="segmented-bars" aria-hidden="true">
+              {[1, 2, 3].map((i) => (
+                <span key={i} className={cx('segmented-bar', `bar-${i}`, i > o.bars! && 'dim')} />
+              ))}
+            </span>
+          )}
           {o.label}
         </button>
       ))}

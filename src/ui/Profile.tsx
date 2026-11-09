@@ -304,22 +304,24 @@ function Settings() {
           />
         </div>
       </Card>
-      <BottomSheet open={sheet} title={t('settings.languageTitle')} onClose={() => setSheet(false)}>
-        {LANGS.map((l) => (
-          <button
-            key={l}
-            type="button"
-            className="sheet-option"
-            aria-pressed={l === lang}
-            onClick={() => {
-              setLang(l)
-              setSheet(false)
-            }}
-          >
-            {LANG_NAMES[l]}
-            {l === lang && <span className="sheet-check">✓</span>}
-          </button>
-        ))}
+      <BottomSheet open={sheet} title={t('settings.languageTitle')} closeLabel={t('habits.close')} onClose={() => setSheet(false)}>
+        <div className="sheet-options">
+          {LANGS.map((l) => (
+            <button
+              key={l}
+              type="button"
+              className="sheet-option"
+              aria-pressed={l === lang}
+              onClick={() => {
+                setLang(l)
+                setSheet(false)
+              }}
+            >
+              {LANG_NAMES[l]}
+              {l === lang && <span className="sheet-check">✓</span>}
+            </button>
+          ))}
+        </div>
       </BottomSheet>
     </section>
   )

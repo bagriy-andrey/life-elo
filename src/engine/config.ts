@@ -26,6 +26,10 @@ export interface RulesetConfig {
   /** R += eloRate x (eloScale x S - R). */
   eloRate: number
   eloScale: number
+  /** Weekly-goal streak bonus share by tier; index `min(week, len) - 1`, week 0 earns nothing. */
+  weeklyStreakFraction: Record<ImpactTier, number[]>
+  /** Label of days that use no v2 feature (history stays labelled with the older ruleset). Defaults to `version`. */
+  baseVersion?: string
   /** Days after the day itself during which it can still be reviewed. */
   reviewWindowDays: number
 }
@@ -44,4 +48,8 @@ export const RULESET_V1: RulesetConfig = {
   eloRate: 0.1,
   eloScale: 10,
   reviewWindowDays: 1,
+  weeklyStreakFraction: { strong: [1], medium: [0.5, 1], weak: [0, 1] },
 }
+
+/** v2 = v1.1 numbers + constructive weekly goal semantics (they only trigger for habits with `weeklyGoal`). */
+export const RULESET_V2: RulesetConfig = { ...RULESET_V1, version: 'v2', baseVersion: RULESET_V1.version }

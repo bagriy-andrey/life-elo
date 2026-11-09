@@ -84,6 +84,13 @@ describe('YesterdayReview stage B, summary, done', () => {
     expect(html).toContain('Использовано 0 из 2')
   })
 
+  it('weekly-goal card shows the week progress note', () => {
+    const goal = habit('g', 'Спорт', 5, {
+      versions: [{ from: '2026-01-01', tier: 'medium', rule: { kind: 'boolean' }, weeklyGoal: { perWeek: 3 } }],
+    } as unknown as Partial<Habit>)
+    expect(render(0, [goal])).toContain('На этой неделе: 0 из 3')
+  })
+
   it('summary lists answers with tone and hides progress', () => {
     const habits = [habit('a', 'Зарядка', 1), steps, sleep, weekly]
     const html = render(0, habits, {

@@ -1,0 +1,68 @@
+.habits-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  min-height: 44px;
+}
+.habits-head h2 { margin: 0; font-size: var(--text-lg); }
+.habits-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  text-align: center;
+  padding: 56px 24px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+}
+.habits-empty strong { font-size: var(--text-lg); }
+.habits-empty span { color: var(--muted); font-size: var(--text-sm); max-width: 280px; text-wrap: pretty; }
+
+.habit-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.habit-card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--pos);
+}
+.habit-card-dot.neg { background: var(--neg); }
+.habit-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1;
+}
+.habit-card-text strong { overflow-wrap: anywhere; }
+.habit-card-meta { color: var(--muted); font-size: var(--text-sm); }
+
+.habit-sheet-form { display: flex; flex-direction: column; gap: 22px; }
+.habit-sheet-group { display: flex; flex-direction: column; gap: var(--space-8); }
+.habit-sheet-title { font-size: var(--text-sm); font-weight: 600; }
+.habit-sheet-titlebar { display: flex; justify-content: space-between; gap: var(--space-8); }
+.habit-sheet-note { color: var(--muted); font-size: var(--text-xs); text-wrap: pretty; }
+.habit-sheet-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-14);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+.habit-sheet-limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-12); }
+.habit-sheet-footer { display: flex; flex-direction: column; gap: var(--space-8); }
+.habit-sheet-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }

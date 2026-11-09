@@ -1,6 +1,16 @@
 import { timeToMinutes } from './day'
 import { settingsOn } from './settings'
-import type { DayKey, DayReview, Habit, HabitVersion, ImpactTier, Quota, ZonedRule } from './types'
+import type {
+  DayKey,
+  DayReview,
+  Habit,
+  HabitDirection,
+  HabitVersion,
+  ImpactTier,
+  Quota,
+  WeeklyGoal,
+  ZonedRule,
+} from './types'
 
 /** Rule kinds offered in the setup form. */
 export type RuleChoice = 'boolean' | 'count' | 'minutes' | 'steps' | 'time'
@@ -8,7 +18,12 @@ export type RuleChoice = 'boolean' | 'count' | 'minutes' | 'steps' | 'time'
 /** Raw text form state; thresholds are strings as typed. */
 export interface HabitForm {
   kind: RuleChoice
-  better: 'lower' | 'higher'
+  /** Only set from a stored rule (or an explicit choice); otherwise derived from the direction. */
+  better?: 'lower' | 'higher'
+  /** Yes/no habits only; ignored for measured kinds. */
+  period: 'day' | 'week'
+  /** Weekly target as typed (constructive 1-7 days, destructive 0-6 «yes» days). */
+  weeklyTarget: string
   excellent: string
   ok: string
   tolerable: string
@@ -19,7 +34,8 @@ export interface HabitForm {
 
 export const EMPTY_FORM: HabitForm = {
   kind: 'boolean',
-  better: 'lower',
+  period: 'day',
+  weeklyTarget: '',
   excellent: '',
   ok: '',
   tolerable: '',
@@ -34,6 +50,7 @@ export type SetupErrorKey =
   | 'habitError.badThreshold'
   | 'habitError.thresholdOrder'
   | 'habitError.limitsInteger'
+  | 'habitError.weeklyTarget'
   | 'habitError.reducerNeedsLimit'
   | 'habitError.reducerSelf'
   | 'habitError.reducerMissing'
@@ -60,8 +77,14 @@ function threshold(kind: RuleChoice, raw: string): number | string | null | unde
   return Number.isFinite(n) && n >= 0 ? n : null
 }
 
+/** Constructive: higher is better (time: earlier, i.e. «do by»); destructive: lower («not later than»). */
+export function deriveBetter(direction: HabitDirection, kind: RuleChoice): 'lower' | 'higher' {
+  if (direction === 'destructive') return 'lower'
+  return kind === 'time' ? 'lower' : 'higher'
+}
+
 /** Build a validated rule from the form; thresholds must be ordered on the good side. */
-export function buildRule(form: HabitForm): Result<ZonedRule> {
+export function buildRule(form: HabitForm, direction: HabitDirection): Result<ZonedRule> {
   if (form.kind === 'boolean') return { ok: true, value: { kind: 'boolean' } }
   const kind = form.kind
   const excellent = threshold(kind, form.excellent)
@@ -70,12 +93,13 @@ export function buildRule(form: HabitForm): Result<ZonedRule> {
   if (excellent === undefined) return fail('habitError.excellentRequired')
   if (excellent === null || ok === null || tolerable === null) return fail('habitError.badThreshold')
   const num = (v: number | string) => (kind === 'time' ? timeToMinutes(v as string) : (v as number))
-  const sign = form.better === 'lower' ? 1 : -1
+  const better = form.better ?? deriveBetter(direction, kind)
+  const sign = better === 'lower' ? 1 : -1
   const chain = [excellent, ok, tolerable].filter((v): v is number | string => v !== undefined)
   for (let i = 1; i < chain.length; i++) {
     if (sign * num(chain[i]) < sign * num(chain[i - 1])) return fail('habitError.thresholdOrder')
   }
-  const rule: ZonedRule = { kind: 'measured', unit: kind, better: form.better, excellent }
+  const rule: ZonedRule = { kind: 'measured', unit: kind, better, excellent }
   if (ok !== undefined) rule.ok = ok
   if (tolerable !== undefined) rule.tolerable = tolerable
   return { ok: true, value: rule }
@@ -88,8 +112,24 @@ function limit(raw: string): number | null | undefined {
   return Number.isInteger(n) && n >= 0 ? n : null
 }
 
-/** Build the optional quota (only for count habits). `undefined` value = no quota. */
-export function buildQuota(form: HabitForm): Result<Quota | undefined> {
+function weekCount(raw: string, min: number, max: number): number | null {
+  const text = raw.trim()
+  if (!/^\d+$/.test(text)) return null
+  const n = Number(text)
+  return n >= min && n <= max ? n : null
+}
+
+/**
+ * Build the optional quota. Count habits: per-day/per-week limits and reducer.
+ * Destructive yes/no with period «week»: `{ perWeek }` (0-6 «yes» days). `undefined` value = no quota.
+ */
+export function buildQuota(form: HabitForm, direction: HabitDirection): Result<Quota | undefined> {
+  if (form.kind === 'boolean') {
+    if (direction !== 'destructive' || form.period !== 'week') return { ok: true, value: undefined }
+    const perWeek = weekCount(form.weeklyTarget, 0, 6)
+    if (perWeek === null) return fail('habitError.weeklyTarget')
+    return { ok: true, value: { perWeek } }
+  }
   if (form.kind !== 'count') return { ok: true, value: undefined }
   const perDay = limit(form.perDay)
   const perWeek = limit(form.perWeek)
@@ -102,6 +142,16 @@ export function buildQuota(form: HabitForm): Result<Quota | undefined> {
     quota.reducedByDaysOf = form.reducedByDaysOf
   }
   return { ok: true, value: Object.keys(quota).length > 0 ? quota : undefined }
+}
+
+/** Constructive yes/no with period «week»: `{ perWeek }` (1-7 days); otherwise `undefined`. */
+export function buildWeeklyGoal(form: HabitForm, direction: HabitDirection): Result<WeeklyGoal | undefined> {
+  if (form.kind !== 'boolean' || direction !== 'constructive' || form.period !== 'week') {
+    return { ok: true, value: undefined }
+  }
+  const perWeek = weekCount(form.weeklyTarget, 1, 7)
+  if (perWeek === null) return fail('habitError.weeklyTarget')
+  return { ok: true, value: { perWeek } }
 }
 
 /**
@@ -142,21 +192,34 @@ export function editedVersions(habit: Habit, next: Omit<HabitVersion, 'from'>, t
   const from = today > habit.effectiveFrom ? today : habit.effectiveFrom
   const version: HabitVersion = { from, tier: next.tier, rule: next.rule }
   if (next.quota) version.quota = next.quota
+  if (next.weeklyGoal) version.weeklyGoal = next.weeklyGoal
   return upsertVersion(existing, version)
 }
 
-/** Form state prefilled from existing settings. */
-export function formOf(rule: ZonedRule, quota: Quota | undefined): HabitForm {
-  if (rule.kind === 'boolean') return { ...EMPTY_FORM }
+/** Form state prefilled from the settings in effect (keeps a stored `better` as is). */
+export function formOf(version: HabitVersion): HabitForm {
+  const { rule, quota, weeklyGoal } = version
+  const limits = {
+    perDay: quota?.perDay === undefined ? '' : String(quota.perDay),
+    perWeek: quota?.perWeek === undefined ? '' : String(quota.perWeek),
+    reducedByDaysOf: quota?.reducedByDaysOf ?? '',
+  }
+  if (rule.kind === 'boolean') {
+    const target = weeklyGoal?.perWeek ?? quota?.perWeek
+    return {
+      ...EMPTY_FORM,
+      period: target === undefined ? 'day' : 'week',
+      weeklyTarget: target === undefined ? '' : String(target),
+    }
+  }
   return {
+    ...EMPTY_FORM,
     kind: rule.unit,
     better: rule.better,
     excellent: String(rule.excellent),
     ok: rule.ok === undefined ? '' : String(rule.ok),
     tolerable: rule.tolerable === undefined ? '' : String(rule.tolerable),
-    perDay: quota?.perDay === undefined ? '' : String(quota.perDay),
-    perWeek: quota?.perWeek === undefined ? '' : String(quota.perWeek),
-    reducedByDaysOf: quota?.reducedByDaysOf ?? '',
+    ...limits,
   }
 }
 

@@ -291,3 +291,20 @@ describe('unknown habits', () => {
     expect(b.ledger.flatMap((e) => e.contributions)).toEqual(a.ledger.flatMap((e) => e.contributions))
   })
 })
+
+describe('replay: ruleset v2 parity', () => {
+  it('without any weekly goal v2 equals v1.1 (ledger labelled v1.1)', async () => {
+    const { RULESET_V2 } = await import('./config')
+    const reviews = [
+      ...perfectDays(3).map((r) => ({ ...r, entries: { ...r.entries, gym: yes } })),
+      review(addDays(START, 3), { sugar: num(2), gym: no }),
+      review(addDays(START, 4), { sugar: num(4), gym: { kind: 'not_applicable' } }),
+      review(addDays(START, 6), { sugar: num(0), gym: yes }),
+    ]
+    const today = addDays(START, 9)
+    const v1 = replay([gym, sugar], reviews, cfg, today)
+    const v2 = replay([gym, sugar], reviews, RULESET_V2, today)
+    expect(v2).toEqual(v1)
+    expect(v1.ledger.every((e) => e.rulesetVersion === 'v1.1')).toBe(true)
+  })
+})

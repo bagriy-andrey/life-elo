@@ -34,4 +34,19 @@ describe('settingsOn', () => {
     expect(settingsOn(h, '2026-01-10').tier).toBe('strong')
     expect(settingsOn(h, '2026-03-01').tier).toBe('strong')
   })
+
+  it('reads a stored «lower» on constructive count/minutes/steps as «higher»', () => {
+    const minutes = { kind: 'measured', unit: 'minutes', better: 'lower', excellent: 60 } as const
+    const h = habit({ versions: [{ from: '2026-01-01', tier: 'strong', rule: minutes }] })
+    expect(settingsOn(h, '2026-02-01').rule).toEqual({ ...minutes, better: 'higher' })
+    expect(h.versions[0].rule).toBe(minutes)
+  })
+
+  it('keeps «lower» for constructive time and destructive rules', () => {
+    const time = { kind: 'measured', unit: 'time', better: 'lower', excellent: '23:00' } as const
+    const count = { kind: 'measured', unit: 'count', better: 'lower', excellent: 0 } as const
+    expect(settingsOn(habit({ versions: [{ from: '2026-01-01', tier: 'weak', rule: time }] }), '2026-02-01').rule).toBe(time)
+    const destructive = habit({ direction: 'destructive', versions: [{ from: '2026-01-01', tier: 'weak', rule: count }] })
+    expect(settingsOn(destructive, '2026-02-01').rule).toBe(count)
+  })
 })

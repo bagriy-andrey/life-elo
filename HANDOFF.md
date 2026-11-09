@@ -1,18 +1,19 @@
 # Handoff
-Updated: 2026-11-08 by Claude Code
-Branch: profile-redesign (from main, not pushed)
-Plan: docs/plans/09-profile-redesign.md — done (13/13), verifier PASS on every step. Tests 334 / lint / build green
-(1 old lint warning: src/i18n/index.tsx:40). App version 0.9.0.
+Updated: 2026-11-09 by Claude Code
+Branch: habit-sheet (PR #9), main (PR #8 profile redesign) merged in.
+Plans: docs/plans/09-profile-redesign.md (on main) and docs/plans/10-habit-sheet.md — both done.
+Merge: the two independent `BottomSheet`s unified (habit-sheet API: closeLabel, footer; main's `sheet-option`/`sheet-check`
+pick-list styles kept, now inside `<div className="sheet-options">`); the profile language sheet now has the ✕ header.
 ## In progress
-Nothing uncommitted. `stash@{0}` "home-chart draft" is obsolete; drop it.
+Nothing uncommitted.
 ## Next step (user)
-1. Manual check in `npm run dev` at 375px: view/edit, language sheet, theme, export (file has a `rating` block),
-   clear-all dialog (cancel only), sync ↻, ru/en/uk, light/dark.
-2. Paste `supabase/templates/email_change.html` into the Supabase dashboard (docs/setup/backend.md §6), then test
-   «Сменить» login email on a real email/password account.
-3. Run `/design-sync` (new BottomSheet), then record HEAD in `.design-sync/last-sync`.
-4. Push and open a PR, then merge and deploy.
+1. Manual check in `npm run dev` at 375px, light/dark: habit sheet (constructive 4/week, destructive weekly yes/no,
+   measured thresholds, edit/pause/delete), weekly-goal review, minutes habit scores «more is better»;
+   profile view/edit, language sheet, export, clear-all (cancel only).
+2. Paste `supabase/templates/email_change.html` into the Supabase dashboard (docs/setup/backend.md §6), test «Сменить».
+3. Merge PR #9, deploy (design-sync done after the merge).
 ## Broken / open questions
-- The email-change link uses `{{ .ConfirmationURL }}`, so it opens in Safari, not the installed PWA. The new email shows after the next session refresh.
-- Google-only accounts cannot change their login email (managed by Google); they see the caption «Вход через Google».
-- Known: the Resend test sender limits mail delivery; `--warn` token has no dark value.
+- SegmentedControl track not restyled to the mockup's pill-in-tray look (only bars added) — ask user.
+- Destructive weekly quota: after an overrun, later 0-days that week stay bad (v1 rule, deferred in product context).
+- Email-change link opens in Safari, not the PWA; Google-only accounts can't change login email.
+- Old: Resend test sender limits mail; Google sign-in in iOS PWA unverified; `--warn` has no dark value.

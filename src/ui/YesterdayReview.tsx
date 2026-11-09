@@ -6,6 +6,7 @@ import {
   buildCards,
   entryForYesNo,
   goalLabelParts,
+  weeklyGoalNote,
   type NumericUnit,
   type ReviewCard,
 } from '../domain/reviewFlow'
@@ -13,7 +14,7 @@ import { deadlineShowsRating, timeLeft } from '../domain/reviewDeadline'
 import { reviewOutcome, type ReviewOutcome } from '../domain/reviewOutcome'
 import { settingsOn } from '../domain/settings'
 import type { DayKey, DayReview, Habit, HabitEntry } from '../domain/types'
-import { RULESET_V1 } from '../engine/config'
+import { RULESET_V2 } from '../engine/config'
 import { quotaZone, weeklyQuotaUsage } from '../engine/quota'
 import { replay } from '../engine/rating'
 import { classifyZone } from '../engine/zones'
@@ -131,6 +132,8 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
     const kind = c.quota ? 'quota' : c.direction
     const dir = c.direction === 'constructive' ? 'constructive' : 'destructive'
     const usage = quotaFor(c)
+    const h = habits.find((x) => x.id === c.habitId)
+    const goal = h ? weeklyGoalNote(h, day, byDayWith(answers)) : null
     return (
       <SwipeCard
         key={c.habitId}
@@ -151,6 +154,7 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
             note={usage.used >= usage.limit ? t('yr.quota.exhausted') : t('yr.quota.used', { n: usage.used, limit: usage.limit })}
           />
         )}
+        {goal && <p className="yr-week-note">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>}
       </SwipeCard>
     )
   }
@@ -230,8 +234,8 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
       const existing = reviews.find((r) => r.day === day)
       const saved = buildReview(day, full, at, existing)
       const asOf = addDays(day, 1)
-      const before = replay(habits, reviews, RULESET_V1, asOf)
-      const after = replay(habits, [...reviews.filter((r) => r.day !== day), saved], RULESET_V1, asOf)
+      const before = replay(habits, reviews, RULESET_V2, asOf)
+      const after = replay(habits, [...reviews.filter((r) => r.day !== day), saved], RULESET_V2, asOf)
       setOutcome(reviewOutcome(before, after, day))
       setScreen('done')
     } catch {

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Привычки" description="Список привычек с кнопкой «Добавить» и шторкой создания привычки" -->
+<helmet><script src="./ds-base.js"></script><style>@keyframes habSheetUp{from{transform:translateY(100%)}to{transform:none}}@keyframes habFade{from{opacity:0}to{opacity:1}}</style></helmet>
+<div style="min-height:100dvh;background:var(--bg);color:var(--text);font:var(--text-md)/var(--line-height) var(--font-sans)">
+<main style="max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px 96px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px">
+<h2 style="margin:0;font-size:var(--text-lg)">Привычки</h2>
+<button type="button" onClick="{{ openSheet }}" style="min-height:40px;display:flex;align-items:center;gap:6px;padding:0 14px 0 10px;border:0;border-radius:var(--radius-full);background:var(--accent);color:var(--accent-text);font:inherit;font-weight:600;cursor:pointer"><span aria-hidden="true" style="font-size:20px;line-height:1;font-weight:500">+</span>Добавить</button>
+</div>
+<sc-if value="{{ hasHabits }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ habitList }}" as="h" hint-placeholder-count="3">
+<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;display:flex;align-items:center;gap:12px">
+<sc-if value="{{ h.good }}" hint-placeholder-val="{{ true }}"><span style="width:10px;height:10px;border-radius:50%;flex:none;background:var(--pos)"></span></sc-if>
+<sc-if value="{{ h.bad }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:10px;border-radius:50%;flex:none;background:var(--neg)"></span></sc-if>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+<strong style="overflow-wrap:anywhere">{{ h.name }}</strong>
+<span style="color:var(--muted);font-size:var(--text-sm)">{{ h.meta }}</span>
+</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ noHabits }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:56px 24px;border:1px dashed var(--border);border-radius:var(--radius-md)">
+<strong style="font-size:var(--text-lg)">Пока нет привычек</strong>
+<span style="color:var(--muted);font-size:var(--text-sm);text-wrap:pretty;max-width:280px">Добавьте первую — то, что хотите делать регулярно, или то, от чего хотите отказаться.</span>
+</div>
+</sc-if>
+</main>
+<x-import component-from-global-scope="LifeElo.TabBar" items="{{ tabs }}" active="habits" onSelect="{{ noop }}" hint-size="100%,60px"></x-import>
+<sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSheet }}" style="position:fixed;inset:0;z-index:30;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;animation:habFade .2s ease-out">
+<div role="dialog" aria-modal="true" aria-labelledby="hab-new-title" onClick="{{ stop }}" onKeyDown="{{ onKey }}" style="width:100%;max-width:560px;max-height:92dvh;overflow:hidden;background:var(--card);border:1px solid var(--border);border-bottom:0;border-radius:24px 24px 0 0;display:flex;flex-direction:column;animation:habSheetUp .28s cubic-bezier(.2,.8,.2,1)">
+<div style="flex:none;display:flex;flex-direction:column;gap:10px;padding:8px 20px 14px;border-bottom:1px solid var(--border)">
+<span style="align-self:center;width:36px;height:4px;border-radius:2px;background:var(--border)"></span>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:6px">
+<strong id="hab-new-title" style="font-size:1.35rem;line-height:1.2;letter-spacing:-0.01em">Новая привычка</strong>
+<button type="button" onClick="{{ closeSheet }}" aria-label="Закрыть" style="flex:none;width:36px;height:36px;border-radius:50%;border:0;background:color-mix(in srgb, var(--text) 8%, transparent);color:var(--muted);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</button>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px;display:flex;flex-direction:column;gap:22px">
+<label style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:var(--text-sm);font-weight:600">Название</span>
+<input value="{{ draft.name }}" onChange="{{ onName }}" placeholder="{{ namePlaceholder }}" autoFocus="{{ true }}" maxLength="60" aria-invalid="{{ nameInvalid }}" style="min-height:52px;font-size:var(--text-lg);padding:0 14px"></input>
+<sc-if value="{{ nameInvalid }}" hint-placeholder-val="{{ false }}"><span style="color:var(--neg);font-size:var(--text-xs)">Введите название</span></sc-if>
+</label>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:var(--text-sm);font-weight:600">Тип</span>
+<div role="radiogroup" aria-label="Тип" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
+<sc-if value="{{ goodOn }}" hint-placeholder-val="{{ true }}">
+<button type="button" role="radio" aria-checked="true" onClick="{{ pickGood }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:var(--radius-md);border:1.5px solid var(--pos);background:color-mix(in srgb, var(--pos) 10%, var(--card));color:var(--text);font:inherit;text-align:left;cursor:pointer"><span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--pos);color:var(--card);font-size:18px;font-weight:700;line-height:1">+</span><strong>Конструктивная</strong><span style="color:var(--muted);font-size:var(--text-xs);text-wrap:pretty">Делаю — рейтинг растёт</span></button>
+</sc-if>
+<sc-if value="{{ goodOff }}" hint-placeholder-val="{{ false }}">
+<button type="button" role="radio" aria-checked="false" onClick="{{ pickGood }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer"><span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--text) 8%, transparent);color:var(--muted);font-size:18px;font-weight:700;line-height:1">+</span><strong>Конструктивная</strong><span style="color:var(--muted);font-size:var(--text-xs);text-wrap:pretty">Делаю — рейтинг растёт</span></button>
+</sc-if>
+<sc-if value="{{ badOn }}" hint-placeholder-val="{{ false }}">
+<button type="button" role="radio" aria-checked="true" onClick="{{ pickBad }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:var(--radius-md);border:1.5px solid var(--neg);background:color-mix(in srgb, var(--neg) 10%, var(--card));color:var(--text);font:inherit;text-align:left;cursor:pointer"><span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--neg);color:var(--card);font-size:18px;font-weight:700;line-height:1">−</span><strong>Нежелательная</strong><span style="color:var(--muted);font-size:var(--text-xs);text-wrap:pretty">Срываюсь — рейтинг падает</span></button>
+</sc-if>
+<sc-if value="{{ badOff }}" hint-placeholder-val="{{ true }}">
+<button type="button" role="radio" aria-checked="false" onClick="{{ pickBad }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer"><span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--text) 8%, transparent);color:var(--muted);font-size:18px;font-weight:700;line-height:1">−</span><strong>Нежелательная</strong><span style="color:var(--muted);font-size:var(--text-xs);text-wrap:pretty">Срываюсь — рейтинг падает</span></button>
+</sc-if>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:8px;font-size:var(--text-sm)"><span style="font-weight:600">Важность</span><span style="color:var(--muted)">{{ weightHint }}</span></div>
+<div role="radiogroup" aria-label="Важность" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:var(--radius-sm);background:color-mix(in srgb, var(--text) 6%, transparent)">
+<sc-for list="{{ weights }}" as="w" hint-placeholder-count="3">
+<sc-if value="{{ w.on }}" hint-placeholder-val="{{ false }}">
+<button type="button" role="radio" aria-checked="true" onClick="{{ w.pick }}" style="min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:9px;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.18);color:var(--text);font:inherit;font-size:var(--text-sm);font-weight:600;cursor:pointer"><span aria-hidden="true" style="display:flex;align-items:flex-end;gap:2px;height:13px;color:var(--accent)"><span style="width:3px;height:7px;border-radius:1px;background:currentColor"></span><sc-if value="{{ w.b2 }}"><span style="width:3px;height:10px;border-radius:1px;background:currentColor"></span></sc-if><sc-if value="{{ w.b2dim }}"><span style="width:3px;height:10px;border-radius:1px;background:currentColor;opacity:0.3"></span></sc-if><sc-if value="{{ w.b3 }}"><span style="width:3px;height:13px;border-radius:1px;background:currentColor"></span></sc-if><sc-if value="{{ w.b3dim }}"><span style="width:3px;height:13px;border-radius:1px;background:currentColor;opacity:0.3"></span></sc-if></span>{{ w.label }}</button>
+</sc-if>
+<sc-if value="{{ w.off }}" hint-placeholder-val="{{ true }}">
+<button type="button" role="radio" aria-checked="false" onClick="{{ w.pick }}" style="min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:var(--text-sm);cursor:pointer"><span aria-hidden="true" style="display:flex;align-items:flex-end;gap:2px;height:13px"><span style="width:3px;height:7px;border-radius:1px;background:currentColor"></span><sc-if value="{{ w.b2 }}"><span style="width:3px;height:10px;border-radius:1px;background:currentColor"></span></sc-if><sc-if value="{{ w.b2dim }}"><span style="width:3px;height:10px;border-radius:1px;background:currentColor;opacity:0.3"></span></sc-if><sc-if value="{{ w.b3 }}"><span style="width:3px;height:13px;border-radius:1px;background:currentColor"></span></sc-if><sc-if value="{{ w.b3dim }}"><span style="width:3px;height:13px;border-radius:1px;background:currentColor;opacity:0.3"></span></sc-if></span>{{ w.label }}</button>
+</sc-if>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:var(--text-sm);font-weight:600">Как отмечать</span>
+<div role="radiogroup" aria-label="Как отмечать" style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ measures }}" as="m" hint-placeholder-count="5">
+<sc-if value="{{ m.on }}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{ m.pick }}" style="min-height:40px;padding:0 16px;border-radius:var(--radius-full);border:1px solid var(--accent);background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--text);font:inherit;font-size:var(--text-sm);font-weight:600;cursor:pointer">{{ m.label }}</button></sc-if>
+<sc-if value="{{ m.off }}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{ m.pick }}" style="min-height:40px;padding:0 16px;border-radius:var(--radius-full);border:1px solid var(--border);background:transparent;color:var(--muted);font:inherit;font-size:var(--text-sm);cursor:pointer">{{ m.label }}</button></sc-if>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font-size:var(--text-sm);font-weight:600">{{ normTitle }}</span>
+<sc-if value="{{ showPeriod }}" hint-placeholder-val="{{ true }}">
+<div role="radiogroup" aria-label="Период" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px;padding:4px;border-radius:var(--radius-sm);background:color-mix(in srgb, var(--text) 6%, transparent)">
+<sc-if value="{{ dayOn }}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="true" onClick="{{ pickDay }}" style="min-height:40px;border:0;border-radius:9px;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.18);color:var(--text);font:inherit;font-size:var(--text-sm);font-weight:600;cursor:pointer">Каждый день</button></sc-if>
+<sc-if value="{{ dayOff }}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="false" onClick="{{ pickDay }}" style="min-height:40px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:var(--text-sm);cursor:pointer">Каждый день</button></sc-if>
+<sc-if value="{{ weekOn }}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{ pickWeek }}" style="min-height:40px;border:0;border-radius:9px;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.18);color:var(--text);font:inherit;font-size:var(--text-sm);font-weight:600;cursor:pointer">За неделю</button></sc-if>
+<sc-if value="{{ weekOff }}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{ pickWeek }}" style="min-height:40px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:var(--text-sm);cursor:pointer">За неделю</button></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showStepper }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:var(--radius-sm);background:color-mix(in srgb, var(--text) 5%, transparent)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<span style="color:var(--muted);font-size:var(--text-sm)">{{ stepLabel }}</span>
+<div style="display:flex;align-items:center;gap:4px">
+<button type="button" onClick="{{ dec }}" disabled="{{ decOff }}" aria-label="Меньше" style="width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:20px;line-height:1;cursor:pointer">−</button>
+<strong style="min-width:56px;text-align:center;font-size:1.35rem;font-variant-numeric:tabular-nums">{{ draft.times }}</strong>
+<button type="button" onClick="{{ inc }}" disabled="{{ incOff }}" aria-label="Больше" style="width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:20px;line-height:1;cursor:pointer">+</button>
+</div>
+</div>
+<div aria-hidden="true" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+<sc-for list="{{ weekDots }}" as="d" hint-placeholder-count="7">
+<sc-if value="{{ d.okGood }}"><span style="height:6px;border-radius:3px;background:var(--pos)"></span></sc-if>
+<sc-if value="{{ d.okBad }}"><span style="height:6px;border-radius:3px;background:var(--muted)"></span></sc-if>
+<sc-if value="{{ d.over }}"><span style="height:6px;border-radius:3px;background:color-mix(in srgb, var(--neg) 35%, transparent)"></span></sc-if>
+<sc-if value="{{ d.rest }}"><span style="height:6px;border-radius:3px;background:color-mix(in srgb, var(--muted) 25%, transparent)"></span></sc-if>
+</sc-for>
+</div>
+<span style="color:var(--muted);font-size:var(--text-xs);text-wrap:pretty">{{ stepHint }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ dailyBoolNote }}" hint-placeholder-val="{{ true }}"><span style="color:var(--muted);font-size:var(--text-xs)">{{ dailyBoolNote }}</span></sc-if>
+<sc-if value="{{ hasTarget }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 14px;border-radius:var(--radius-sm);background:color-mix(in srgb, var(--text) 5%, transparent)">
+<span style="color:var(--muted);font-size:var(--text-sm)">{{ targetLabel }}</span>
+<div style="display:flex;align-items:center;gap:8px">
+<input type="{{ targetType }}" inputMode="numeric" value="{{ draft.target }}" onChange="{{ onTarget }}" placeholder="{{ targetPlaceholder }}" style="width:104px;min-height:40px;text-align:right;font-variant-numeric:tabular-nums"></input>
+<sc-if value="{{ targetUnit }}"><span style="color:var(--muted);font-size:var(--text-sm);min-width:28px">{{ targetUnit }}</span></sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+<div style="flex:none;padding:12px 20px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--border);background:var(--card);display:flex;flex-direction:column">
+<x-import component-from-global-scope="LifeElo.Button" variant="primary" onClick="{{ add }}" style="min-height:52px" hint-size="100%,52px">Добавить привычку</x-import>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;startState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;filled&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;filled&quot;,&quot;tsType&quot;:&quot;'filled' | 'empty'&quot;}}">
+const WEIGHTS = [
+  { value: 'low', label: 'Слабая', n: 1, hint: 'Мелочь, но приятно' },
+  { value: 'mid', label: 'Средняя', n: 2, hint: 'Заметно влияет на день' },
+  { value: 'high', label: 'Сильная', n: 3, hint: 'Главное для вас' },
+];
+const MEASURES = [
+  { value: 'bool', label: 'Да/нет' },
+  { value: 'count', label: 'Число', unit: 'раз', ph: '3' },
+  { value: 'minutes', label: 'Минуты', unit: 'мин', ph: '30' },
+  { value: 'steps', label: 'Шаги', unit: 'шагов', ph: '8000' },
+  { value: 'time', label: 'Время', ph: '23:00' },
+];
+const SAMPLE = [
+  { name: 'Пробежка 5 км', kind: 'good', weight: 'high', measure: 'bool' },
+  { name: 'Без сладкого', kind: 'bad', weight: 'mid', measure: 'bool' },
+  { name: 'Чтение', kind: 'good', weight: 'low', measure: 'minutes', target: '30' },
+  { name: 'Отбой', kind: 'good', weight: 'mid', measure: 'time', target: '23:30' },
+  { name: 'Спортзал', kind: 'good', weight: 'high', measure: 'bool', period: 'week', times: 4 },
+  { name: 'Алкоголь', kind: 'bad', weight: 'mid', measure: 'bool', period: 'week', times: 2 },
+];
+const blank = () => ({ name: '', kind: 'good', weight: 'mid', measure: 'bool', target: '', period: 'day', times: 4 });
+function timesWord(n) { const a = n % 10, b = n % 100; return a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'раза' : 'раз'; }
+function metaOf(h) {
+  const w = WEIGHTS.find(x => x.value === h.weight), m = MEASURES.find(x => x.value === h.measure);
+  let t = m.label;
+  const wk = h.period === 'week';
+  if (wk && h.measure === 'bool') t = (h.kind === 'good' ? 'от ' : 'до ') + h.times + ' ' + timesWord(h.times) + ' в неделю';
+  else if (h.target) t = h.measure === 'time' ? (h.kind === 'good' ? 'до ' : 'не позже ') + h.target : (h.kind === 'good' ? '≥ ' : '≤ ') + h.target + ' ' + m.unit + (wk ? ' в неделю' : ' в день');
+  return (h.kind === 'good' ? 'Конструктивная' : 'Нежелательная') + ' · ' + w.label + ' · ' + t;
+}
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { habits: props.startState === 'empty' ? [] : SAMPLE.slice(), open: props.startOpen ?? true, draft: blank(), tried: false };
+  }
+  componentDidUpdate(pp) {
+    if (pp.startOpen !== this.props.startOpen) this.setState({ open: !!this.props.startOpen });
+    if (pp.startState !== this.props.startState) this.setState({ habits: this.props.startState === 'empty' ? [] : SAMPLE.slice() });
+  }
+  set(patch) { this.setState(s => ({ draft: { ...s.draft, ...patch } })); }
+  renderVals() {
+    const { habits, open, draft, tried } = this.state;
+    const m = MEASURES.find(x => x.value === draft.measure);
+    const good = draft.kind === 'good';
+    const close = () => this.setState({ open: false });
+    const week = draft.period === 'week' && draft.measure !== 'time';
+    const n = draft.times;
+    return {
+      hasHabits: habits.length > 0, noHabits: habits.length === 0,
+      habitList: habits.map(h => ({ name: h.name, meta: metaOf(h), good: h.kind === 'good', bad: h.kind !== 'good' })),
+      open,
+      openSheet: () => this.setState({ open: true, draft: blank(), tried: false }),
+      closeSheet: close,
+      onKey: e => { if (e.key === 'Escape') close(); },
+      stop: e => e.stopPropagation(),
+      draft,
+      namePlaceholder: good ? 'Например, зарядка утром' : 'Например, соцсети после 23:00',
+      onName: e => this.set({ name: e.target.value }),
+      nameInvalid: tried && !draft.name.trim(),
+      goodOn: good, goodOff: !good, badOn: !good, badOff: good,
+      pickGood: () => this.set({ kind: 'good', times: draft.period === 'week' ? draft.times : 4 }), pickBad: () => this.set({ kind: 'bad', times: draft.period === 'week' ? draft.times : 2 }),
+      normTitle: good ? 'Цель' : 'Норма',
+      showPeriod: draft.measure !== 'time',
+      dayOn: !week, dayOff: week, weekOn: week, weekOff: !week,
+      pickDay: () => this.set({ period: 'day' }), pickWeek: () => this.set({ period: 'week' }),
+      showStepper: week && draft.measure === 'bool',
+      stepLabel: good ? 'Не меньше, раз в неделю' : 'Не больше, раз в неделю',
+      dec: () => this.set({ times: Math.max(good ? 1 : 0, n - 1) }), inc: () => this.set({ times: Math.min(good ? 7 : 6, n + 1) }),
+      decOff: n <= (good ? 1 : 0), incOff: n >= (good ? 7 : 6),
+      weekDots: [0,1,2,3,4,5,6].map(i => ({ okGood: good && i < n, okBad: !good && i < n, over: !good && i >= n, rest: good && i >= n })),
+      stepHint: good
+        ? (n === 7 ? 'Каждый день недели.' : `Любые ${n} ${timesWord(n)} за неделю — цель выполнена. Меньше — рейтинг снизится.`)
+        : (n === 0 ? 'Ни разу — любой случай считается нарушением.' : `До ${n} ${timesWord(n)} за неделю — норма. Каждый раз сверх — нарушение.`),
+      dailyBoolNote: draft.measure === 'bool' && !week ? (good ? 'Отмечаете каждый день: сделал или нет.' : 'Каждый срыв — нарушение.') : '',
+      weightHint: WEIGHTS.find(w => w.value === draft.weight).hint,
+      weights: WEIGHTS.map(w => ({ label: w.label, on: w.value === draft.weight, off: w.value !== draft.weight, pick: () => this.set({ weight: w.value }), b2: w.n >= 2, b2dim: w.n < 2, b3: w.n >= 3, b3dim: w.n < 3 })),
+      measures: MEASURES.map(x => ({ label: x.label, on: x.value === draft.measure, off: x.value !== draft.measure, pick: () => this.set({ measure: x.value, target: '' }) })),
+      hasTarget: draft.measure !== 'bool',
+      targetLabel: draft.measure === 'time' ? (good ? 'Сделать до' : 'Не позже') : (good ? 'Не меньше' : 'Не больше') + (week ? ' за неделю' : ' в день'),
+      targetType: draft.measure === 'time' ? 'time' : 'number',
+      targetPlaceholder: m.ph || '',
+      targetUnit: m.unit || '',
+      onTarget: e => this.set({ target: e.target.value }),
+      add: () => {
+        if (!draft.name.trim()) return this.setState({ tried: true });
+        this.setState(s => ({ habits: [{ ...s.draft, name: s.draft.name.trim() }, ...s.habits], open: false }));
+      },
+      tabs: [{ id: 'home', label: 'Главная' }, { id: 'review', label: 'Обзор дня' }, { id: 'habits', label: 'Привычки' }, { id: 'profile', label: 'Профиль' }],
+      noop: () => {},
+    };
+  }
+}
+</script>
+</body>
+</html>

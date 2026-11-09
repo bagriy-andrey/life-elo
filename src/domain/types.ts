@@ -31,12 +31,18 @@ export interface Quota {
   reducedByDaysOf?: string
 }
 
+/** Constructive yes/no goal: do the habit `perWeek` days (1-7) per calendar week (Mon-Sun). Ruleset v2. */
+export interface WeeklyGoal {
+  perWeek: number
+}
+
 /** Habit settings in effect from day `from` (inclusive). */
 export interface HabitVersion {
   from: DayKey
   tier: ImpactTier
   rule: ZonedRule
   quota?: Quota
+  weeklyGoal?: WeeklyGoal
 }
 
 export interface Habit {

@@ -9,6 +9,8 @@ export interface DayHabit {
   tier: ImpactTier
   /** Destructive or quota habit; constructive habits never take part in the clean day. */
   canBeBad: boolean
+  /** Weekly-goal habit: its streak counts weeks (`weekStreak` AFTER this day) and is managed by `replay`. */
+  weekly?: { weekStreak: number }
 }
 
 /** Result of one habit on one day. `unknown` stays in the weight sum, `not_applicable` leaves it. */
@@ -66,7 +68,8 @@ export function scoreDay({ habits, zones, streaks, cfg }: DayScoreInput): DaySco
   for (const h of habits) {
     const before = streaks[h.id] ?? EMPTY_STREAK
     const z = zones[h.id] ?? 'unknown'
-    if (z === 'not_applicable') after[h.id] = before
+    if (h.weekly) after[h.id] = { pos: h.weekly.weekStreak, neg: 0 }
+    else if (z === 'not_applicable') after[h.id] = before
     else if (z === 'unknown') after[h.id] = breakStreak()
     else after[h.id] = advanceStreak(before, z, cfg)
   }
@@ -104,7 +107,13 @@ export function scoreDay({ habits, zones, streaks, cfg }: DayScoreInput): DaySco
 
   if (sumWeights > 0) {
     for (const h of applicable) {
-      const fraction = streakFraction(after[h.id].pos, h.tier, cfg)
+      let fraction: number
+      if (h.weekly) {
+        if (zones[h.id] !== 'excellent') continue // Bonus is paid on done days only.
+        const f = cfg.weeklyStreakFraction[h.tier]
+        const week = h.weekly.weekStreak
+        fraction = week <= 0 ? 0 : (f[Math.min(week, f.length) - 1] ?? 0)
+      } else fraction = streakFraction(after[h.id].pos, h.tier, cfg)
       if (fraction <= 0) continue
       const points = cfg.budget.streak * (cfg.tierWeight[h.tier] / sumWeights) * fraction
       push({ source: 'streak_bonus', habitId: h.id, points, multiplier: 1 })

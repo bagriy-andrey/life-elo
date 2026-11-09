@@ -12,7 +12,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 
 ## Layout
 - `src/domain/` — types and day-boundary logic (`dayOf`, `reviewDay`).
-- `src/engine/` — pure, deterministic rating engine (`replay`) + versioned `RulesetConfig`.
+- `src/engine/` — pure, deterministic rating engine (`replay`) + versioned `RulesetConfig` (v2 adds the weekly goal, `weeklyGoal.ts`).
 - `src/db/` — Dexie schema. Rating/streaks are never stored; they are derived by replaying confirmed reviews.
 - `src/auth/` — Supabase client, `AuthProvider`, `context.ts` (`useAuth`), validation, error texts.
 - `src/sync/` — outbox, merge rules, remote calls, sync engine (raw records only: reviews, wellbeing, profile, tombstones).

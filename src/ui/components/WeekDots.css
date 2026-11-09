@@ -1,0 +1,10 @@
+.week-dots {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.week-dot { height: 6px; border-radius: 3px; }
+.week-dot-pos { background: var(--pos); }
+.week-dot-allowed { background: var(--muted); }
+.week-dot-over { background: color-mix(in srgb, var(--neg) 35%, transparent); }
+.week-dot-rest { background: color-mix(in srgb, var(--muted) 25%, transparent); }

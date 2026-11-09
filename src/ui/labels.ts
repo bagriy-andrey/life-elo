@@ -58,6 +58,9 @@ export const formatSigned = (n: number, digits = 2) => {
   return r === 0 ? '0' : n > 0 ? `+${r}` : `−${r}`
 }
 
+/** A rating value (not a change): only negatives get a sign, «−12.5» / «60.9». */
+export const formatRating = (n: number, digits = 1) => formatSigned(n, digits).replace('+', '')
+
 export const formatDay = (day: string, locale: string) =>
   new Date(`${day}T12:00:00`).toLocaleDateString(locale, {
     weekday: 'short',

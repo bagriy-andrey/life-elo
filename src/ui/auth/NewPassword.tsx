@@ -112,8 +112,8 @@ export function NewPassword({ onRequestNew }: { onRequestNew: () => void }) {
               {...pwProps}
               {...pwLabels}
             />
-            <Button variant="primary" type="submit" className="auth-submit" disabled={busy}>
-              {busy ? t('auth.busy') : t('auth.newPassword.save')}
+            <Button variant="primary" type="submit" className="auth-submit" loading={busy}>
+              {t('auth.newPassword.save')}
             </Button>
           </form>
           <div className="auth-footer">

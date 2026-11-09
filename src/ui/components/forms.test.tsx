@@ -1,6 +1,6 @@
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { ChipGroup, SegmentedControl, Stepper, TypeCards, WeekDots } from './index'
+import { Button, ChipGroup, SegmentedControl, Select, Skeleton, Spinner, Stepper, TypeCards, WeekDots } from './index'
 
 describe('form components', () => {
   it('Stepper disables buttons at the bounds and labels them', () => {
@@ -18,6 +18,33 @@ describe('form components', () => {
     const bad = renderToString(<WeekDots value={2} direction="destructive" />)
     expect(bad.match(/week-dot-allowed/g)).toHaveLength(2)
     expect(bad.match(/week-dot-over/g)).toHaveLength(5)
+  })
+  it('Select renders a closed listbox trigger with the selected label', () => {
+    const options = [{ value: '', label: 'Не уменьшается' }, { value: 'h1', label: 'Курение' }]
+    const html = renderToString(<Select label="Уменьшается" value="h1" onChange={() => {}} options={options} />)
+    expect(html).toContain('aria-haspopup="listbox"')
+    expect(html).toContain('aria-expanded="false"')
+    expect(html).toContain('aria-label="Уменьшается"')
+    expect(html).toContain('Курение')
+    expect(html).not.toContain('role="listbox"')
+    const empty = renderToString(<Select label="x" value="zzz" placeholder="Выберите" onChange={() => {}} options={options} />)
+    expect(empty).toContain('select-value placeholder')
+  })
+  it('Button loading keeps the label for width, shows a spinner and disables', () => {
+    const html = renderToString(<Button variant="primary" loading>Сохранить</Button>)
+    expect(html).toContain('aria-busy="true"')
+    expect(html).toContain('disabled=""')
+    expect(html).toContain('btn-label')
+    expect(html).toContain('Сохранить')
+    expect(html).toContain('spinner')
+    expect(renderToString(<Button>Сохранить</Button>)).not.toContain('spinner')
+  })
+  it('Spinner is decorative unless labelled; Skeleton is aria-hidden', () => {
+    expect(renderToString(<Spinner />)).toContain('aria-hidden="true"')
+    expect(renderToString(<Spinner label="Загрузка" />)).toContain('role="status"')
+    const sk = renderToString(<Skeleton width={40} height={40} radius="full" />)
+    expect(sk).toContain('aria-hidden="true"')
+    expect(sk).toContain('var(--radius-full)')
   })
   it('ChipGroup is a radiogroup with the selected chip checked', () => {
     const html = renderToString(<ChipGroup label="Как отмечать" value="b" onChange={() => {}} options={[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]} />)

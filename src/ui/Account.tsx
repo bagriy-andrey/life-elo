@@ -92,8 +92,8 @@ export function AccountSection({ engine }: { engine: SyncEngine }) {
           </Field>
           {failure && <Notice tone="error">{t(failure)}</Notice>}
           <div className="dialog-actions">
-            <Button variant="primary" type="submit" className="clear-btn" disabled={busy}>
-              {busy ? t('auth.busy') : t('account.send')}
+            <Button variant="primary" type="submit" className="clear-btn" loading={busy}>
+              {t('account.send')}
             </Button>
             <Button type="button" className="clear-btn" onClick={close} disabled={busy}>
               {t('common.cancel')}
@@ -175,8 +175,8 @@ export function AccountActions({ engine, onPassword }: { engine: SyncEngine; onP
         <Card>
           <div className="stack-sm">
             <p>{t('account.unsynced')}</p>
-            <Button variant="primary" className="clear-btn" disabled={busy} onClick={confirmLogout}>
-              {busy ? t('auth.busy') : t('account.logout')}
+            <Button variant="primary" className="clear-btn" loading={busy} onClick={confirmLogout}>
+              {t('account.logout')}
             </Button>
             <Button className="clear-btn" disabled={busy} onClick={() => setConfirming(false)}>
               {t('common.cancel')}
@@ -184,8 +184,8 @@ export function AccountActions({ engine, onPassword }: { engine: SyncEngine; onP
           </div>
         </Card>
       ) : (
-        <Button className="clear-btn" disabled={busy} onClick={logout}>
-          {busy ? t('auth.busy') : t('account.logout')}
+        <Button className="clear-btn" loading={busy} onClick={logout}>
+          {t('account.logout')}
         </Button>
       )}
     </div>

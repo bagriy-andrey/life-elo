@@ -9,6 +9,8 @@
   gap: calc(var(--space-16) + var(--space-4));
 }
 .auth-splash { align-items: center; justify-content: center; }
+.auth-splash-spinner { color: var(--muted); opacity: 0; animation: spinner-turn 0.7s linear infinite, auth-splash-in 0.2s ease-out 0.4s forwards; }
+@keyframes auth-splash-in { to { opacity: 1; } }
 .auth-logo { display: flex; align-items: center; gap: var(--space-10); }
 .auth-logo-mark {
   width: 36px;
@@ -77,8 +79,10 @@
 .auth-footer {
   margin-top: auto;
   display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: center;
-  gap: var(--space-6);
+  column-gap: var(--space-6);
   color: var(--muted);
   font-size: var(--text-sm);
 }

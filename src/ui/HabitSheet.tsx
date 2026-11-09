@@ -18,7 +18,7 @@ import {
 import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
 import { useI18n } from '../i18n'
-import { BottomSheet, Button, ChipGroup, Dialog, Field, SegmentedControl, Stepper, TypeCards, WeekDots } from './components'
+import { BottomSheet, Button, ChipGroup, Dialog, Field, SegmentedControl, Select, Stepper, TypeCards, WeekDots } from './components'
 import { ruleChoiceLabels, tierLabels, unitLabels } from './labels'
 import './HabitSheet.css'
 
@@ -52,6 +52,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const [tier, setTier] = useState<ImpactTier>(current?.tier ?? 'medium')
   const [form, setForm] = useState<HabitForm>(current ? formOf(current) : EMPTY_FORM)
   const [error, setError] = useState<SetupError>()
+  const [saving, setSaving] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const set = (patch: Partial<HabitForm>) => setForm((f) => ({ ...f, ...patch }))
@@ -93,6 +94,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const otherError = error && !known.includes(error.key) ? t(error.key, error.params) : undefined
 
   const save = async () => {
+    if (saving) return
     if (!name.trim()) return setError({ key: 'habitError.nameEmpty' })
     const rule = buildRule(form, direction)
     if (!rule.ok) return setError(rule.error)
@@ -102,26 +104,32 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
     if (!weeklyGoal.ok) return setError(weeklyGoal.error)
     const reducerError = validateReducer(habit?.id, quota.value, habits, editing ? day : effectiveFrom)
     if (reducerError) return setError(reducerError)
-    if (habit) {
-      const versions = editedVersions(
-        habit,
-        { tier, rule: rule.value, quota: quota.value, weeklyGoal: weeklyGoal.value },
-        day,
-      )
-      await db.habits.update(habit.id, { versions, name: name.trim(), direction: locked ? habit.direction : direction })
-    } else {
-      const version: HabitVersion = { from: effectiveFrom, tier, rule: rule.value }
-      if (quota.value) version.quota = quota.value
-      if (weeklyGoal.value) version.weeklyGoal = weeklyGoal.value
-      await db.habits.add({
-        id: newId(),
-        name: name.trim(),
-        direction,
-        versions: [version],
-        active: true,
-        effectiveFrom,
-        createdAt: Date.now(),
-      })
+    setSaving(true)
+    try {
+      if (habit) {
+        const versions = editedVersions(
+          habit,
+          { tier, rule: rule.value, quota: quota.value, weeklyGoal: weeklyGoal.value },
+          day,
+        )
+        await db.habits.update(habit.id, { versions, name: name.trim(), direction: locked ? habit.direction : direction })
+      } else {
+        const version: HabitVersion = { from: effectiveFrom, tier, rule: rule.value }
+        if (quota.value) version.quota = quota.value
+        if (weeklyGoal.value) version.weeklyGoal = weeklyGoal.value
+        await db.habits.add({
+          id: newId(),
+          name: name.trim(),
+          direction,
+          versions: [version],
+          active: true,
+          effectiveFrom,
+          createdAt: Date.now(),
+        })
+      }
+    } catch (e) {
+      setSaving(false)
+      throw e
     }
     onClose()
   }
@@ -184,7 +192,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
         closeLabel={t('habits.close')}
         footer={
           <div className="habit-sheet-footer">
-            <Button variant="primary" onClick={save}>
+            <Button variant="primary" onClick={save} loading={saving}>
               {t('common.save')}
             </Button>
             {editing && (
@@ -315,18 +323,15 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
                     />
                   </Field>
                 </div>
-                <select
-                  aria-label={t('habits.reducedByAria')}
+                <Select
+                  label={t('habits.reducedByAria')}
                   value={form.reducedByDaysOf}
-                  onChange={(e) => set({ reducedByDaysOf: e.target.value })}
-                >
-                  <option value="">{t('habits.notReduced')}</option>
-                  {reducers.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {t('habits.reducedBy', { name: nameOf(h.id) ?? h.name })}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => set({ reducedByDaysOf: v })}
+                  options={[
+                    { value: '', label: t('habits.notReduced') },
+                    ...reducers.map((h) => ({ value: h.id, label: t('habits.reducedBy', { name: nameOf(h.id) ?? h.name }) })),
+                  ]}
+                />
                 {errorText(limitKeys.filter((k) => k !== 'habitError.weeklyTarget')) && (
                   <span className="field-error">{errorText(limitKeys.filter((k) => k !== 'habitError.weeklyTarget'))}</span>
                 )}

@@ -12,7 +12,7 @@ import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
 import { APP_VERSION } from '../appVersion'
-import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, SegmentedControl } from './components'
+import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, SegmentedControl, Spinner } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
@@ -182,7 +182,7 @@ export function ProfileEdit({ profile, today, onDone, onCancel }: {
         )}
       </Card>
       {failed && <p className="neg">{t('profile.saveError')}</p>}
-      <Button type="submit" variant="primary" className="profile-save" disabled={saving || processing}>
+      <Button type="submit" variant="primary" className="profile-save" loading={saving} disabled={processing}>
         {t('common.save')}
       </Button>
     </form>
@@ -251,7 +251,10 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
       <Card className="profile-list">
         <button type="button" className="profile-listrow" onClick={doExport} disabled={exporting}>
           <span>{t('settings.export')}</span>
-          <span className="muted">{exportState === 'done' ? t('settings.exportDone') : t('settings.exportHint')} ›</span>
+          <span className="muted profile-export-hint">
+            {exportState === 'done' ? t('settings.exportDone') : t('settings.exportHint')}
+            {exporting ? <Spinner size={14} /> : ' ›'}
+          </span>
         </button>
         <button type="button" className="profile-listrow clear-row" onClick={() => setOpen(true)}>
           <span className="clear-row-text">
@@ -265,7 +268,7 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
         <p className="dialog-body">{t('settings.clearBody')}</p>
         {failed && <p className="neg" role="alert">{t('settings.clearError')}</p>}
         <div className="dialog-actions">
-          <Button variant="danger" className="clear-btn" onClick={confirm} disabled={clearing}>
+          <Button variant="danger" className="clear-btn" onClick={confirm} loading={clearing}>
             {t('common.delete')}
           </Button>
           <Button className="clear-btn" onClick={close} disabled={clearing} autoFocus>

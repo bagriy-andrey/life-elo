@@ -1,5 +1,5 @@
 import { renderToString } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { DayReview, Habit } from '../domain/types'
 import { I18nProvider } from '../i18n'
 import { HabitSheet } from './HabitSheet'
@@ -29,6 +29,8 @@ const sheet = (h?: Habit, reviews: DayReview[] = []) =>
   wrap(<HabitSheet habit={h} habits={[gym, social, steps]} reviews={reviews} effectiveFrom="2026-01-01" onClose={() => {}} />)
 
 describe('Habits smoke render', () => {
+  vi.stubGlobal('document', { activeElement: null })
+
   it('renders the empty state with the add action', () => {
     const html = wrap(<Habits habits={[]} reviews={[]} effectiveFrom="2026-01-01" />)
     expect(html).toContain('Пока нет привычек')
@@ -56,7 +58,16 @@ describe('Habits smoke render', () => {
     expect(html).toContain('Конструктивная · Средняя · от 4 раз в неделю')
     expect(html).toContain('Нежелательная · Сильная · до 2 раз в неделю')
     expect(html).toContain('≥ 8000 шагов в день')
-    expect(html).toContain('card-inactive')
+    expect(html).toContain('habit-row-content paused')
+    expect(html.match(/habit-row-badge/g)).toHaveLength(1)
+    expect(html.match(/aria-label="Действия с привычкой"/g)).toHaveLength(3)
+    expect(html).toContain('role="button"')
+  })
+
+  it('groups by direction, then tier subgroups with TierBars; hides empty subgroups', () => {
+    const html = wrap(<Habits habits={[gym, social, steps]} reviews={[]} effectiveFrom="2026-01-01" />)
+    expect(html.match(/class="habit-row-tier"/g)).toHaveLength(3)
+    expect(html).toContain('tier-bars')
   })
 
   it('renders the create sheet without edit actions', () => {

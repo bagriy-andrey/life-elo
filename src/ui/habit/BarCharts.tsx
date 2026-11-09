@@ -47,7 +47,10 @@ export function AmountChart({
         <strong>{title}</strong>
         {line > 0 && (
           <span className="bar-chart__caption">
-            {constructive ? t('habit.chart.targetLabel') : t('habit.chart.normLabel')} {fmt(line)}
+            {t('habit.chart.perDay', {
+              label: constructive ? t('habit.chart.targetLabel') : t('habit.chart.normLabel'),
+              amount: fmt(line),
+            })}
           </span>
         )}
       </div>
@@ -104,7 +107,9 @@ export function MonthlyChart({ months, direction }: { months: MonthCount[]; dire
     <section className="bar-chart" aria-label={title}>
       <div className="bar-chart__head">
         <strong>{title}</strong>
-        {!constructive && <span className="bar-chart__caption">{t('habit.chart.lessBetter')}</span>}
+        <span className="bar-chart__caption">
+          {constructive ? t('habit.chart.daysPerMonth') : t('habit.chart.lessBetter')}
+        </span>
       </div>
       <div className="bar-chart__row bar-chart__row--12 bar-chart__counts" aria-hidden="true">
         {months.map((m) => (
@@ -157,7 +162,7 @@ export function WeeklyChart({ series, direction }: { series: WeeklySeries; direc
         <strong>{title}</strong>
         {norm > 0 && (
           <span className="bar-chart__caption">
-            {constructive ? t('habit.chart.targetLabel') : t('habit.chart.normLabel')} {norm}
+            {t(constructive ? 'habit.chart.weekNormGood' : 'habit.chart.weekNormBad', { count: norm })}
           </span>
         )}
       </div>

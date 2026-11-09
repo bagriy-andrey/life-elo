@@ -1,8 +1,8 @@
 import { useI18n } from '../../i18n'
 import './WeekdayBars.css'
 
-/** `percents`: Mon..Sun from `weekdayPercent`; `null` = no evaluated days. */
-export function WeekdayBars({ percents }: { percents: (number | null)[] }) {
+/** `percents`: Mon..Sun from `weekdayPercent`; `null` = no evaluated days. `caption`: right-hand note in the header. */
+export function WeekdayBars({ percents, caption }: { percents: (number | null)[]; caption?: string }) {
   const { t, locale } = useI18n()
   const max = Math.max(0, ...percents.map((p) => p ?? 0))
   const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' })
@@ -10,6 +10,7 @@ export function WeekdayBars({ percents }: { percents: (number | null)[] }) {
     <section className="weekday-bars" aria-label={t('habit.weekdays.title')}>
       <div className="weekday-bars__head">
         <strong>{t('habit.weekdays.title')}</strong>
+        <span className="weekday-bars__caption">{caption ?? t('habit.weekdays.caption')}</span>
       </div>
       <div className="weekday-bars__grid">
         {percents.map((p, i) => {

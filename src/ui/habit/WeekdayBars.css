@@ -7,6 +7,17 @@
   flex-direction: column;
   gap: 12px;
 }
+.weekday-bars__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.weekday-bars__caption {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: right;
+}
 .weekday-bars__grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));

@@ -432,7 +432,7 @@ export const en: Dict = {
   'habit.chart.same': "same as before",
   'habit.chart.onTime': "On time",
   'habit.chart.tolerable': "Tolerable",
-  'habit.chart.late': "Later",
+  'habit.chart.late': "Late",
   'habit.duration.hm': "{h} h {m} min",
   'habit.duration.m': "{m} min",
   'habit.chart.normLabel': "Norm",
@@ -455,4 +455,17 @@ export const en: Dict = {
   'habits.tolerableHint.with': "Until {excellent} — excellent, until {tolerable} — tolerable, later — violation",
   'habits.tolerableHint.without': "Later than this time is a violation. Between the target and this time is tolerable.",
   'habits.metaTolerable': "{norm}, tolerable until {value}",
+  'habit.chart.perDay': "{label} {amount} a day",
+  'habit.chart.daysPerMonth': "days per month",
+  'habit.chart.weekNormGood': {
+    one: "goal {count} time, above — extra",
+    other: "goal {count} times, above — extra",
+  },
+  'habit.chart.weekNormBad': {
+    one: "limit {count} time, red — over the limit",
+    other: "limit {count} times, red — over the limit",
+  },
+  'habit.weekdays.caption': "% successful days",
+  'habit.weekdays.captionWeeklyGood': "How often you do it",
+  'habit.weekdays.captionWeeklyBad': "How often you hold back",
 }

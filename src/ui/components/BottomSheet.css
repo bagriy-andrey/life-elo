@@ -83,6 +83,30 @@
   border-top: 1px solid var(--border);
   background: var(--card);
 }
+.sheet-options {
+  display: flex;
+  flex-direction: column;
+}
+.sheet-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-8);
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sheet-option[aria-pressed='true'] {
+  font-weight: 700;
+}
+.sheet-check {
+  color: var(--accent);
+}
 @keyframes bottom-sheet-up {
   from {
     transform: translateY(100%);

@@ -35,7 +35,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 ## Gotchas
 Short, durable, non-obvious lessons. Compress or replace entries; keep this section ≤10 lines.
 - `src/ui/components/` is mirrored in Claude Design: props of Button (variants), Card, SegmentedControl,
-  TabBar, HistoryEntry, Field, Avatar, Dialog, Notice, PasswordField, FullScreenModal, ProgressSegments, QuotaDots, SwipeCard are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
+  TabBar, HistoryEntry, Field, Avatar, Dialog, Notice, PasswordField, FullScreenModal, BottomSheet, ProgressSegments, QuotaDots, SwipeCard are duplicated by hand in `.design-sync/config.json` → `dtsPropsFor`.
 - Styling: plain CSS per component + CSS variables from `src/ui/tokens.css`; no CSS-in-JS/Tailwind.
   Text inputs go through `Field` (global input styles live in `src/index.css`).
 - Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).
@@ -50,6 +50,7 @@ Roles live in `docs/agents/` (tool-neutral); `.claude/agents/` are thin Claude w
 Skills in `.claude/skills/` (Codex: open the SKILL.md and follow it yourself):
 `build-plan` (implement → verify → ≤1 fix round), `handoff`, `workflow-retro`.
 Plan checkboxes are the progress source of truth; scoring decisions always go to the user.
+App version: `0.NN.0` per finished plan, patch for fix rounds; commit `chore: version 0.NN.0`.
 
 ## Claude Design
 Components/tokens are synced to Claude Design by the user-run `/design-sync` (reads `.design-sync/`,

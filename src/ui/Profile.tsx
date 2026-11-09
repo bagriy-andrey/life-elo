@@ -1,14 +1,18 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
+import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
 import { saveProfile } from '../db/profile'
+import { addDays, reviewDay, toDayKey } from '../domain/day'
 import { ageOn, validateProfile } from '../domain/profile'
 import type { Profile as ProfileData } from '../domain/profile'
-import type { DayKey } from '../domain/types'
+import type { DayKey, DayReview, Habit } from '../domain/types'
+import { RULESET_V1 } from '../engine/config'
 import { useI18n } from '../i18n'
 import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
-import { Avatar, Button, Card, Dialog, Field, SegmentedControl } from './components'
+import { APP_VERSION } from '../appVersion'
+import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, SegmentedControl } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
@@ -21,15 +25,19 @@ interface Props {
   rating: number
   /** Calendar date (toDayKey), not the review day. */
   today: DayKey
-  /** Account block (sign-in, sync, logout), shown above the settings. */
-  account?: ReactNode
+  /** Rows of the Account section (login email, sync). */
+  accountSection?: ReactNode
+  /** Password + logout buttons, shown under the sections (and alone while there is no profile). */
+  accountActions?: ReactNode
+  /** App version for the footer. */
+  version?: string
   /** Deletes all data (server + device); rejects if it could not. */
   onClearData: () => Promise<void>
 }
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
 
-function ProfileEdit({ profile, today, onDone, onCancel }: {
+export function ProfileEdit({ profile, today, onDone, onCancel }: {
   profile: ProfileData | null
   today: DayKey
   onDone: () => void
@@ -105,15 +113,17 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
       </div>
       <div className="profile-id">
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
-        <Avatar name={form.name} src={shownPhoto} size={96} onClick={pickPhoto} label={t('profile.photoLabel')} disabled={processing} />
-        <Button type="button" variant="quiet" onClick={pickPhoto} disabled={processing}>
-          {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
-        </Button>
-        {shownPhoto && (
-          <Button type="button" variant="quiet" onClick={() => setPhoto(null)} disabled={processing}>
-            {t('profile.removePhoto')}
+        <Avatar name={form.name} src={shownPhoto} size={88} onClick={pickPhoto} label={t('profile.photoLabel')} disabled={processing} />
+        <div className="profile-photo-actions">
+          <Button type="button" variant="quiet" onClick={pickPhoto} disabled={processing}>
+            {shownPhoto ? t('profile.changePhoto') : t('profile.addPhoto')}
           </Button>
-        )}
+          {shownPhoto && (
+            <Button type="button" variant="quiet" onClick={() => setPhoto(null)} disabled={processing}>
+              {t('profile.removePhoto')}
+            </Button>
+          )}
+        </div>
         {photoError && <p className="neg" role="alert">{t('profile.photoError')}</p>}
       </div>
       <Card className="profile-form">
@@ -153,11 +163,7 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
             onBlur={blur('email')}
           />
         </Field>
-        <Field
-          label={t('profile.birth')}
-          hint={birthValid ? t('profile.age', { count: ageOn(form.birth, today) }) : undefined}
-          error={errorText('birth')}
-        >
+        <Field label={t('profile.birth')} error={errorText('birth')}>
           <input
             type="date"
             max={today}
@@ -166,6 +172,14 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
             onBlur={blur('birth')}
           />
         </Field>
+        {form.birth !== '' && (
+          <div className="profile-birth-row">
+            <span className="muted">{birthValid ? t('profile.age', { count: ageOn(form.birth, today) }) : ''}</span>
+            <button type="button" className="profile-birth-clear" onClick={() => set('birth', '')}>
+              {t('profile.birthClear')}
+            </button>
+          </div>
+        )}
       </Card>
       {failed && <p className="neg">{t('profile.saveError')}</p>}
       <Button type="submit" variant="primary" className="profile-save" disabled={saving || processing}>
@@ -177,11 +191,13 @@ function ProfileEdit({ profile, today, onDone, onCancel }: {
 
 const LANG_NAMES = { ru: 'Русский', en: 'English', uk: 'Українська' } as const
 
-function ClearData({ onClear }: { onClear: () => Promise<void> }) {
+function DataSection({ onClear, version }: { onClear: () => Promise<void>; version: string }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [clearing, setClearing] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportState, setExportState] = useState<'idle' | 'done' | 'error'>('idle')
   const close = () => {
     if (clearing) return
     setOpen(false)
@@ -205,12 +221,46 @@ function ClearData({ onClear }: { onClear: () => Promise<void> }) {
     }
     location.reload()
   }
+  const doExport = async () => {
+    if (exporting) return
+    setExporting(true)
+    setExportState('idle')
+    try {
+      const now = new Date()
+      // One Dexie read: the exported tables and the replay input are the same snapshot.
+      const tables = await readExportTables()
+      // Same `today` as App/Home replay: the day after the review day.
+      const ledger = exportLedger(
+        tables.habits as Habit[],
+        tables.reviews as DayReview[],
+        RULESET_V1,
+        addDays(reviewDay(now), 1),
+      )
+      const json = JSON.stringify(buildExport({ tables, ledger }, now, version), null, 2)
+      const result = await deliverExport(json, `life-elo-${toDayKey(now)}.json`)
+      setExportState(result === 'shared' ? 'done' : 'idle')
+    } catch {
+      setExportState('error')
+    } finally {
+      setExporting(false)
+    }
+  }
   return (
-    <div className="clear-data">
-      <Button variant="quiet" className="neg clear-btn" onClick={() => setOpen(true)}>
-        {t('settings.clear')}
-      </Button>
-      <span className="muted clear-hint">{t('settings.clearHint')}</span>
+    <section className="profile-section">
+      <h3 className="profile-section-title">{t('settings.data')}</h3>
+      <Card className="profile-list">
+        <button type="button" className="profile-listrow" onClick={doExport} disabled={exporting}>
+          <span>{t('settings.export')}</span>
+          <span className="muted">{exportState === 'done' ? t('settings.exportDone') : t('settings.exportHint')} ›</span>
+        </button>
+        <button type="button" className="profile-listrow clear-row" onClick={() => setOpen(true)}>
+          <span className="clear-row-text">
+            <span className="neg">{t('settings.clear')}</span>
+            <span className="muted clear-hint">{t('settings.clearHint')}</span>
+          </span>
+        </button>
+      </Card>
+      {exportState === 'error' && <Notice tone="error">{t('settings.exportError')}</Notice>}
       <Dialog open={open} title={t('settings.clearTitle')} onClose={close}>
         <p className="dialog-body">{t('settings.clearBody')}</p>
         {failed && <p className="neg" role="alert">{t('settings.clearError')}</p>}
@@ -223,12 +273,13 @@ function ClearData({ onClear }: { onClear: () => Promise<void> }) {
           </Button>
         </div>
       </Dialog>
-    </div>
+    </section>
   )
 }
 
-function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
+function Settings() {
   const { t, lang, setLang } = useI18n()
+  const [sheet, setSheet] = useState(false)
   // localStorage prefs are the single source of truth; this is the only place theme changes.
   const [theme, setThemeState] = useState<Theme>(() => loadPrefs().theme)
   const setTheme = (next: Theme) => {
@@ -237,19 +288,15 @@ function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
     savePrefs({ theme: next })
   }
   return (
-    <section className="stack">
-      <h2 className="settings-title">{t('settings.title')}</h2>
-      <Card className="settings-card">
-        <div className="settings-group">
-          <span className="settings-label">{t('settings.language')}</span>
-          <SegmentedControl
-            options={LANGS.map((l) => ({ value: l, label: LANG_NAMES[l] }))}
-            value={lang}
-            onChange={setLang}
-          />
-        </div>
-        <div className="settings-group">
-          <span className="settings-label">{t('settings.theme')}</span>
+    <section className="profile-section">
+      <h3 className="profile-section-title">{t('settings.title')}</h3>
+      <Card className="profile-list">
+        <button type="button" className="profile-listrow" onClick={() => setSheet(true)}>
+          <span>{t('settings.language')}</span>
+          <span className="muted">{LANG_NAMES[lang]} ›</span>
+        </button>
+        <div className="profile-listrow static theme-row">
+          <span>{t('settings.theme')}</span>
           <SegmentedControl
             options={THEMES.map((v) => ({ value: v, label: t(`settings.theme.${v}`) }))}
             value={theme}
@@ -257,12 +304,30 @@ function Settings({ onClearData }: { onClearData: () => Promise<void> }) {
           />
         </div>
       </Card>
-      <ClearData onClear={onClearData} />
+      <BottomSheet open={sheet} title={t('settings.languageTitle')} closeLabel={t('habits.close')} onClose={() => setSheet(false)}>
+        <div className="sheet-options">
+          {LANGS.map((l) => (
+            <button
+              key={l}
+              type="button"
+              className="sheet-option"
+              aria-pressed={l === lang}
+              onClick={() => {
+                setLang(l)
+                setSheet(false)
+              }}
+            >
+              {LANG_NAMES[l]}
+              {l === lang && <span className="sheet-check">✓</span>}
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
     </section>
   )
 }
 
-export function Profile({ profile, rating, today, account, onClearData }: Props) {
+export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -274,8 +339,7 @@ export function Profile({ profile, rating, today, account, onClearData }: Props)
           onDone={() => setEditing(false)}
           onCancel={profile ? () => setEditing(false) : undefined}
         />
-        {account}
-        <Settings onClearData={onClearData} />
+        {!profile && accountActions}
       </div>
     )
   }
@@ -293,9 +357,11 @@ export function Profile({ profile, rating, today, account, onClearData }: Props)
           <Button onClick={() => setEditing(true)}>{t('profile.edit')}</Button>
         </div>
         <div className="profile-id">
-          <Avatar src={profile.photo} name={profile.name} size={96} />
+          <Avatar src={profile.photo} name={profile.name} size={88} />
           <strong className="profile-name">{profile.name}</strong>
           {profile.nick && <span className="muted">@{profile.nick}</span>}
+          {profile.birth && <span className="muted">{formatBirth(profile.birth, today, t, locale)}</span>}
+          {profile.email && <span className="muted profile-email">{profile.email}</span>}
         </div>
         <div className="profile-grid">
           <Card className="profile-stat">
@@ -307,21 +373,15 @@ export function Profile({ profile, rating, today, account, onClearData }: Props)
             <strong className="profile-stat-date">{since}</strong>
           </Card>
         </div>
-        <Card className="profile-rows">
-          <div className="profile-row">
-            <span className="muted">{t('profile.email')}</span>
-            <span className="profile-row-value">{profile.email || '—'}</span>
-          </div>
-          <div className="profile-row">
-            <span className="muted">{t('profile.birth')}</span>
-            <span className="profile-row-value">
-              {profile.birth ? formatBirth(profile.birth, today, t, locale) : '—'}
-            </span>
-          </div>
-        </Card>
       </section>
-      {account}
-      <Settings onClearData={onClearData} />
+      <section className="profile-section">
+        <h3 className="profile-section-title">{t('account.title')}</h3>
+        {accountSection}
+      </section>
+      <Settings />
+      <DataSection onClear={onClearData} version={version} />
+      {accountActions}
+      <p className="muted profile-version">{t('app.version', { version })}</p>
     </div>
   )
 }

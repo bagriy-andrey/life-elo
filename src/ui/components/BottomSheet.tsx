@@ -14,7 +14,10 @@ interface Props {
   closeLabel: string
   /** Sticky footer under the scrollable body (e.g. the primary action); hidden when omitted. */
   footer?: ReactNode
-  /** Scrollable sheet body. */
+  /**
+   * Scrollable sheet body: a form, or a pick list `<div className="sheet-options">` of
+   * `<button className="sheet-option" aria-pressed={selected}>` rows with a trailing `<span className="sheet-check">✓</span>` on the selected one.
+   */
   children: ReactNode
 }
 

@@ -25,4 +25,16 @@ describe('BottomSheet', () => {
     const html = renderToString(<BottomSheet open title="t" closeLabel="c" onClose={() => {}}>x</BottomSheet>)
     expect(html).not.toContain('bottom-sheet-footer')
   })
+  it('renders pick-list option rows', () => {
+    const html = renderToString(
+      <BottomSheet open title="Язык" closeLabel="Закрыть" onClose={() => {}}>
+        <div className="sheet-options">
+          <button className="sheet-option" aria-pressed="true">Русский</button>
+        </div>
+      </BottomSheet>,
+    )
+    expect(html).toContain('Язык')
+    expect(html).toContain('Русский')
+    expect(html).toContain('aria-pressed="true"')
+  })
 })

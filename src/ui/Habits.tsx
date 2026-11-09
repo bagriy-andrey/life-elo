@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { dayOf } from '../domain/day'
 import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit } from '../domain/types'
-import { Button, Card } from './components'
-import { groupByDirectionAndTier } from './grouping'
+import { Button, Card, StatTile } from './components'
+import { countByDirectionAndTier, groupByDirectionAndTier } from './grouping'
 import { HabitSheet } from './HabitSheet'
 import { useI18n } from '../i18n'
 import { directionGroupLabels, habitMeta, TIER_COLOR, tierGroupLabels } from './labels'
@@ -28,6 +28,16 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
   const TIER_GROUP_LABEL = tierGroupLabels(t)
   const [sheet, setSheet] = useState<SheetState>()
   const editing = sheet?.mode === 'edit' ? habits.find((h) => h.id === sheet.id) : undefined
+
+  const counts = countByDirectionAndTier(habits, (h) => ({
+    direction: h.direction,
+    tier: settingsOn(h, today()).tier,
+  }))
+  const summaryRows = (c: (typeof counts)['constructive']) => [
+    { label: TIER_GROUP_LABEL.strong, value: c.strong, level: 3 as const },
+    { label: TIER_GROUP_LABEL.medium, value: c.medium, level: 2 as const },
+    { label: TIER_GROUP_LABEL.weak, value: c.weak, level: 1 as const },
+  ]
 
   const renderHabit = (h: Habit) => {
     const cur = settingsOn(h, today())
@@ -58,6 +68,23 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
           <strong>{t('habits.emptyTitle')}</strong>
           <span>{t('habits.emptyText')}</span>
         </div>
+      )}
+
+      {habits.length > 0 && (
+        <section className="habits-summary" aria-label={t('habits.summary.aria')}>
+          <StatTile
+            title={t('habits.summary.constructive')}
+            total={counts.constructive.total}
+            tone="pos"
+            rows={summaryRows(counts.constructive)}
+          />
+          <StatTile
+            title={t('habits.summary.destructive')}
+            total={counts.destructive.total}
+            tone="neg"
+            rows={summaryRows(counts.destructive)}
+          />
+        </section>
       )}
 
       {groupByDirectionAndTier(habits, (h) => ({

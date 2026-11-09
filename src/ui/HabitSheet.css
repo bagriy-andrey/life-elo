@@ -6,6 +6,11 @@
   min-height: 44px;
 }
 .habits-head h2 { margin: 0; font-size: var(--text-lg); }
+.habits-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 .habits-empty {
   display: flex;
   flex-direction: column;

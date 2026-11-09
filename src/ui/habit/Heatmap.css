@@ -22,11 +22,12 @@
 .heatmap-days span {
   height: 12px;
 }
-.heatmap-scroll {
+.heatmap-frame {
   flex: 1;
   min-width: 0;
-  overflow-x: auto;
-  padding-bottom: 4px;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-end;
 }
 .heatmap-grid {
   display: flex;

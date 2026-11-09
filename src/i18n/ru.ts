@@ -467,7 +467,7 @@ export const ru = {
   'habit.chart.normLabel': "Норма",
   'habit.chart.targetLabel': "Цель",
   'habit.weekdays.title': "По дням недели",
-  'habit.heatmap.title': "Активность за 12 месяцев",
+  'habit.heatmap.title': "Активность",
   'habit.heatmap.less': "Меньше",
   'habit.heatmap.more': "Больше",
   'habit.heatmap.earlier': "Раньше",

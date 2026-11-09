@@ -468,7 +468,7 @@ export const uk: Dict = {
   'habit.chart.normLabel': "Норма",
   'habit.chart.targetLabel': "Мета",
   'habit.weekdays.title': "За днями тижня",
-  'habit.heatmap.title': "Активність за 12 місяців",
+  'habit.heatmap.title': "Активність",
   'habit.heatmap.less': "Менше",
   'habit.heatmap.more': "Більше",
   'habit.heatmap.earlier': "Раніше",

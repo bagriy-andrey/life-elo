@@ -438,7 +438,7 @@ export const en: Dict = {
   'habit.chart.normLabel': "Norm",
   'habit.chart.targetLabel': "Target",
   'habit.weekdays.title': "By weekday",
-  'habit.heatmap.title': "Activity over 12 months",
+  'habit.heatmap.title': "Activity",
   'habit.heatmap.less': "Less",
   'habit.heatmap.more': "More",
   'habit.heatmap.earlier': "Earlier",

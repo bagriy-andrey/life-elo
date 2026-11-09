@@ -22,7 +22,9 @@ UI
    by direction and tier stays.
 6. The «Больше лучше / Меньше лучше» switch is removed: `better` is derived from direction (constructive → higher /
    for time: earlier is better = «Сделать до»; destructive → lower / «Не позже»). Existing habits whose `better`
-   disagrees with their direction keep their stored value unchanged.
+   disagrees with their direction keep their stored value unchanged — except (user decision 2026-11-09)
+   constructive count/minutes/steps with `lower` (the old form's default): `settingsOn` reads them as `higher`
+   for all days, so past days are re-scored.
 
 Scoring — constructive weekly goal «N days per week» (new ruleset v2; past days are not re-scored under v1
 semantics). Applies to constructive **yes/no** habits with period «За неделю» (stepper 1–7). Calendar week Mon–Sun.

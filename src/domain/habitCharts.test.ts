@@ -148,7 +148,8 @@ describe('heatmapGrid', () => {
     expect(last.days[0].day).toBe('2026-11-09')
     expect(last.days[1].level).toBe('pos')
     expect(last.days[1].tooltipValue).toBe(true)
-    expect(last.days[2].level).toBe('future')
+    expect(last.days[2].level).toBe('nodata') // 2026-11-11 is today
+    expect(last.days[3].level).toBe('future')
     expect(last.days[6].level).toBe('future')
     expect(g.weeks[0].weekStart).toBe('2025-11-10')
     expect(g.monthLabels.at(-1)).toEqual({ column: 50, month: '2026-11' })

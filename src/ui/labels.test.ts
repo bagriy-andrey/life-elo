@@ -4,7 +4,7 @@ import { ru } from '../i18n/ru'
 import { translate } from '../i18n/translate'
 import { LOCALE, type Dict, type Key, type Lang, type Params } from '../i18n/types'
 import { uk } from '../i18n/uk'
-import { booleanOptions, formatBirth, formatDay, habitMeta, quotaSummary, ruleSummary, zoneLabels } from './labels'
+import { booleanOptions, formatBirth, formatDay, formatRating, formatSigned, habitMeta, quotaSummary, ruleSummary, zoneLabels } from './labels'
 
 const tFor = (lang: Lang) => {
   const dict: Dict = { ru, en, uk }[lang]
@@ -85,5 +85,14 @@ describe('habitMeta', () => {
     const time = v({ rule: { kind: 'measured', unit: 'time', better: 'lower', excellent: '23:00' } })
     expect(habitMeta(t, 'constructive', time)).toContain('до 23:00')
     expect(habitMeta(t, 'destructive', time)).toContain('не позже 23:00')
+  })
+})
+
+describe('formatRating', () => {
+  it('signs only negative ratings, deltas keep the plus', () => {
+    expect(formatRating(60.94)).toBe('60.9')
+    expect(formatRating(-12.46)).toBe('−12.5')
+    expect(formatRating(0.01)).toBe('0')
+    expect(formatSigned(60.94, 1)).toBe('+60.9')
   })
 })

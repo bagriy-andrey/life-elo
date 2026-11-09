@@ -3,7 +3,7 @@ import type { LedgerEntry } from '../engine/rating'
 import { useI18n } from '../i18n'
 import { cx } from './components/cx'
 import { smoothPath, chartGeometry, periodStats, TEN_DAYS, type HomeRange } from './homeStats'
-import { formatDay, formatSigned } from './labels'
+import { formatDay, formatRating, formatSigned } from './labels'
 import './components/Card.css'
 import './HomeChart.css'
 
@@ -146,7 +146,7 @@ export function HomeChart({ ledger, selected, onSelect, range, onRangeChange }: 
                   aria-label={t('home.point', {
                     day: formatDay(e.day, locale),
                     delta: formatSigned(e.delta),
-                    rating: formatSigned(e.ratingAfter, 1),
+                    rating: formatRating(e.ratingAfter),
                   })}
                   onClick={() => pick(i, false)}
                 >
@@ -155,7 +155,7 @@ export function HomeChart({ ledger, selected, onSelect, range, onRangeChange }: 
                       <>
                         <span className="home-guide" style={{ top: dotY }} />
                         <span className={cx('home-tip', edge)} style={{ top: Math.max(2, dotY - 50) }}>
-                          <strong>{formatSigned(e.ratingAfter, 1)}</strong>
+                          <strong>{formatRating(e.ratingAfter)}</strong>
                           <span>{shortDay(e.day, locale)}</span>
                         </span>
                       </>
@@ -172,8 +172,8 @@ export function HomeChart({ ledger, selected, onSelect, range, onRangeChange }: 
       </div>
 
       <div className="home-tiles">
-        {tile(t('home.min'), stats.iMin, formatSigned(ledger[stats.iMin].ratingAfter, 1), tone(ledger[stats.iMin].ratingAfter))}
-        {tile(t('home.max'), stats.iMax, formatSigned(ledger[stats.iMax].ratingAfter, 1), tone(ledger[stats.iMax].ratingAfter))}
+        {tile(t('home.min'), stats.iMin, formatRating(ledger[stats.iMin].ratingAfter), tone(ledger[stats.iMin].ratingAfter))}
+        {tile(t('home.max'), stats.iMax, formatRating(ledger[stats.iMax].ratingAfter), tone(ledger[stats.iMax].ratingAfter))}
         {tile(t('home.best'), stats.iBest, formatSigned(ledger[stats.iBest].delta), tone(ledger[stats.iBest].delta))}
         {tile(t('home.worst'), stats.iWorst, formatSigned(ledger[stats.iWorst].delta), tone(ledger[stats.iWorst].delta))}
         <button

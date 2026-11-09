@@ -25,20 +25,21 @@ import { Profile } from './ui/Profile'
 import { ProfilePassword } from './ui/ProfilePassword'
 import { Review } from './ui/Review'
 import { YesterdayReview } from './ui/YesterdayReview'
-
-type Tab = 'home' | 'review' | 'habits' | 'profile'
+import { useRoute, type Tab } from './ui/route'
 
 const NO_HABITS: Habit[] = []
 const NO_REVIEWS: DayReview[] = []
 
 function MainApp() {
   const { t } = useI18n()
-  const [tab, setTab] = useState<Tab>('home')
-  const [passwordOpen, setPasswordOpen] = useState(false)
+  const [route, navigate] = useRoute()
+  const tab = route.tab
+  const passwordOpen = route.tab === 'profile' && !!route.password
   const [now, setNow] = useState(() => new Date())
   const yesterday = reviewDay(now)
   const today = toDayKey(now)
-  const [reviewing, setReviewing] = useState(yesterday)
+  // Only yesterday or earlier can be reviewed; a future/stale day in the URL falls back to yesterday.
+  const reviewing = route.tab === 'review' && route.day && route.day < yesterday ? route.day : yesterday
 
   // The PWA may stay open across midnight: re-read the clock when it comes back and at midnight.
   useEffect(() => {
@@ -99,10 +100,8 @@ function MainApp() {
     return () => undo.forEach((u) => u())
   }, [modalOpen])
 
-  const openReview = () => {
-    setReviewing(yesterday)
-    setTab('review')
-  }
+  const openReview = () => navigate({ tab: 'review' })
+  const setTab = (next: Exclude<Tab, 'review'>) => navigate({ tab: next })
 
   return (
     <div className="app">
@@ -118,11 +117,11 @@ function MainApp() {
             habits={sortedHabits}
             reviews={reviews}
             existing={reviews.find((r) => r.day === reviewing)}
-            onDayChange={setReviewing}
+            onDayChange={(day) => navigate({ tab: 'review', day: day < yesterday ? day : undefined }, { replace: true })}
             onDone={() => setTab('home')}
           />
         )}
-        {tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => setPasswordOpen(false)} />}
+        {tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => navigate({ tab: 'profile' })} />}
         {tab === 'profile' && !passwordOpen && profile !== undefined && (
           <Profile
             profile={profile}
@@ -130,7 +129,7 @@ function MainApp() {
             today={today}
             onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
             accountSection={<AccountSection engine={syncEngine} />}
-            accountActions={<AccountActions engine={syncEngine} onPassword={() => setPasswordOpen(true)} />}
+            accountActions={<AccountActions engine={syncEngine} onPassword={() => navigate({ tab: 'profile', password: true })} />}
           />
         )}
         {tab === 'habits' && <Habits habits={sortedHabits} reviews={reviews} effectiveFrom={yesterday} />}
@@ -139,7 +138,6 @@ function MainApp() {
       <TabBar
         active={tab}
         onSelect={(id) => {
-          setPasswordOpen(false)
           if (id === 'review') openReview()
           else setTab(id)
         }}

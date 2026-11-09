@@ -1,0 +1,10 @@
+.tier-bars { display: flex; align-items: flex-end; gap: var(--space-2); height: 13px; }
+.tier-bar { width: 3px; border-radius: 1px; background: currentColor; }
+.tier-bar.bar-1 { height: 7px; }
+.tier-bar.bar-2 { height: 10px; }
+.tier-bar.bar-3 { height: 13px; }
+.tier-bar.dim { opacity: 0.3; }
+.tier-bars-sm { height: 12px; }
+.tier-bars-sm .tier-bar.bar-1 { height: 6px; }
+.tier-bars-sm .tier-bar.bar-2 { height: 9px; }
+.tier-bars-sm .tier-bar.bar-3 { height: 12px; }

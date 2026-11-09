@@ -64,8 +64,8 @@ describe('form components', () => {
   })
   it('SegmentedControl renders importance bars only for options with bars', () => {
     const html = renderToString(<SegmentedControl value="a" onChange={() => {}} options={[{ value: 'a', label: 'A', bars: 2 }, { value: 'b', label: 'B' }]} />)
-    expect(html.match(/segmented-bars/g)).toHaveLength(1)
-    expect(html.match(/segmented-bar bar-/g)).toHaveLength(3)
+    expect(html.match(/tier-bars/g)).toHaveLength(1)
+    expect(html.match(/tier-bar bar-/g)).toHaveLength(3)
     expect(html.match(/ dim/g)).toHaveLength(1)
   })
 })

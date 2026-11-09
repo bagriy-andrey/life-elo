@@ -107,7 +107,9 @@ export function normSummary(t: T, version: Pick<HabitVersion, 'rule' | 'quota' |
   }
   const value = rule.excellent
   if (rule.unit === 'time') {
-    return t(direction === 'constructive' ? 'habits.metaBy' : 'habits.metaNotLater', { value })
+    const norm = t(direction === 'constructive' ? 'habits.metaBy' : 'habits.metaNotLater', { value })
+    // The D2 default (+30 min) is display-only and never shown here; only a stored `tolerable` is.
+    return rule.tolerable === undefined ? norm : t('habits.metaTolerable', { norm, value: rule.tolerable })
   }
   const unit = t(`unit.${rule.unit}`, { count: Number(value) })
   if (rule.better === 'lower') {
@@ -126,4 +128,12 @@ export function habitMeta(t: T, direction: HabitDirection, version: HabitVersion
     tier: tierLabels(t)[version.tier],
     norm: normSummary(t, version, direction),
   })
+}
+
+/** «8 ч 40 мин» / «40 мин» for a minutes value (charts). */
+export function formatDuration(t: T, minutes: number): string {
+  const total = Math.max(0, Math.round(minutes))
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  return h > 0 ? t('habit.duration.hm', { h, m }) : t('habit.duration.m', { m })
 }

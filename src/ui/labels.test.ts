@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import type { HabitVersion } from '../domain/types'
 import { en } from '../i18n/en'
 import { ru } from '../i18n/ru'
 import { translate } from '../i18n/translate'
 import { LOCALE, type Dict, type Key, type Lang, type Params } from '../i18n/types'
 import { uk } from '../i18n/uk'
-import { booleanOptions, formatBirth, formatDay, formatRating, formatSigned, habitMeta, quotaSummary, ruleSummary, zoneLabels } from './labels'
+import { booleanOptions, formatBirth, formatDuration, formatDay, formatRating, formatSigned, habitMeta, normSummary, quotaSummary, ruleSummary, zoneLabels } from './labels'
 
 const tFor = (lang: Lang) => {
   const dict: Dict = { ru, en, uk }[lang]
@@ -94,5 +95,27 @@ describe('formatRating', () => {
     expect(formatRating(-12.46)).toBe('−12.5')
     expect(formatRating(0.01)).toBe('0')
     expect(formatSigned(60.94, 1)).toBe('+60.9')
+  })
+})
+
+describe('time norm with tolerable', () => {
+  const base = { tier: 'medium' } as const
+  const time = (tolerable?: string) => ({
+    ...base,
+    rule: { kind: 'measured', unit: 'time', better: 'lower', excellent: '23:00', ...(tolerable ? { tolerable } : {}) },
+  }) as unknown as HabitVersion
+  it('appends tolerable only when stored', () => {
+    expect(normSummary(tFor('ru'), time(), 'constructive')).not.toContain('терпимо')
+    expect(normSummary(tFor('ru'), time('23:30'), 'constructive')).toContain('терпимо до 23:30')
+    expect(normSummary(tFor('en'), time('23:30'), 'destructive')).toContain('tolerable until 23:30')
+  })
+})
+
+describe('formatDuration', () => {
+  it('formats hours and minutes per language', () => {
+    expect(formatDuration(tFor('ru'), 520)).toBe('8 ч 40 мин')
+    expect(formatDuration(tFor('ru'), 40)).toBe('40 мин')
+    expect(formatDuration(tFor('en'), 60)).toBe('1 h 0 min')
+    expect(formatDuration(tFor('uk'), 125)).toBe('2 год 5 хв')
   })
 })

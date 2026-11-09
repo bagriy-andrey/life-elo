@@ -11,7 +11,7 @@ Nothing uncommitted.
    measured thresholds, edit/pause/delete), weekly-goal review, minutes habit scores «more is better»;
    profile view/edit, language sheet, export, clear-all (cancel only).
 2. Paste `supabase/templates/email_change.html` into the Supabase dashboard (docs/setup/backend.md §6), test «Сменить».
-3. Re-run `/design-sync` (BottomSheet changed in the merge), record HEAD in `.design-sync/last-sync`. Merge PR #9, deploy.
+3. Merge PR #9, deploy (design-sync done after the merge).
 ## Broken / open questions
 - SegmentedControl track not restyled to the mockup's pill-in-tray look (only bars added) — ask user.
 - Destructive weekly quota: after an overrun, later 0-days that week stay bad (v1 rule, deferred in product context).

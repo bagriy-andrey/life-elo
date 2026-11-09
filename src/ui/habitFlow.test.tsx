@@ -62,5 +62,4 @@ describe('habit flow smoke render', () => {
     )
     expect(html).toContain('Чтение')
   })
-
 })

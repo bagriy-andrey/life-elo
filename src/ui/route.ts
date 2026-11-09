@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 export type Route =
   | { tab: 'home' }
   | { tab: 'review'; /** Day being reviewed; yesterday when omitted. */ day?: string }
-  | { tab: 'habits' }
+  | { tab: 'habits'; /** Habit page when set; the list otherwise. */ id?: string }
   | { tab: 'profile'; password?: boolean }
 
 export type Tab = Route['tab']
@@ -17,6 +17,13 @@ export function parseRoute(pathname: string): Route {
   if (rest.length > 0) return { tab: 'home' }
   if (first === 'review' && (second === undefined || DAY.test(second))) return second ? { tab: 'review', day: second } : { tab: 'review' }
   if (first === 'habits' && second === undefined) return { tab: 'habits' }
+  if (first === 'habits' && second) {
+    try {
+      return { tab: 'habits', id: decodeURIComponent(second) }
+    } catch {
+      return { tab: 'home' }
+    }
+  }
   if (first === 'profile' && second === undefined) return { tab: 'profile' }
   if (first === 'profile' && second === 'password') return { tab: 'profile', password: true }
   return { tab: 'home' }
@@ -29,7 +36,7 @@ export function routePath(route: Route): string {
     case 'review':
       return route.day ? `/review/${route.day}` : '/review'
     case 'habits':
-      return '/habits'
+      return route.id ? `/habits/${encodeURIComponent(route.id)}` : '/habits'
     case 'profile':
       return route.password ? '/profile/password' : '/profile'
   }

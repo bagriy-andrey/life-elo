@@ -37,7 +37,7 @@ See spec «Done when». Short form:
 
 ### Wave 1 (pure logic and independent pieces; steps 1–4 are file-disjoint)
 
-- [ ] 1. Habit stats core — **Wave: 1** — **Depends on:** none — files: `src/domain/habitStats.ts`, `src/domain/habitStats.test.ts`.
+- [x] 1. Habit stats core — **Wave: 1** — **Depends on:** none — files: `src/domain/habitStats.ts`, `src/domain/habitStats.test.ts`.
   Pure, deterministic, no React/Dexie. Exports (names fixed so later steps can code against them):
   `type ChartKind = 'yesno' | 'weekly' | 'amount' | 'time'`; `chartKind(habit, day): ChartKind`;
   `type DayStatus` (see decisions); `interface DayCell { day: DayKey; status: DayStatus; value?: boolean | number | string }`;
@@ -50,16 +50,16 @@ See spec «Done when». Short form:
   Reuse `classifyZone` (`src/engine/zones.ts`), `weeklyTarget`/`weekOf` (`src/engine/weeklyGoal.ts`), `eachDay/addDays/weekStart` (`src/domain/day.ts`).
   Verify: tests for every status mapping, both directions, not_applicable/unknown/missing review, today pending, effectiveFrom, tolerable default +30 min, streak and % edge cases (empty, all skipped, version change), weekly first partial week and current-week rules; `npm test`, `npm run lint`.
 
-- [ ] 2. [design-sync] `Menu` popover component — **Wave: 1** — **Depends on:** none — files: `src/ui/components/Menu.tsx`, `src/ui/components/Menu.css`, `src/ui/components/Menu.test.tsx`, `src/ui/components/index.ts` (add `export { Menu, type MenuItem } from './Menu'` — only this step touches `index.ts` in wave 1; later steps must not), `.design-sync/config.json` (`dtsPropsFor.Menu` with JSDoc, plus a `cardMode` entry if neighbours have one), `.design-sync/previews/Menu.tsx` (preview in the style of `previews/StatTile.tsx`), `AGENTS.md` (add `Menu` to the Gotchas components list — only this step edits `AGENTS.md` in wave 1).
+- [x] 2. [design-sync] `Menu` popover component — **Wave: 1** — **Depends on:** none — files: `src/ui/components/Menu.tsx`, `src/ui/components/Menu.css`, `src/ui/components/Menu.test.tsx`, `src/ui/components/index.ts` (add `export { Menu, type MenuItem } from './Menu'` — only this step touches `index.ts` in wave 1; later steps must not), `.design-sync/config.json` (`dtsPropsFor.Menu` with JSDoc, plus a `cardMode` entry if neighbours have one), `.design-sync/previews/Menu.tsx` (preview in the style of `previews/StatTile.tsx`), `AGENTS.md` (add `Menu` to the Gotchas components list — only this step edits `AGENTS.md` in wave 1).
   Props: `items: { id: string; label: string; tone?: 'danger'; separatorBefore?: boolean }[]`, `onSelect(id)`, `triggerLabel: string` (aria-label for the ⋮ button), `className?`. Component renders the 44×44 ⋮ trigger itself (`aria-haspopup="menu"`, `aria-expanded`), the trigger `stopPropagation`s click/keydown, popover `role="menu"` with `role="menuitem"` buttons (min-height 44px), opens under the trigger and flips above when there is no room below (measure `getBoundingClientRect` vs `window.innerHeight` on open). Closes on outside pointerdown, Esc (returns focus to the trigger), second tap on ⋮, and after select. Arrow keys move focus (optional nicety, not required). Danger item uses `--neg`. Tokens only (`--card`, `--border`, `--text`, `--neg`, `--radius-*`), plain CSS, light and dark.
   Verify: `Menu.test.tsx` (renderToString: closed state has trigger + aria; open state needs a testable pure helper `placeMenu(rect, menuHeight, viewportHeight): 'below' | 'above'` exported from `Menu.tsx` and unit-tested); `npm test`, `npm run lint`, `npm run build`.
 
-- [ ] 3. [design-sync] `--warn` dark token + route `/habits/:id` — **Wave: 1** — **Depends on:** none — files: `src/ui/tokens.css`, `src/ui/route.ts`, `src/ui/route.test.ts`.
+- [x] 3. [design-sync] `--warn` dark token + route `/habits/:id` — **Wave: 1** — **Depends on:** none — files: `src/ui/tokens.css`, `src/ui/route.ts`, `src/ui/route.test.ts`.
   Tokens: `--warn` exists only in the OS-dark `@media` block; add `--warn: #e6b34d;` (same value) to the forced `:root[data-theme='dark']` block (the two dark blocks MUST stay identical).
   Route: extend the habits variant to `{ tab: 'habits'; id?: string }`; `/habits/:id` parses to `{ tab: 'habits', id }` (id = non-empty single segment, URL-decoded), `routePath` inverse (`encodeURIComponent`); `/habits` stays `{ tab: 'habits' }`; extra segments still fall back to home. `Tab` type unchanged, so `App.tsx` keeps compiling.
   Verify: round-trip tests in `route.test.ts` (list, id, encoded id, trailing extra segment); `npm test`, `npm run lint`.
 
-- [ ] 4. All i18n keys + norm labels — **Wave: 1** — **Depends on:** none — files: `src/i18n/ru.ts`, `src/i18n/en.ts`, `src/i18n/uk.ts`, `src/ui/labels.ts`, `src/ui/labels.test.ts`.
+- [x] 4. All i18n keys + norm labels — **Wave: 1** — **Depends on:** none — files: `src/i18n/ru.ts`, `src/i18n/en.ts`, `src/i18n/uk.ts`, `src/ui/labels.ts`, `src/ui/labels.test.ts`.
   The ONLY step that edits dictionaries. Add as one clearly marked block at the end of each file (`// habit page (spec 12)`), ru is the source of truth, en/uk translated, plurals in the existing `{one, few, many, other}` object style. Keys:
   menu/actions: `habit.menu.aria` (Действия с привычкой), `habit.menu.info` (Информация), `habit.menu.edit` (Изменить), `habit.menu.pause` (Пауза), `habit.menu.resume` (Возобновить), `habit.menu.delete` (Удалить), `habit.badge.paused` (Пауза);
   delete dialog: `habit.delete.title` («Удалить «{name}»?»), `habit.delete.text` (Вся история отметок по привычке будет удалена. Это нельзя отменить.), `habit.delete.confirm` (Удалить);

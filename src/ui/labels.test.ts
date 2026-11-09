@@ -82,7 +82,7 @@ describe('habitMeta', () => {
   it('describes yes/no, weekly goal and measured norms', () => {
     expect(habitMeta(t, 'constructive', v({}))).toBe('Конструктивная · Сильная · Да/нет')
     expect(habitMeta(t, 'constructive', v({ weeklyGoal: { perWeek: 4 } }))).toBe('Конструктивная · Сильная · от 4 раз в неделю')
-    expect(habitMeta(t, 'destructive', v({ quota: { perWeek: 1 } }))).toBe('Нежелательная · Сильная · до 1 раза в неделю')
+    expect(habitMeta(t, 'destructive', v({ quota: { perWeek: 1 } }))).toBe('Деструктивная · Сильная · до 1 раза в неделю')
     const time = v({ rule: { kind: 'measured', unit: 'time', better: 'lower', excellent: '23:00' } })
     expect(habitMeta(t, 'constructive', time)).toContain('до 23:00')
     expect(habitMeta(t, 'destructive', time)).toContain('не позже 23:00')

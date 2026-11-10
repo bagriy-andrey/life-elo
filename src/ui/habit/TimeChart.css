@@ -46,7 +46,6 @@
 }
 .time-chart__svg {
   width: 100%;
-  height: auto;
   display: block;
   overflow: visible;
 }
@@ -99,7 +98,7 @@
 }
 .time-chart__point {
   fill: var(--card);
-  stroke-width: 1.5;
+  stroke-width: 1.25;
   vector-effect: non-scaling-stroke;
 }
 .time-chart__point--onTime {
@@ -171,7 +170,7 @@
   fill: var(--neg);
 }
 .time-chart__lbl {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
 }
 .time-chart__lbl--onTime {
@@ -181,8 +180,8 @@
   fill: var(--warn);
 }
 .time-chart__dates {
-  /* Aligned with the plot (the SVG's left gutter is 34/300 of its width). */
-  padding-left: 11.33%;
+  /* Aligned with the plot: same as the SVG's left gutter (PAD_L). */
+  padding-left: 34px;
   display: flex;
   justify-content: space-between;
   gap: 8px;

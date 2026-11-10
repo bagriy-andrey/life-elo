@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useI18n } from '../../i18n'
 import type { TimeSeries } from '../../domain/habitCharts'
 import { nearestIndex, smoothRuns, type Pt } from './chartHover'
 import './TimeChart.css'
 
-const W = 300
-const H = 150
+/** Plot height in px; the width follows the card (measured), so points and labels keep their pixel size. */
+const H = 160
 /** Left gutter for the target / tolerable time labels. */
 const PAD_L = 34
 const PAD_Y = 8
@@ -25,6 +25,18 @@ const GRID_EVERY = 5
 export function TimeChart({ series }: { series: TimeSeries }) {
   const { t, locale } = useI18n()
   const [active, setActive] = useState<number | null>(null)
+  const plotRef = useRef<HTMLDivElement>(null)
+  const [W, setW] = useState(320)
+  useLayoutEffect(() => {
+    const el = plotRef.current
+    if (!el) return
+    const measure = () => el.clientWidth > 0 && setW(el.clientWidth)
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   const { points, bounds, share, avg4w, diffMinutes } = series
   const tolOff = bounds.tolerable - bounds.target
   const offs = points.filter((p) => p.minutes !== null).map((p) => (p.minutes as number) - bounds.target)
@@ -90,12 +102,13 @@ export function TimeChart({ series }: { series: TimeSeries }) {
         )}
       </div>
       <div
+        ref={plotRef}
         className="time-chart__plot"
         onPointerMove={(e) => e.pointerType === 'mouse' && pick(e)}
         onPointerDown={pick}
         onPointerLeave={(e) => e.pointerType === 'mouse' && setActive(null)}
       >
-        <svg className="time-chart__svg" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <svg className="time-chart__svg" width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
           <path className="time-chart__zone time-chart__zone--onTime" d={rect(PAD_L, 0, W - PAD_L, yT)} />
           <path className="time-chart__zone time-chart__zone--tolerable" d={rect(PAD_L, yT, W - PAD_L, yTol - yT)} />
           <path className="time-chart__zone time-chart__zone--late" d={rect(PAD_L, yTol, W - PAD_L, H - yTol)} />
@@ -118,7 +131,7 @@ export function TimeChart({ series }: { series: TimeSeries }) {
                 className={`time-chart__point time-chart__point--${points[i].zone}${i === active ? ' is-active' : ''}`}
                 cx={p[0]}
                 cy={p[1]}
-                r={i === active ? 4.5 : 3}
+                r={i === active ? 3.5 : 2.25}
               />
             ) : null,
           )}

@@ -16,6 +16,7 @@
   background: transparent;
   color: var(--muted);
   position: relative;
+  white-space: nowrap;
 }
 .tabbar button.on { color: var(--accent); font-weight: 600; }
 .dot {
@@ -26,4 +27,30 @@
   border-radius: 50%;
   background: var(--neg);
   vertical-align: super;
+}
+.tab-icon { display: none; }
+.tab-icon svg { display: block; width: 26px; height: 26px; }
+@media (max-width: 600px) {
+  .tabbar button.has-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-8);
+  }
+  .tabbar button.has-icon .tab-icon { display: block; }
+  /* The label stays for screen readers. */
+  .tabbar button.has-icon .tab-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .tabbar button.has-icon .dot {
+    position: absolute;
+    top: var(--space-6);
+    left: calc(50% + 10px);
+    margin: 0;
+  }
 }

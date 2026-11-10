@@ -18,6 +18,7 @@ import { AuthLogo, AuthScreen } from './ui/auth/AuthScreen'
 import { NewPassword } from './ui/auth/NewPassword'
 import { AccountActions, AccountSection } from './ui/Account'
 import { Spinner, TabBar } from './ui/components'
+import { tabIcons } from './ui/tabIcons'
 import { setBackgroundInert } from './ui/components/focus'
 import { HabitPage } from './ui/HabitPage'
 import { Habits } from './ui/Habits'
@@ -180,10 +181,10 @@ function MainApp() {
           } else setTab(id)
         }}
         items={[
-          { id: 'home', label: t('tab.home') },
-          { id: 'review', label: t('tab.review'), badge: !!pendingDay },
-          { id: 'habits', label: t('tab.habits') },
-          { id: 'profile', label: t('tab.profile') },
+          { id: 'home', label: t('tab.home'), icon: tabIcons.home },
+          { id: 'review', label: t('tab.review'), icon: tabIcons.review, badge: !!pendingDay },
+          { id: 'habits', label: t('tab.habits'), icon: tabIcons.habits },
+          { id: 'profile', label: t('tab.profile'), icon: tabIcons.profile },
         ]}
       />
       </div>

@@ -19,7 +19,8 @@ h2 { margin: 0; font-size: var(--text-lg); }
 }
 main {
   flex: 1;
-  padding: calc(env(safe-area-inset-top) + var(--space-16)) var(--space-16) 96px;
+  /* Room for the fixed tab bar, which also grows by the home-indicator inset. */
+  padding: calc(env(safe-area-inset-top) + var(--space-16)) var(--space-16) calc(env(safe-area-inset-bottom) + 96px);
   max-width: 560px;
   width: 100%;
   margin: 0 auto;
@@ -47,3 +48,11 @@ input {
   min-width: 0;
 }
 fieldset.plain { border: 0; margin: 0; padding: 0; min-width: 0; }
+/* iOS Safari gives date/time inputs an intrinsic min width (they overflow their box) and centers the value. */
+input[type='date'],
+input[type='time'] {
+  -webkit-appearance: none;
+  appearance: none;
+  max-width: 100%;
+}
+input[type='date']::-webkit-date-and-time-value { text-align: left; }

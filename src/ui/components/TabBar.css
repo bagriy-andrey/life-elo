@@ -16,6 +16,7 @@
   background: transparent;
   color: var(--muted);
   position: relative;
+  white-space: nowrap;
 }
 .tabbar button.on { color: var(--accent); font-weight: 600; }
 .dot {

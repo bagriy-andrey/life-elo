@@ -4,7 +4,7 @@ import { useI18n } from '../i18n'
 import { Button, Field } from './components'
 
 interface Props {
-  /** `time` shows an HH:MM input, the rest an integer stepper. */
+  /** `time` shows a native time picker (the iOS numeric keypad has no ':'), the rest an integer stepper. */
   unit: NumericUnit | 'time'
   title: string
   typeLabel: string
@@ -58,9 +58,7 @@ export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initi
             <Field label={t('yr.time.label')} error={error}>
               <input
                 className="yr-num-input"
-                type="text"
-                inputMode="numeric"
-                placeholder="23:00"
+                type="time"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
               />

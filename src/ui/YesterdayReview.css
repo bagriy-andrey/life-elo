@@ -52,6 +52,8 @@
 .yr-num-question, .yr-num-unit, .yr-num-goal { color: var(--muted); font-size: var(--text-sm); }
 .yr-num-hint { text-align: center; color: var(--muted); font-size: var(--text-xs); }
 .yr-num-input { text-align: center; font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.yr-num-input[type='time'] { display: block; width: 100%; }
+.yr-num-input::-webkit-date-and-time-value { text-align: center; }
 .yr-stepper { display: flex; align-items: flex-start; gap: var(--space-10); width: 100%; max-width: 300px; }
 .yr-stepper-field { flex: 1; min-width: 0; }
 .yr-step {

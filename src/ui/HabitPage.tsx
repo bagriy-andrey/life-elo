@@ -81,8 +81,8 @@ export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today
   const amountUnit = version.rule.kind === 'measured' && version.rule.unit !== 'time' ? version.rule.unit : 'count'
 
   // «По дням недели» per habit type; steps have none.
-  let weekday: { bars: WeekdayBar[]; caption: string } | undefined
-  if (data.kind === 'yesno') weekday = { bars: percentBars(data.weekdays, false), caption: t('habit.weekdays.caption') }
+  let weekday: { bars: WeekdayBar[]; caption?: string } | undefined
+  if (data.kind === 'yesno') weekday = { bars: percentBars(data.weekdays, false) }
   else if (weekly)
     weekday = {
       bars: percentBars(data.weekdays, true),

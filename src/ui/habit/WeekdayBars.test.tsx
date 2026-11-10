@@ -45,12 +45,12 @@ describe('weekdayData', () => {
 
 describe('WeekdayBars', () => {
   it('renders 7 bars with fills, labels and caption', () => {
-    const html = render(percentBars([50, 80, 70, 20, null, 0, 65], true), '% успешных дней')
+    const html = render(percentBars([50, 80, 70, 20, null, 0, 65], true), 'в среднем, мин')
     expect(html.match(/weekday-bars__col/g)).toHaveLength(7)
     expect(html.match(/weekday-bars__bar--best/g)).toHaveLength(1)
     expect(html).toContain('80%')
     expect(html).toContain('По дням недели')
-    expect(html).toContain('% успешных дней')
+    expect(html).toContain('в среднем, мин')
   })
   it('no labels and no caption when not given', () => {
     const html = render(percentBars([50, 80, 70, 20, null, 0, 65], false))

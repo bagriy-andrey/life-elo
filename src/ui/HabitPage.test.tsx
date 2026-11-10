@@ -53,6 +53,7 @@ describe('HabitPage smoke render', () => {
     expect(html).toContain('Успехи и срывы по месяцам')
     expect(html).toContain('weekday-bars__bar--best')
     expect(html).not.toContain('weekday-bars__pct')
+    expect(html).not.toContain('weekday-bars__caption')
   })
 
   it('daily yes/no destructive shows the holding label and slips chart', () => {

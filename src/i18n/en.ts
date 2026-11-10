@@ -462,7 +462,6 @@ export const en: Dict = {
     one: "limit {count} time, red — over the limit",
     other: "limit {count} times, red — over the limit",
   },
-  'habit.weekdays.caption': "% successful days",
   'habit.weekdays.captionMinutes': "average, min",
   'habit.weekdays.captionCount': "average, times",
   'habit.weekdays.captionTime': "average time, height — % on time",

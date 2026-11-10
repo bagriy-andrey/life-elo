@@ -495,9 +495,6 @@ export const ru = {
     many: "норма до {count} раз, красным — сверх нормы",
     other: "норма до {count} раза, красным — сверх нормы",
   },
-  'habit.weekdays.captionMinutes': "в среднем, мин",
-  'habit.weekdays.captionCount': "в среднем, раз",
-  'habit.weekdays.captionTime': "среднее время, высота — % вовремя",
-  'habit.weekdays.captionWeeklyGood': "Как часто делаете",
-  'habit.weekdays.captionWeeklyBad': "Как часто удерживаетесь",
+  'habit.weekdays.captionMinutes': "мин",
+  'habit.weekdays.captionCount': "раз",
 }

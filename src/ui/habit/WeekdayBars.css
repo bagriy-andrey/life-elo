@@ -53,7 +53,6 @@
 .weekday-bars__bar--dim {
   background: color-mix(in srgb, var(--pos) 55%, var(--card));
 }
-.weekday-bars__bar--best,
 .weekday-bars__bar--pos,
 .weekday-bars__bar--pos4 {
   background: var(--pos);
@@ -86,4 +85,8 @@
 .weekday-bars__label {
   color: var(--muted);
   font-size: var(--text-xs);
+}
+.weekday-bars__col--today .weekday-bars__label {
+  color: var(--text);
+  font-weight: 600;
 }

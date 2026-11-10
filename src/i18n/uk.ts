@@ -496,9 +496,6 @@ export const uk: Dict = {
     many: "норма до {count} разів, червоним — понад норму",
     other: "норма до {count} разу, червоним — понад норму",
   },
-  'habit.weekdays.captionMinutes': "у середньому, хв",
-  'habit.weekdays.captionCount': "у середньому, разів",
-  'habit.weekdays.captionTime': "середній час, висота — % вчасно",
-  'habit.weekdays.captionWeeklyGood': "Як часто робите",
-  'habit.weekdays.captionWeeklyBad': "Як часто утримуєтеся",
+  'habit.weekdays.captionMinutes': "хв",
+  'habit.weekdays.captionCount': "разів",
 }

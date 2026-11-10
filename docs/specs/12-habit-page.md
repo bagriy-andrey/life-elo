@@ -131,3 +131,8 @@ Overrides §4.6, §5 and §6 where they differ.
   weekday bars: label = average times, same shades.
 - Weekly yes/no: unchanged.
 - Weekday averages: mean of answered values over the last 12 months.
+- *2026-11-10, later:* «По дням недели» shows the **last 7 days, today last** (today is not reviewed yet,
+  so its bar is empty), one bar per day instead of 12-month aggregates. Yes/no: full bar green (success) /
+  red (miss, slip), no labels; weekly: only event days coloured. Time: full bar in the zone colour, time
+  above. Minutes / count: value above, height relative to the biggest of the 7 days, heatmap shade; captions
+  «мин» / «раз». No «% успешных дней» caption anywhere.

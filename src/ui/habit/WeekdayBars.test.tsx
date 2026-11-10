@@ -1,10 +1,17 @@
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import type { HabitNorms } from '../../domain/habitStats'
+import type { DayCell, HabitNorms } from '../../domain/habitStats'
 import type { Habit } from '../../domain/types'
 import { I18nProvider } from '../../i18n'
 import { WeekdayBars } from './WeekdayBars'
-import { amountBars, percentBars, timeBars, type WeekdayBar } from './weekdayData'
+import { amountBars, historyFrom, outcomeBars, timeBars, type WeekdayBar } from './weekdayData'
+
+// 2026-11-10 is a Tuesday: the window is Wed 11-04 .. Tue 11-10 (today, not reviewed yet).
+const TODAY = '2026-11-10'
+const days = ['2026-11-04', '2026-11-05', '2026-11-06', '2026-11-07', '2026-11-08', '2026-11-09', TODAY]
+const cells = (xs: (Omit<DayCell, 'day'> | null)[]): DayCell[] =>
+  xs.map((x, i) => ({ day: days[i], ...(x ?? { status: 'nodata' as const }) }))
+const habit = (direction: Habit['direction']) => ({ direction }) as Habit
 
 const render = (bars: WeekdayBar[], caption?: string) =>
   renderToString(
@@ -13,47 +20,84 @@ const render = (bars: WeekdayBar[], caption?: string) =>
     </I18nProvider>,
   )
 
-const habit = (direction: Habit['direction']) => ({ direction }) as Habit
-
 describe('weekdayData', () => {
-  it('percentBars: best bright, rest dim; labels only on request', () => {
-    const bars = percentBars([50, 80, 70, 20, null, 0, 65], false)
-    expect(bars.filter((b) => b.fill === 'best')).toHaveLength(1)
-    expect(bars[1]).toEqual({ ratio: 0.8, label: undefined, fill: 'best' })
-    expect(bars[4].ratio).toBeNull()
-    expect(percentBars([50, null, null, null, null, null, null], true)[1].label).toBe('—')
-    expect(percentBars([0, null, null, null, null, null, null], false).some((b) => b.fill === 'best')).toBe(false)
+  it('window: 7 days ending today', () => {
+    expect(historyFrom(TODAY)).toBe('2026-11-04')
   })
-  it('timeBars: height = %, label = average time, colour = zone of the average', () => {
+  it('outcomeBars: success green, miss red, rest empty; weekly colours event days only', () => {
+    const cs = cells([
+      { status: 'success', value: true },
+      { status: 'fail', value: false },
+      { status: 'skipped' },
+      null,
+      null,
+      null,
+      { status: 'future' },
+    ])
+    const b = outcomeBars(cs, 'yesno', 'constructive')
+    expect(b.slice(0, 3).map((x) => [x.ratio, x.fill])).toEqual([
+      [1, 'pos'],
+      [1, 'neg'],
+      [null, 'dim'],
+    ])
+    expect(b[6]).toMatchObject({ day: TODAY, ratio: null })
+    expect(outcomeBars(cs, 'weekly', 'constructive').map((x) => x.fill).slice(0, 2)).toEqual(['pos', 'dim'])
+    expect(outcomeBars(cs, 'weekly', 'destructive').map((x) => x.fill).slice(0, 2)).toEqual(['dim', 'neg'])
+  })
+  it('timeBars: zone colour and the time above', () => {
     const norms: HabitNorms = { unit: 'time', better: 'lower', target: 420, tolerableBound: 450 }
-    const bars = timeBars([90, 50, 10, null, null, null, null], [410, 440, 470, null, null, null, null], norms, String)
-    expect(bars.slice(0, 3).map((b) => b.fill)).toEqual(['pos', 'warn', 'neg'])
-    expect(bars[0]).toMatchObject({ ratio: 0.9, label: '410' })
-    expect(bars[3]).toMatchObject({ ratio: null, label: '—', fill: 'dim' })
+    const cs = cells([
+      { status: 'success', value: '06:50' },
+      { status: 'tolerable', value: '07:20' },
+      { status: 'fail', value: '07:50' },
+      null,
+      null,
+      null,
+      { status: 'future' },
+    ])
+    const b = timeBars(cs, norms, String)
+    expect(b.slice(0, 3).map((x) => x.fill)).toEqual(['pos', 'warn', 'neg'])
+    expect(b[0]).toMatchObject({ ratio: 1, label: '410' })
+    expect(b[6]).toMatchObject({ ratio: null, label: '—' })
   })
-  it('amountBars: height relative to the max average; green or red shades by habit type', () => {
+  it('amountBars: height relative to the biggest day, green or red shades by habit type', () => {
     const good: HabitNorms = { unit: 'minutes', better: 'higher', target: 60 }
-    const g = amountBars([30, 60, 90, null, 0, 0, 0], habit('constructive'), good, (v) => String(v))
-    expect(g.slice(0, 3).map((b) => b.fill)).toEqual(['pos2', 'pos3', 'pos4'])
+    const cs = cells([
+      { status: 'fail', value: 30 },
+      { status: 'success', value: 60 },
+      { status: 'success', value: 90 },
+      null,
+      null,
+      null,
+      { status: 'future' },
+    ])
+    const g = amountBars(cs, habit('constructive'), good, String)
+    expect(g.slice(0, 3).map((x) => x.fill)).toEqual(['pos2', 'pos3', 'pos4'])
     expect(g[2].ratio).toBe(1)
-    expect(g[3]).toMatchObject({ ratio: null, fill: 'dim' })
+    expect(g[3]).toMatchObject({ ratio: null, label: '—' })
     const bad: HabitNorms = { unit: 'count', better: 'lower', limit: 2 }
-    const d = amountBars([1, 3, null, null, null, null, null], habit('destructive'), bad, (v) => String(v))
-    expect(d.slice(0, 2).map((b) => b.fill)).toEqual(['neg2', 'neg4'])
+    const d = amountBars(
+      cells([{ status: 'success', value: 1 }, { status: 'fail', value: 3 }, null, null, null, null, null]),
+      habit('destructive'),
+      bad,
+      String,
+    )
+    expect(d.slice(0, 2).map((x) => x.fill)).toEqual(['neg2', 'neg4'])
   })
 })
 
 describe('WeekdayBars', () => {
-  it('renders 7 bars with fills, labels and caption', () => {
-    const html = render(percentBars([50, 80, 70, 20, null, 0, 65], true), 'в среднем, мин')
-    expect(html.match(/weekday-bars__col/g)).toHaveLength(7)
-    expect(html.match(/weekday-bars__bar--best/g)).toHaveLength(1)
-    expect(html).toContain('80%')
-    expect(html).toContain('По дням недели')
-    expect(html).toContain('в среднем, мин')
+  it('7 bars, today last and highlighted, labels and caption', () => {
+    const norms: HabitNorms = { unit: 'minutes', better: 'higher', target: 60 }
+    const bars = amountBars(cells([{ status: 'success', value: 45 }, null, null, null, null, null, null]), habit('constructive'), norms, String)
+    const html = render(bars, 'мин')
+    expect(html.match(/weekday-bars__col/g)).toHaveLength(7 + 1) // + the --today modifier
+    expect(html.match(/weekday-bars__col--today/g)).toHaveLength(1)
+    expect(html).toContain('45')
+    expect(html).toContain('мин')
   })
-  it('no labels and no caption when not given', () => {
-    const html = render(percentBars([50, 80, 70, 20, null, 0, 65], false))
+  it('no labels and no caption for yes/no', () => {
+    const html = render(outcomeBars(cells([{ status: 'success', value: true }, null, null, null, null, null, null]), 'yesno', 'constructive'))
     expect(html).not.toContain('weekday-bars__pct')
     expect(html).not.toContain('weekday-bars__caption')
   })

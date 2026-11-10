@@ -51,7 +51,7 @@ describe('HabitPage smoke render', () => {
     common(html, 'Зарядка')
     expect(html).toContain('Текущая серия')
     expect(html).toContain('Успехи и срывы по месяцам')
-    expect(html).toContain('weekday-bars__bar--best')
+    expect(html).toContain('weekday-bars__col--today')
     expect(html).not.toContain('weekday-bars__pct')
     expect(html).not.toContain('weekday-bars__caption')
   })
@@ -69,7 +69,7 @@ describe('HabitPage smoke render', () => {
     const html = page(h, reviewsOf(40))
     common(html, 'Чтение')
     expect(html).toContain('Последние 30 дней')
-    expect(html).toContain('в среднем, мин')
+    expect(html).toContain('weekday-bars__caption">мин<')
     expect(html).toContain('weekday-bars__bar--pos')
     expect(html).not.toContain('% успешных дней')
   })
@@ -90,7 +90,7 @@ describe('HabitPage smoke render', () => {
     common(html, 'Кофе')
     expect(html).toContain('heatmap heatmap--neg')
     expect(html).toContain('weekday-bars__bar--neg')
-    expect(html).toContain('в среднем, раз')
+    expect(html).toContain('weekday-bars__caption">раз<')
   })
 
   it('time with tolerable', () => {
@@ -102,7 +102,6 @@ describe('HabitPage smoke render', () => {
     expect(html).toContain('time-chart__zone--tolerable')
     expect(html).toContain('heatmap-cell--pos')
     expect(html).toContain('22:20')
-    expect(html).toContain('среднее время')
   })
 
   it('weekly yes/no, paused badge', () => {

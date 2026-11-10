@@ -5,9 +5,8 @@ import {
   chartKind,
   completionPercent,
   currentStreak,
+  dayCells,
   habitNorms,
-  weekdayAverages,
-  weekdayPercent,
   weekStreaks,
 } from '../domain/habitStats'
 import { amountSeries, heatmapGrid, monthlyCounts, timeSeries, weeklySeries } from '../domain/habitCharts'
@@ -21,7 +20,7 @@ import { AmountChart, MonthlyChart, WeeklyChart } from './habit/BarCharts'
 import { Heatmap } from './habit/Heatmap'
 import { TimeChart } from './habit/TimeChart'
 import { WeekdayBars } from './habit/WeekdayBars'
-import { amountBars, percentBars, timeBars, type WeekdayBar } from './habit/weekdayData'
+import { amountBars, historyFrom, outcomeBars, timeBars, type WeekdayBar } from './habit/weekdayData'
 import { HabitDeleteDialog } from './HabitDeleteDialog'
 import { HabitSheet } from './HabitSheet'
 import { habitMeta } from './labels'
@@ -66,8 +65,7 @@ export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today
       weeks: kind === 'weekly' ? weeklySeries(habit, reviews, today) : undefined,
       grid: heatmapGrid(habit, reviews, today),
       norms: habitNorms(habit, today),
-      weekdays: weekdayPercent(habit, reviews, today),
-      averages: weekdayAverages(habit, reviews, today),
+      last7: dayCells(habit, reviews, historyFrom(today), today, today),
     }
   }, [habit, reviews, today])
 
@@ -80,24 +78,18 @@ export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today
   const holding = destructive && data.kind === 'yesno'
   const amountUnit = version.rule.kind === 'measured' && version.rule.unit !== 'time' ? version.rule.unit : 'count'
 
-  // «По дням недели» per habit type; steps have none.
+  // «По дням недели»: the last 7 days, today last; steps have none.
   let weekday: { bars: WeekdayBar[]; caption?: string } | undefined
-  if (data.kind === 'yesno') weekday = { bars: percentBars(data.weekdays, false) }
-  else if (weekly)
-    weekday = {
-      bars: percentBars(data.weekdays, true),
-      caption: t(destructive ? 'habit.weekdays.captionWeeklyBad' : 'habit.weekdays.captionWeeklyGood'),
-    }
-  else if (data.kind === 'time')
-    weekday = { bars: timeBars(data.weekdays, data.averages, data.norms, clock), caption: t('habit.weekdays.captionTime') }
+  if (data.kind === 'yesno' || weekly) weekday = { bars: outcomeBars(data.last7, data.kind, habit.direction) }
+  else if (data.kind === 'time') weekday = { bars: timeBars(data.last7, data.norms, clock) }
   else if (amountUnit === 'minutes')
     weekday = {
-      bars: amountBars(data.averages, habit, data.norms, (v) => String(Math.round(v))),
+      bars: amountBars(data.last7, habit, data.norms, (v) => String(Math.round(v))),
       caption: t('habit.weekdays.captionMinutes'),
     }
   else if (amountUnit === 'count')
     weekday = {
-      bars: amountBars(data.averages, habit, data.norms, (v) => v.toLocaleString(locale, { maximumFractionDigits: 1 })),
+      bars: amountBars(data.last7, habit, data.norms, (v) => v.toLocaleString(locale, { maximumFractionDigits: 1 })),
       caption: t('habit.weekdays.captionCount'),
     }
 

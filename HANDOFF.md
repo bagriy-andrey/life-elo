@@ -10,7 +10,7 @@ Nothing uncommitted.
 ## Next step (user)
 1. Manual check in `npm run dev` at 375px, light/dark: list → page for daily yes/no (both directions), minutes,
    time with tolerable, weekly yes/no; ⋮ menu (flip above near the bottom), pause badge, delete from page.
-2. Run `/design-sync` (new `Menu` component, dark `--warn` token), then write HEAD to `.design-sync/last-sync`.
+2. design-sync done (2026-11-10): 27 components incl. Menu.
 3. PR for `habit-page` is open: review, merge, deploy.
 ## Broken / open questions
 - Minor (verifier): `placeMenu` export in `Menu.tsx` gives an oxlint fast-refresh warning; HabitCard is

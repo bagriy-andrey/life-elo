@@ -32,6 +32,11 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - Select / Skeleton / Spinner / StatTile previews authored 2026-11-09. Select shows only closed states (the list opens on
   click, `position: fixed`). StatTile is `cardMode: column`; `TierBars` is internal (not exported, no card).
 
+- Menu (2026-11-10): the popover opens on click, so the `Open` story clicks `.menu-trigger` once from a ref callback
+  (`setTimeout(…click)`; no pointerdown → the outside-tap handler doesn't close it) and reserves `minHeight: 280`.
+  A preview with only the closed ⋮ trigger trips `[RENDER_THIN]` (a 44px icon button paints almost nothing).
+  `dialog-actions--row` (two buttons side by side) is documented only in `dtsPropsFor.Dialog`, not in conventions.md.
+
 ## Known render warns
 - none
 

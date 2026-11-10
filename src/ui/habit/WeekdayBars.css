@@ -1,0 +1,92 @@
+.weekday-bars {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.weekday-bars__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.weekday-bars__caption {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: right;
+}
+.weekday-bars__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.weekday-bars__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.weekday-bars__pct {
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.weekday-bars__track {
+  width: 100%;
+  max-width: 28px;
+  height: 72px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.weekday-bars__bar {
+  width: 100%;
+  border-radius: 6px;
+}
+.weekday-bars__bar--dim {
+  background: color-mix(in srgb, var(--pos) 55%, var(--card));
+}
+.weekday-bars__bar--pos,
+.weekday-bars__bar--pos4 {
+  background: var(--pos);
+}
+.weekday-bars__bar--warn {
+  background: var(--warn);
+}
+.weekday-bars__bar--neg,
+.weekday-bars__bar--neg4 {
+  background: var(--neg);
+}
+.weekday-bars__bar--pos1 {
+  background: color-mix(in srgb, var(--pos) 28%, var(--card));
+}
+.weekday-bars__bar--pos2 {
+  background: color-mix(in srgb, var(--pos) 50%, var(--card));
+}
+.weekday-bars__bar--pos3 {
+  background: color-mix(in srgb, var(--pos) 75%, var(--card));
+}
+.weekday-bars__bar--neg1 {
+  background: color-mix(in srgb, var(--neg) 28%, var(--card));
+}
+.weekday-bars__bar--neg2 {
+  background: color-mix(in srgb, var(--neg) 50%, var(--card));
+}
+.weekday-bars__bar--neg3 {
+  background: color-mix(in srgb, var(--neg) 75%, var(--card));
+}
+.weekday-bars__label {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.weekday-bars__col--today .weekday-bars__label {
+  color: var(--text);
+  font-weight: 600;
+}

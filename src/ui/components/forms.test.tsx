@@ -55,7 +55,7 @@ describe('form components', () => {
   it('TypeCards marks the selected card and supports disabled', () => {
     const options = [
       { value: 'c', title: 'Конструктивная', description: 'd1', tone: 'pos' as const },
-      { value: 'd', title: 'Нежелательная', description: 'd2', tone: 'neg' as const },
+      { value: 'd', title: 'Деструктивная', description: 'd2', tone: 'neg' as const },
     ]
     const html = renderToString(<TypeCards label="Тип" options={options} value="d" onChange={() => {}} disabled />)
     expect(html).toContain('type-card on tone-neg')

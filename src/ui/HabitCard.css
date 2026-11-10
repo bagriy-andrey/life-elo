@@ -1,0 +1,40 @@
+.habit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+}
+.habit-row-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex: 1;
+  min-width: 0;
+}
+.habit-row-content.paused { opacity: 0.5; }
+.habit-row-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--pos);
+}
+.habit-row-dot.neg { background: var(--neg); }
+.habit-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1;
+}
+.habit-row-name { display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap; }
+.habit-row-name strong { overflow-wrap: anywhere; }
+.habit-row-badge {
+  padding: 1px var(--space-8);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.habit-row-meta { color: var(--muted); font-size: var(--text-sm); }
+.habit-row-tier { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-sm); }

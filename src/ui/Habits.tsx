@@ -2,11 +2,15 @@ import { useState } from 'react'
 import { dayOf } from '../domain/day'
 import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit } from '../domain/types'
-import { Button, Card, StatTile } from './components'
+import { Button, StatTile } from './components'
 import { countByDirectionAndTier, groupByDirectionAndTier } from './grouping'
 import { HabitSheet } from './HabitSheet'
 import { useI18n } from '../i18n'
 import { directionGroupLabels, habitMeta, TIER_COLOR, tierGroupLabels } from './labels'
+import { HabitCard } from './HabitCard'
+import { HabitDeleteDialog } from './HabitDeleteDialog'
+import { togglePause } from './habitActions'
+import { TierBars } from './components/TierBars'
 import './HabitSheet.css'
 
 interface Props {
@@ -15,18 +19,23 @@ interface Props {
   reviews: DayReview[]
   /** New habits become reviewable starting from this day. */
   effectiveFrom: string
+  /** Opens the habit page; wired in App. */
+  onOpenHabit?: (id: string) => void
 }
+
+const TIER_LEVEL = { strong: 3, medium: 2, weak: 1 } as const
 
 const today = () => dayOf(new Date())
 
 /** Which habit the sheet shows: a new one or the one being edited. */
 type SheetState = { mode: 'create' } | { mode: 'edit'; id: string }
 
-export function Habits({ habits, reviews, effectiveFrom }: Props) {
+export function Habits({ habits, reviews, effectiveFrom, onOpenHabit = () => {} }: Props) {
   const { t } = useI18n()
   const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
   const TIER_GROUP_LABEL = tierGroupLabels(t)
   const [sheet, setSheet] = useState<SheetState>()
+  const [deleting, setDeleting] = useState<Habit>()
   const editing = sheet?.mode === 'edit' ? habits.find((h) => h.id === sheet.id) : undefined
 
   const counts = countByDirectionAndTier(habits, (h) => ({
@@ -39,20 +48,17 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
     { label: TIER_GROUP_LABEL.weak, value: c.weak, level: 1 as const },
   ]
 
-  const renderHabit = (h: Habit) => {
-    const cur = settingsOn(h, today())
-    return (
-      <Card key={h.id} inactive={!h.active}>
-        <button type="button" className="habit-card" onClick={() => setSheet({ mode: 'edit', id: h.id })}>
-          <span className={h.direction === 'destructive' ? 'habit-card-dot neg' : 'habit-card-dot'} aria-hidden="true" />
-          <span className="habit-card-text">
-            <strong>{h.name}</strong>
-            <span className="habit-card-meta">{habitMeta(t, h.direction, cur)}</span>
-          </span>
-        </button>
-      </Card>
-    )
-  }
+  const renderHabit = (h: Habit) => (
+    <HabitCard
+      key={h.id}
+      habit={h}
+      meta={habitMeta(t, h.direction, settingsOn(h, today()))}
+      onOpen={() => onOpenHabit(h.id)}
+      onEdit={() => setSheet({ mode: 'edit', id: h.id })}
+      onTogglePause={() => void togglePause(h)}
+      onDelete={() => setDeleting(h)}
+    />
+  )
 
   return (
     <section className="stack">
@@ -95,8 +101,9 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
           <h2>{DIRECTION_GROUP_LABEL[g.direction]}</h2>
           {g.tiers.map((tg) => (
             <div key={tg.tier} className="stack">
-              <span className="muted">
-                <span style={{ color: TIER_COLOR[tg.tier] }}>●</span> {TIER_GROUP_LABEL[tg.tier]}
+              <span className="habit-row-tier" style={{ color: TIER_COLOR[tg.tier] }}>
+                <TierBars level={TIER_LEVEL[tg.tier]} size="sm" />
+                <span className="muted">{TIER_GROUP_LABEL[tg.tier]}</span>
               </span>
               {tg.items.map(renderHabit)}
             </div>
@@ -114,6 +121,7 @@ export function Habits({ habits, reviews, effectiveFrom }: Props) {
           onClose={() => setSheet(undefined)}
         />
       )}
+      <HabitDeleteDialog habit={deleting} onClose={() => setDeleting(undefined)} onDeleted={() => setDeleting(undefined)} />
     </section>
   )
 }

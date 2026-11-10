@@ -1,0 +1,225 @@
+.time-chart {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.time-chart__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.time-chart__sub {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: right;
+}
+.time-chart__top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.time-chart__top .time-chart__sub {
+  font-size: var(--text-sm);
+  text-align: left;
+}
+.time-chart__avg {
+  font-size: 1.5rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.time-chart__delta {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.time-chart__delta--early {
+  color: var(--pos);
+}
+.time-chart__delta--late {
+  color: var(--neg);
+}
+.time-chart__svg {
+  width: 100%;
+  display: block;
+  overflow: visible;
+}
+.time-chart__zone--onTime {
+  fill: var(--pos);
+  opacity: 0.07;
+}
+.time-chart__zone--tolerable {
+  fill: var(--warn);
+  opacity: 0.09;
+}
+.time-chart__zone--late {
+  fill: var(--neg);
+  opacity: 0.07;
+}
+.time-chart__dash {
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.7;
+}
+.time-chart__dash--onTime {
+  stroke: var(--pos);
+}
+.time-chart__dash--tolerable {
+  stroke: var(--warn);
+}
+.time-chart__plot {
+  position: relative;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+.time-chart__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__guide {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__point {
+  fill: var(--card);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__point--onTime {
+  stroke: var(--pos);
+}
+.time-chart__point--tolerable {
+  stroke: var(--warn);
+}
+.time-chart__point--late {
+  stroke: var(--neg);
+}
+.time-chart__point--onTime.is-active {
+  fill: var(--pos);
+}
+.time-chart__point--tolerable.is-active {
+  fill: var(--warn);
+}
+.time-chart__point--late.is-active {
+  fill: var(--neg);
+}
+.time-chart__tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--text) 14%, transparent);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+.time-chart__tip.is-left {
+  transform: translate(-12px, calc(-100% - 10px));
+  align-items: flex-start;
+}
+.time-chart__tip.is-right {
+  transform: translate(calc(-100% + 12px), calc(-100% - 10px));
+  align-items: flex-end;
+}
+.time-chart__tip strong {
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+}
+.time-chart__tip-day {
+  color: var(--muted);
+}
+.time-chart__tip-zone--onTime {
+  color: var(--pos);
+}
+.time-chart__tip-zone--tolerable {
+  color: var(--warn);
+}
+.time-chart__tip-zone--late {
+  color: var(--neg);
+}
+.time-chart__fill--onTime {
+  fill: var(--pos);
+}
+.time-chart__fill--tolerable {
+  fill: var(--warn);
+}
+.time-chart__fill--late {
+  fill: var(--neg);
+}
+.time-chart__lbl {
+  font-size: 10px;
+  font-weight: 600;
+}
+.time-chart__lbl--onTime {
+  fill: var(--pos);
+}
+.time-chart__lbl--tolerable {
+  fill: var(--warn);
+}
+.time-chart__dates {
+  /* Aligned with the plot: same as the SVG's left gutter (PAD_L). */
+  padding-left: 34px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.time-chart__share {
+  width: 100%;
+  height: 8px;
+  display: block;
+  border-radius: 4px;
+}
+.time-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+.time-chart__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.time-chart__legend-item strong {
+  color: var(--text);
+}
+.time-chart__swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.time-chart__swatch--onTime {
+  background: var(--pos);
+}
+.time-chart__swatch--tolerable {
+  background: var(--warn);
+}
+.time-chart__swatch--late {
+  background: var(--neg);
+}

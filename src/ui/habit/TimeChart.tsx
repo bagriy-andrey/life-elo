@@ -1,10 +1,15 @@
+import { useState } from 'react'
+import type { PointerEvent } from 'react'
 import { useI18n } from '../../i18n'
 import type { TimeSeries } from '../../domain/habitCharts'
+import { nearestIndex, smoothRuns, type Pt } from './chartHover'
 import './TimeChart.css'
 
 const W = 300
-const H = 120
-const STEP = 10
+const H = 150
+/** Left gutter for the target / tolerable time labels. */
+const PAD_L = 34
+const PAD_Y = 8
 
 /** Minutes (possibly night-wrapped, > 1440) -> "HH:MM". */
 function formatClock(minutes: number): string {
@@ -14,32 +19,39 @@ function formatClock(minutes: number): string {
 
 const rect = (x: number, y: number, w: number, h: number) =>
   `M${x} ${y.toFixed(1)}h${w}v${Math.max(0, h).toFixed(1)}h${-w}z`
-const dot = (x: number, y: number, r: number) =>
-  `M${x - r} ${y.toFixed(1)}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0z`
+/** Vertical grid every 5 days, counted from the right edge (today). */
+const GRID_EVERY = 5
 
 export function TimeChart({ series }: { series: TimeSeries }) {
   const { t, locale } = useI18n()
+  const [active, setActive] = useState<number | null>(null)
   const { points, bounds, share, avg4w, diffMinutes } = series
   const tolOff = bounds.tolerable - bounds.target
   const offs = points.filter((p) => p.minutes !== null).map((p) => (p.minutes as number) - bounds.target)
   const top = Math.min(-60, ...offs) - 5
   const bot = Math.max(tolOff + 45, ...offs) + 5
-  const Y = (o: number) => 6 + ((o - top) / (bot - top)) * 108
+  const Y = (o: number) => PAD_Y + ((o - top) / (bot - top)) * (H - 2 * PAD_Y)
+  const step = (W - PAD_L) / Math.max(1, points.length)
+  const X = (i: number) => PAD_L + i * step + step / 2
 
-  let line = ''
-  let gap = true
-  const dots = { onTime: '', tolerable: '', late: '' }
-  points.forEach((p, i) => {
-    if (p.minutes === null || p.zone === 'nodata') {
-      gap = true
-      return
-    }
-    const x = i * STEP + STEP / 2
-    const y = Y(p.minutes - bounds.target)
-    line += `${gap ? 'M' : 'L'}${x} ${y.toFixed(1)}`
-    gap = false
-    dots[p.zone] += dot(x, y, 3.5)
-  })
+  const xy: (Pt | null)[] = points.map((p, i) =>
+    p.minutes === null || p.zone === 'nodata' ? null : [X(i), Y(p.minutes - bounds.target)],
+  )
+  const line = smoothRuns(xy)
+  // Horizontal grid on whole hours inside the visible range.
+  const hours: number[] = []
+  for (let m = Math.ceil((bounds.target + top) / 60) * 60; m <= bounds.target + bot; m += 60) hours.push(m)
+  const columns = Array.from({ length: Math.floor((points.length - 1) / GRID_EVERY) + 1 }, (_, k) => points.length - 1 - k * GRID_EVERY)
+
+  const pick = (e: PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    if (r.width <= 0) return
+    const x = ((e.clientX - r.left) / r.width) * W
+    setActive(nearestIndex(xy.map(Boolean), (x - PAD_L) / (W - PAD_L)))
+  }
+  const hit = active === null ? null : xy[active]
+  const activePoint = active === null ? null : points[active]
+  const zoneLabel = { onTime: t('habit.chart.onTime'), tolerable: t('habit.chart.tolerable'), late: t('habit.chart.late'), nodata: '' }
 
   const fmtDay = (day: string | undefined) => {
     if (!day) return ''
@@ -77,23 +89,58 @@ export function TimeChart({ series }: { series: TimeSeries }) {
           </span>
         )}
       </div>
-      <svg className="time-chart__svg" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
-        <path className="time-chart__zone time-chart__zone--onTime" d={rect(0, 0, W, yT)} />
-        <path className="time-chart__zone time-chart__zone--tolerable" d={rect(0, yT, W, yTol - yT)} />
-        <path className="time-chart__zone time-chart__zone--late" d={rect(0, yTol, W, H - yTol)} />
-        <line className="time-chart__dash time-chart__dash--onTime" x1="0" x2={W} y1={yT} y2={yT} />
-        <line className="time-chart__dash time-chart__dash--tolerable" x1="0" x2={W} y1={yTol} y2={yTol} />
-        {line && <path className="time-chart__line" d={line} />}
-        <path className="time-chart__dot--onTime" d={dots.onTime} />
-        <path className="time-chart__dot--tolerable" d={dots.tolerable} />
-        <path className="time-chart__dot--late" d={dots.late} />
-        <text className="time-chart__lbl time-chart__lbl--onTime" x="2" y={yT - 3}>
-          {formatClock(bounds.target)}
-        </text>
-        <text className="time-chart__lbl time-chart__lbl--tolerable" x="2" y={yTol - 3}>
-          {formatClock(bounds.tolerable)}
-        </text>
-      </svg>
+      <div
+        className="time-chart__plot"
+        onPointerMove={(e) => e.pointerType === 'mouse' && pick(e)}
+        onPointerDown={pick}
+        onPointerLeave={(e) => e.pointerType === 'mouse' && setActive(null)}
+      >
+        <svg className="time-chart__svg" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+          <path className="time-chart__zone time-chart__zone--onTime" d={rect(PAD_L, 0, W - PAD_L, yT)} />
+          <path className="time-chart__zone time-chart__zone--tolerable" d={rect(PAD_L, yT, W - PAD_L, yTol - yT)} />
+          <path className="time-chart__zone time-chart__zone--late" d={rect(PAD_L, yTol, W - PAD_L, H - yTol)} />
+          {hours.map((m) => {
+            const y = Y(m - bounds.target)
+            return <line key={m} className="time-chart__grid" x1={PAD_L} x2={W} y1={y} y2={y} />
+          })}
+          {columns.map((i) => {
+            const x = X(i)
+            return <line key={i} className="time-chart__grid" x1={x} x2={x} y1="0" y2={H} />
+          })}
+          <line className="time-chart__dash time-chart__dash--onTime" x1={PAD_L} x2={W} y1={yT} y2={yT} />
+          <line className="time-chart__dash time-chart__dash--tolerable" x1={PAD_L} x2={W} y1={yTol} y2={yTol} />
+          {hit && <line className="time-chart__guide" x1={hit[0]} x2={hit[0]} y1="0" y2={H} />}
+          {line && <path className="time-chart__line" d={line} />}
+          {xy.map((p, i) =>
+            p ? (
+              <circle
+                key={i}
+                className={`time-chart__point time-chart__point--${points[i].zone}${i === active ? ' is-active' : ''}`}
+                cx={p[0]}
+                cy={p[1]}
+                r={i === active ? 4.5 : 3}
+              />
+            ) : null,
+          )}
+          <text className="time-chart__lbl time-chart__lbl--onTime" x={PAD_L - 5} y={yT} textAnchor="end" dominantBaseline="middle">
+            {formatClock(bounds.target)}
+          </text>
+          <text className="time-chart__lbl time-chart__lbl--tolerable" x={PAD_L - 5} y={yTol} textAnchor="end" dominantBaseline="middle">
+            {formatClock(bounds.tolerable)}
+          </text>
+        </svg>
+        {hit && activePoint && activePoint.minutes !== null && (
+          <div
+            className={`time-chart__tip${hit[0] / W < 0.2 ? ' is-left' : hit[0] / W > 0.8 ? ' is-right' : ''}`}
+            style={{ left: `${(hit[0] / W) * 100}%`, top: `${(hit[1] / H) * 100}%` }}
+            role="status"
+          >
+            <span className="time-chart__tip-day">{fmtDay(activePoint.day)}</span>
+            <strong>{formatClock(activePoint.minutes)}</strong>
+            <span className={`time-chart__tip-zone time-chart__tip-zone--${activePoint.zone}`}>{zoneLabel[activePoint.zone]}</span>
+          </div>
+        )}
+      </div>
       <div className="time-chart__dates">
         <span>{fmtDay(points[0]?.day)}</span>
         <span>{fmtDay(points[Math.floor(points.length / 2)]?.day)}</span>

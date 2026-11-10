@@ -52,15 +52,15 @@
 }
 .time-chart__zone--onTime {
   fill: var(--pos);
-  opacity: 0.1;
+  opacity: 0.07;
 }
 .time-chart__zone--tolerable {
   fill: var(--warn);
-  opacity: 0.12;
+  opacity: 0.09;
 }
 .time-chart__zone--late {
   fill: var(--neg);
-  opacity: 0.1;
+  opacity: 0.07;
 }
 .time-chart__dash {
   stroke-width: 1;
@@ -73,22 +73,100 @@
 .time-chart__dash--tolerable {
   stroke: var(--warn);
 }
-.time-chart__line {
-  fill: none;
+.time-chart__plot {
+  position: relative;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+.time-chart__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__guide {
   stroke: var(--muted);
   stroke-width: 1;
-  opacity: 0.45;
-  stroke-linejoin: round;
+  opacity: 0.6;
+  vector-effect: non-scaling-stroke;
 }
-.time-chart__dot--onTime,
+.time-chart__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__point {
+  fill: var(--card);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.time-chart__point--onTime {
+  stroke: var(--pos);
+}
+.time-chart__point--tolerable {
+  stroke: var(--warn);
+}
+.time-chart__point--late {
+  stroke: var(--neg);
+}
+.time-chart__point--onTime.is-active {
+  fill: var(--pos);
+}
+.time-chart__point--tolerable.is-active {
+  fill: var(--warn);
+}
+.time-chart__point--late.is-active {
+  fill: var(--neg);
+}
+.time-chart__tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--text) 14%, transparent);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+.time-chart__tip.is-left {
+  transform: translate(-12px, calc(-100% - 10px));
+  align-items: flex-start;
+}
+.time-chart__tip.is-right {
+  transform: translate(calc(-100% + 12px), calc(-100% - 10px));
+  align-items: flex-end;
+}
+.time-chart__tip strong {
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+}
+.time-chart__tip-day {
+  color: var(--muted);
+}
+.time-chart__tip-zone--onTime {
+  color: var(--pos);
+}
+.time-chart__tip-zone--tolerable {
+  color: var(--warn);
+}
+.time-chart__tip-zone--late {
+  color: var(--neg);
+}
 .time-chart__fill--onTime {
   fill: var(--pos);
 }
-.time-chart__dot--tolerable,
 .time-chart__fill--tolerable {
   fill: var(--warn);
 }
-.time-chart__dot--late,
 .time-chart__fill--late {
   fill: var(--neg);
 }
@@ -103,6 +181,8 @@
   fill: var(--warn);
 }
 .time-chart__dates {
+  /* Aligned with the plot (the SVG's left gutter is 34/300 of its width). */
+  padding-left: 11.33%;
   display: flex;
   justify-content: space-between;
   gap: 8px;

@@ -50,14 +50,17 @@ describe('HabitPage smoke render', () => {
     const html = page(habit('Зарядка'), reviewsOf(true))
     common(html, 'Зарядка')
     expect(html).toContain('Текущая серия')
-    expect(html).toContain('Выполнено по месяцам')
+    expect(html).toContain('Успехи и срывы по месяцам')
+    expect(html).toContain('weekday-bars__bar--best')
+    expect(html).not.toContain('weekday-bars__pct')
   })
 
   it('daily yes/no destructive shows the holding label and slips chart', () => {
     const html = page(habit('Соцсети', { direction: 'destructive' }), reviewsOf(false))
     common(html, 'Соцсети')
     expect(html).toContain('Держусь')
-    expect(html).toContain('Срывы по месяцам')
+    expect(html).toContain('Успехи и срывы по месяцам')
+    expect(html).toContain('Срыв')
   })
 
   it('minutes', () => {
@@ -65,6 +68,28 @@ describe('HabitPage smoke render', () => {
     const html = page(h, reviewsOf(40))
     common(html, 'Чтение')
     expect(html).toContain('Последние 30 дней')
+    expect(html).toContain('в среднем, мин')
+    expect(html).toContain('weekday-bars__bar--pos')
+    expect(html).not.toContain('% успешных дней')
+  })
+
+  it('steps: no weekday bars', () => {
+    const h = habit('Шаги', {}, { rule: { kind: 'measured', unit: 'steps', better: 'higher', excellent: 8000 } })
+    const html = page(h, reviewsOf(9000))
+    expect(html).toContain('Последние 30 дней')
+    expect(html).toContain('heatmap-grid')
+    expect(html).not.toContain('weekday-bars')
+  })
+
+  it('count destructive: red heatmap and weekday shades', () => {
+    const h = habit('Кофе', { direction: 'destructive' }, {
+      rule: { kind: 'measured', unit: 'count', better: 'lower', excellent: 0, ok: 2 },
+    })
+    const html = page(h, reviewsOf(3))
+    common(html, 'Кофе')
+    expect(html).toContain('heatmap heatmap--neg')
+    expect(html).toContain('weekday-bars__bar--neg')
+    expect(html).toContain('в среднем, раз')
   })
 
   it('time with tolerable', () => {
@@ -74,6 +99,9 @@ describe('HabitPage smoke render', () => {
     const html = page(h, reviewsOf('22:20'))
     common(html, 'Сон')
     expect(html).toContain('time-chart__zone--tolerable')
+    expect(html).toContain('heatmap-cell--pos')
+    expect(html).toContain('22:20')
+    expect(html).toContain('среднее время')
   })
 
   it('weekly yes/no, paused badge', () => {

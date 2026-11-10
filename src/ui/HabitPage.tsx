@@ -5,6 +5,8 @@ import {
   chartKind,
   completionPercent,
   currentStreak,
+  habitNorms,
+  weekdayAverages,
   weekdayPercent,
   weekStreaks,
 } from '../domain/habitStats'
@@ -19,12 +21,17 @@ import { AmountChart, MonthlyChart, WeeklyChart } from './habit/BarCharts'
 import { Heatmap } from './habit/Heatmap'
 import { TimeChart } from './habit/TimeChart'
 import { WeekdayBars } from './habit/WeekdayBars'
+import { amountBars, percentBars, timeBars, type WeekdayBar } from './habit/weekdayData'
 import { HabitDeleteDialog } from './HabitDeleteDialog'
 import { HabitSheet } from './HabitSheet'
 import { habitMeta } from './labels'
 import './HabitPage.css'
 
 const todayKey = () => dayOf(new Date())
+const clock = (m: number) => {
+  const d = ((m % 1440) + 1440) % 1440
+  return `${String(Math.floor(d / 60)).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`
+}
 
 interface Props {
   /** `undefined` renders nothing (App redirects to the list). */
@@ -38,7 +45,7 @@ interface Props {
 }
 
 export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today = todayKey() }: Props) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -58,7 +65,9 @@ export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today
       time: kind === 'time' ? timeSeries(habit, reviews, today) : undefined,
       weeks: kind === 'weekly' ? weeklySeries(habit, reviews, today) : undefined,
       grid: heatmapGrid(habit, reviews, today),
+      norms: habitNorms(habit, today),
       weekdays: weekdayPercent(habit, reviews, today),
+      averages: weekdayAverages(habit, reviews, today),
     }
   }, [habit, reviews, today])
 
@@ -70,6 +79,27 @@ export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today
   const unit = (n: number) => t(weekly ? 'habit.unit.week' : 'habit.unit.day', { count: n })
   const holding = destructive && data.kind === 'yesno'
   const amountUnit = version.rule.kind === 'measured' && version.rule.unit !== 'time' ? version.rule.unit : 'count'
+
+  // «По дням недели» per habit type; steps have none.
+  let weekday: { bars: WeekdayBar[]; caption: string } | undefined
+  if (data.kind === 'yesno') weekday = { bars: percentBars(data.weekdays, false), caption: t('habit.weekdays.caption') }
+  else if (weekly)
+    weekday = {
+      bars: percentBars(data.weekdays, true),
+      caption: t(destructive ? 'habit.weekdays.captionWeeklyBad' : 'habit.weekdays.captionWeeklyGood'),
+    }
+  else if (data.kind === 'time')
+    weekday = { bars: timeBars(data.weekdays, data.averages, data.norms, clock), caption: t('habit.weekdays.captionTime') }
+  else if (amountUnit === 'minutes')
+    weekday = {
+      bars: amountBars(data.averages, habit, data.norms, (v) => String(Math.round(v))),
+      caption: t('habit.weekdays.captionMinutes'),
+    }
+  else if (amountUnit === 'count')
+    weekday = {
+      bars: amountBars(data.averages, habit, data.norms, (v) => v.toLocaleString(locale, { maximumFractionDigits: 1 })),
+      caption: t('habit.weekdays.captionCount'),
+    }
 
   const items: MenuItem[] = [
     { id: 'edit', label: t('habit.menu.edit') },
@@ -128,12 +158,7 @@ export function HabitPage({ habit, habits, reviews, effectiveFrom, onBack, today
         <Heatmap grid={data.grid} kind={data.kind} direction={habit.direction} />
       </section>
 
-      <WeekdayBars
-        percents={data.weekdays}
-        caption={
-          weekly ? t(destructive ? 'habit.weekdays.captionWeeklyBad' : 'habit.weekdays.captionWeeklyGood') : undefined
-        }
-      />
+      {weekday && <WeekdayBars bars={weekday.bars} caption={weekday.caption} />}
 
       {editing && (
         <HabitSheet

@@ -41,6 +41,7 @@ export function Heatmap({ grid, kind, direction }: HeatmapProps) {
     new Date(`${day}T12:00:00`).toLocaleDateString(locale, opts)
   const weekly = kind === 'weekly'
   const destructive = direction === 'destructive'
+  const inverse = destructive && grid.tone === 'pos'
   const yesLabel = t(destructive && !weekly ? 'habit.heatmap.held' : 'habit.heatmap.done')
   const noLabel = t(destructive ? 'habit.heatmap.slipped' : 'habit.heatmap.missed')
 
@@ -64,7 +65,7 @@ export function Heatmap({ grid, kind, direction }: HeatmapProps) {
   )
 
   return (
-    <div className="heatmap">
+    <div className={grid.tone === 'neg' ? 'heatmap heatmap--neg' : 'heatmap'}>
       <div className="heatmap-body">
         <div className="heatmap-days" aria-hidden="true">
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -100,11 +101,18 @@ export function Heatmap({ grid, kind, direction }: HeatmapProps) {
           key('pos', t('habit.heatmap.weekMet'), true),
           key('neg', t('habit.heatmap.weekNotMet'), true),
         ]}
-        {(kind === 'amount' || kind === 'time') && (
+        {kind === 'time' && [
+          key('pos', t('habit.chart.onTime')),
+          key('warn', t('habit.chart.tolerable')),
+          key('neg', t('habit.chart.late')),
+          key('nodata', t('habit.heatmap.nodata')),
+        ]}
+        {kind === 'amount' && (
+          // Inverse scale (0 = brightest) for destructive minutes / steps; red «more = brighter» for destructive count.
           <span className="heatmap-scale">
-            <span>{t(kind === 'time' ? 'habit.heatmap.later' : 'habit.heatmap.less')}</span>
+            <span>{t(inverse ? 'habit.heatmap.more' : 'habit.heatmap.less')}</span>
             {SCALE.map((l) => swatch(String(l)))}
-            <span>{t(kind === 'time' ? 'habit.heatmap.earlier' : 'habit.heatmap.more')}</span>
+            <span>{t(inverse ? 'habit.heatmap.less' : 'habit.heatmap.more')}</span>
           </span>
         )}
       </div>

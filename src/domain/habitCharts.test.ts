@@ -75,16 +75,17 @@ describe('amountSeries', () => {
 })
 
 describe('monthlyCounts', () => {
-  it('counts done days for constructive, slips for destructive; 12 months, current flagged', () => {
+  it('counts successful and failed days per month; 12 months, current flagged', () => {
     const reviews = [val('2026-11-10', true), val('2026-11-09', false), val('2026-10-01', true)]
     const c = monthlyCounts(habit({}), reviews, TODAY)
     expect(c).toHaveLength(12)
     expect(c[0].month).toBe('2025-12')
-    expect(c[11]).toEqual({ month: '2026-11', count: 1, current: true })
-    expect(c[10].count).toBe(1)
+    expect(c[11]).toEqual({ month: '2026-11', success: 1, fail: 1, current: true })
+    expect(c[10]).toMatchObject({ success: 1, fail: 0 })
+    // Destructive: true = held (success), false = slipped (fail).
     const d = monthlyCounts(habit({ direction: 'destructive' }), reviews, TODAY)
-    expect(d[11].count).toBe(1)
-    expect(d[10].count).toBe(0)
+    expect(d[11]).toMatchObject({ success: 1, fail: 1 })
+    expect(d[10]).toMatchObject({ success: 1, fail: 0 })
   })
 })
 
@@ -170,10 +171,36 @@ describe('heatmapGrid', () => {
     const gd = heatmapGrid(minutes('destructive'), ds, TODAY)
     expect(['2026-11-09', '2026-11-10', '2026-11-08', '2026-11-07'].map((d) => cellLevel(gd, d))).toEqual([4, 3, 2, 1])
   })
-  it('time levels by deviation from target', () => {
+  it('time cells use the time-chart zones: on time / tolerable / late', () => {
     const rs = [val('2026-11-09', '21:50'), val('2026-11-10', '22:20'), val('2026-11-08', '22:50'), val('2026-11-07', '23:30')]
     const g = heatmapGrid(timeHabit('23:00'), rs, TODAY)
-    expect(['2026-11-09', '2026-11-10', '2026-11-08', '2026-11-07'].map((d) => cellLevel(g, d))).toEqual([4, 3, 2, 1])
+    expect(['2026-11-09', '2026-11-10', '2026-11-08', '2026-11-07'].map((d) => cellLevel(g, d))).toEqual([
+      'pos',
+      'pos',
+      'warn',
+      'neg',
+    ])
+    expect(g.tone).toBe('pos')
+  })
+  it('count: green shades for constructive, red «more = brighter» for destructive', () => {
+    const count = (direction: Habit['direction']) =>
+      habit({
+        direction,
+        version: {
+          rule:
+            direction === 'constructive'
+              ? { kind: 'measured', unit: 'count', better: 'higher', excellent: 4 }
+              : { kind: 'measured', unit: 'count', better: 'lower', excellent: 0, ok: 2 },
+        },
+      })
+    const rs = [val('2026-11-09', 0), val('2026-11-10', 1), val('2026-11-08', 2), val('2026-11-07', 3), val('2026-11-06', 5)]
+    const days = ['2026-11-09', '2026-11-10', '2026-11-08', '2026-11-07', '2026-11-06']
+    const gc = heatmapGrid(count('constructive'), rs, TODAY)
+    expect(gc.tone).toBe('pos')
+    expect(days.map((d) => cellLevel(gc, d))).toEqual([0, 1, 2, 2, 3])
+    const gd = heatmapGrid(count('destructive'), rs, TODAY)
+    expect(gd.tone).toBe('neg')
+    expect(days.map((d) => cellLevel(gd, d))).toEqual([0, 2, 3, 4, 4])
   })
   it('weekly: only event days coloured, weekMet per column', () => {
     const h = habit({ version: { weeklyGoal: { perWeek: 1 } } })

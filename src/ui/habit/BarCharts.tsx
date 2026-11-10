@@ -93,48 +93,55 @@ export function AmountChart({
   )
 }
 
-/** 12 monthly bars (done days or slips) with the count above each, current month brighter. */
+/** 12 monthly stacked bars: successful days (green, bottom) and misses / slips (red, top); current month brighter. */
 export function MonthlyChart({ months, direction }: { months: MonthCount[]; direction: HabitDirection }) {
   const { t, locale } = useI18n()
   const constructive = direction === 'constructive'
-  const title = constructive ? t('habit.chart.byMonthDone') : t('habit.chart.byMonthSlips')
-  const max = Math.max(1, ...months.map((m) => m.count))
-  const tone = constructive ? 'pos' : 'neg'
+  const title = t('habit.chart.byMonthBoth')
+  const yes = t(constructive ? 'habit.heatmap.done' : 'habit.heatmap.held')
+  const no = t(constructive ? 'habit.heatmap.missed' : 'habit.heatmap.slipped')
+  const max = Math.max(1, ...months.map((m) => m.success + m.fail))
   const monthName = (m: string) =>
     date(`${m}-01`).toLocaleDateString(locale, { month: 'short' }).replace(/\.$/, '')
-  const summary = months.map((m) => `${monthName(m.month)} ${m.count}`).join(', ')
+  const summary = months.map((m) => `${monthName(m.month)} ${m.success}/${m.fail}`).join(', ')
+  const bar = (key: string, tone: 'pos' | 'neg', current: boolean, i: number, bottom: number, value: number) => {
+    if (value <= 0) return null
+    const h = Math.max(1.5, (value / max) * MONTH_H)
+    return (
+      <rect
+        key={key}
+        className={`bar-chart__bar bar-chart__bar--${tone}${current ? '' : '-soft'}`}
+        x={i * MONTH_PITCH + 4}
+        y={MONTH_H + 3 - bottom - h}
+        width={12}
+        height={h}
+      />
+    )
+  }
   return (
     <section className="bar-chart" aria-label={title}>
       <div className="bar-chart__head">
         <strong>{title}</strong>
-        <span className="bar-chart__caption">
-          {constructive ? t('habit.chart.daysPerMonth') : t('habit.chart.lessBetter')}
-        </span>
       </div>
-      <div className="bar-chart__row bar-chart__row--12 bar-chart__counts" aria-hidden="true">
+      <div className="bar-chart__row bar-chart__row--12 bar-chart__counts bar-chart__counts--pos" aria-hidden="true">
         {months.map((m) => (
-          <span key={m.month}>{m.count}</span>
+          <span key={m.month}>{m.success}</span>
+        ))}
+      </div>
+      <div className="bar-chart__row bar-chart__row--12 bar-chart__counts bar-chart__counts--neg" aria-hidden="true">
+        {months.map((m) => (
+          <span key={m.month}>{m.fail}</span>
         ))}
       </div>
       <svg
         className="bar-chart__svg"
         viewBox={`0 0 ${months.length * MONTH_PITCH} ${MONTH_H + 4}`}
         role="img"
-        aria-label={`${title}: ${summary}`}
+        aria-label={`${title} (${yes}/${no}): ${summary}`}
       >
-        {months.map((m, i) => {
-          if (m.count <= 0) return null
-          const h = Math.max(1.5, (m.count / max) * MONTH_H)
-          return (
-            <rect
-              key={m.month}
-              className={`bar-chart__bar bar-chart__bar--${tone}${m.current ? '' : '-soft'}`}
-              x={i * MONTH_PITCH + 4}
-              y={MONTH_H + 3 - h}
-              width={12}
-              height={h}
-            />
-          )
+        {months.flatMap((m, i) => {
+          const okH = m.success > 0 ? Math.max(1.5, (m.success / max) * MONTH_H) : 0
+          return [bar(`${m.month}-s`, 'pos', m.current, i, 0, m.success), bar(`${m.month}-f`, 'neg', m.current, i, okH, m.fail)]
         })}
         <path className="bar-chart__axis" d={`M0 ${MONTH_H + 3.5}H${months.length * MONTH_PITCH}`} />
       </svg>
@@ -142,6 +149,10 @@ export function MonthlyChart({ months, direction }: { months: MonthCount[]; dire
         {months.map((m) => (
           <span key={m.month}>{monthName(m.month)}</span>
         ))}
+      </div>
+      <div className="bar-chart__legend" aria-hidden="true">
+        <span><span className="bar-chart__swatch bar-chart__swatch--pos" />{yes}</span>
+        <span><span className="bar-chart__swatch bar-chart__swatch--neg" />{no}</span>
       </div>
     </section>
   )

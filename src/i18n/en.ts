@@ -418,9 +418,7 @@ export const en: Dict = {
   },
   'habit.noValue': "—",
   'habit.chart.last30': "Last 30 days",
-  'habit.chart.byMonthDone': "Done by month",
-  'habit.chart.byMonthSlips': "Slips by month",
-  'habit.chart.lessBetter': "less is better",
+  'habit.chart.byMonthBoth': "Successes and slips by month",
   'habit.chart.timeByDay': "Time by day",
   'habit.chart.byWeek': "By week",
   'habit.chart.today': "Today",
@@ -456,7 +454,6 @@ export const en: Dict = {
   'habits.tolerableHint.without': "Later than this time is a violation. Between the target and this time is tolerable.",
   'habits.metaTolerable': "{norm}, tolerable until {value}",
   'habit.chart.perDay': "{label} {amount} a day",
-  'habit.chart.daysPerMonth': "days per month",
   'habit.chart.weekNormGood': {
     one: "goal {count} time, above — extra",
     other: "goal {count} times, above — extra",
@@ -466,6 +463,9 @@ export const en: Dict = {
     other: "limit {count} times, red — over the limit",
   },
   'habit.weekdays.caption': "% successful days",
+  'habit.weekdays.captionMinutes': "average, min",
+  'habit.weekdays.captionCount': "average, times",
+  'habit.weekdays.captionTime': "average time, height — % on time",
   'habit.weekdays.captionWeeklyGood': "How often you do it",
   'habit.weekdays.captionWeeklyBad': "How often you hold back",
 }

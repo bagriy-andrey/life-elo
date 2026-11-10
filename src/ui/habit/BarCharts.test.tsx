@@ -52,20 +52,23 @@ describe('AmountChart', () => {
 describe('MonthlyChart', () => {
   const months: MonthCount[] = Array.from({ length: 12 }, (_, i) => ({
     month: `2026-${String(i + 1).padStart(2, '0')}`,
-    count: i,
+    success: i,
+    fail: i % 2,
     current: i === 11,
   }))
-  it('constructive: 12 months, 11 bars', () => {
+  it('stacked green successes and red misses, one title for both directions', () => {
     const html = wrap(<MonthlyChart months={months} direction="constructive" />)
-    expect(html).toContain('Выполнено по месяцам')
-    expect(count(html, '<rect')).toBe(11)
-    expect(html).not.toContain('меньше — лучше')
+    expect(html).toContain('Успехи и срывы по месяцам')
+    expect(count(html, '<rect')).toBe(11 + 6)
+    expect(html).toContain('bar-chart__bar--pos')
+    expect(html).toContain('bar-chart__bar--neg-soft')
+    expect(html).toContain('Выполнено')
+    expect(html).toContain('Пропущено')
   })
-  it('destructive: slips title and caption', () => {
+  it('destructive legend: held / slipped', () => {
     const html = wrap(<MonthlyChart months={months} direction="destructive" />)
-    expect(html).toContain('Срывы по месяцам')
-    expect(html).toContain('меньше — лучше')
-    expect(html).toContain('bar-chart__bar--neg')
+    expect(html).toContain('Держался')
+    expect(html).toContain('Срыв')
   })
 })
 

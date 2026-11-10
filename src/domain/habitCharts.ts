@@ -75,11 +75,14 @@ export function amountSeries(habit: Habit, reviews: DayReview[], today: DayKey):
 
 export interface MonthCount {
   month: string
-  count: number
+  /** Successful days: done (constructive) / held (destructive). */
+  success: number
+  /** Missed (constructive) / slipped (destructive) days. */
+  fail: number
   current: boolean
 }
 
-/** Done days (constructive) or slips (destructive) per month, oldest first, ending with the current month. */
+/** Successful and failed days per month, oldest first, ending with the current month. */
 export function monthlyCounts(habit: Habit, reviews: DayReview[], today: DayKey): MonthCount[] {
   const [y, m] = today.split('-').map(Number)
   const keys: string[] = []
@@ -87,13 +90,14 @@ export function monthlyCounts(habit: Habit, reviews: DayReview[], today: DayKey)
     const d = new Date(y, m - 1 - k, 1)
     keys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
   }
-  const event = habit.direction === 'constructive' ? 'success' : 'fail'
-  const counts = new Map(keys.map((k) => [k, 0]))
+  const counts = new Map(keys.map((k) => [k, { success: 0, fail: 0 }]))
   for (const c of dayCells(habit, reviews, `${keys[0]}-01`, yesterdayOf(today), today)) {
-    const key = c.day.slice(0, 7)
-    if (c.status === event && counts.has(key)) counts.set(key, (counts.get(key) ?? 0) + 1)
+    const bucket = counts.get(c.day.slice(0, 7))
+    if (!bucket) continue
+    if (c.status === 'success') bucket.success++
+    else if (c.status === 'fail') bucket.fail++
   }
-  return keys.map((month, i) => ({ month, count: counts.get(month) ?? 0, current: i === MONTHS - 1 }))
+  return keys.map((month, i) => ({ month, ...(counts.get(month) ?? { success: 0, fail: 0 }), current: i === MONTHS - 1 }))
 }
 
 // ---- time ------------------------------------------------------------------------------------------
@@ -120,12 +124,19 @@ export interface TimeSeries {
 
 const mean = (xs: number[]) => (xs.length ? sum(xs) / xs.length : null)
 
+/** Zone of a time value (minutes, night-wrapped): up to the target, up to the tolerable bound, later. */
+export function timeZoneOf(norms: HabitNorms, minutes: number): Exclude<TimeZoneName, 'nodata'> {
+  const target = norms.target ?? 0
+  const tolerable = norms.tolerableBound ?? target + 30
+  return minutes <= target ? 'onTime' : minutes <= tolerable ? 'tolerable' : 'late'
+}
+
 export function timeSeries(habit: Habit, reviews: DayReview[], today: DayKey): TimeSeries {
   const norms = habitNorms(habit, today)
   const target = norms.target ?? 0
   const tolerable = norms.tolerableBound ?? target + 30
   const to = yesterdayOf(today)
-  const zoneOf = (m: number): TimeZoneName => (m <= target ? 'onTime' : m <= tolerable ? 'tolerable' : 'late')
+  const zoneOf = (m: number) => timeZoneOf(norms, m)
   const points = dayCells(habit, reviews, addDays(today, -WINDOW), to, today).map((c): TimePoint => {
     const minutes = minutesOf(c)
     return { day: c.day, minutes, zone: minutes === null ? 'nodata' : zoneOf(minutes) }
@@ -182,7 +193,8 @@ export function weeklySeries(habit: Habit, reviews: DayReview[], today: DayKey):
 
 // ---- heatmap ---------------------------------------------------------------------------------------
 
-export type HeatLevel = 'nodata' | 'future' | 0 | 1 | 2 | 3 | 4 | 'pos' | 'neg'
+/** 1–4: shades of the grid `tone` (amount habits); pos / warn / neg: flat colours (yes/no, weekly, time zones). */
+export type HeatLevel = 'nodata' | 'future' | 0 | 1 | 2 | 3 | 4 | 'pos' | 'warn' | 'neg'
 
 export interface HeatCell {
   day: DayKey
@@ -201,12 +213,30 @@ export interface HeatWeek {
 
 export interface HeatmapGrid {
   weeks: HeatWeek[]
+  /** Colour of the 1–4 shades: red only for destructive «Число» (more = brighter), green otherwise. */
+  tone: 'pos' | 'neg'
   /** First column whose week contains the 1st of a month; `month` is `YYYY-MM`. */
   monthLabels: { column: number; month: string }[]
 }
 
-function amountLevel(direction: Habit['direction'], norms: HabitNorms, v: number): HeatLevel {
-  if (direction === 'destructive') {
+/** Shades are red only for destructive count habits (more times = brighter); everything else is green. */
+export function heatTone(habit: Habit, norms: HabitNorms): 'pos' | 'neg' {
+  return habit.direction === 'destructive' && norms.unit === 'count' ? 'neg' : 'pos'
+}
+
+/**
+ * Shade 0–4 of an amount value. Constructive: % of target (0, <50, <100, <150, ≥150). Destructive count:
+ * the same steps against the limit (more = brighter red; limit 0 → one step per time). Other destructive
+ * amounts: inverse (0 → 4, ≤ half the limit → 3, ≤ limit → 2, more → 1).
+ */
+export function amountHeatLevel(habit: Habit, norms: HabitNorms, v: number): 0 | 1 | 2 | 3 | 4 {
+  const steps = (q: number) => (q < 0.5 ? 1 : q < 1 ? 2 : q < 1.5 ? 3 : 4)
+  if (habit.direction === 'destructive' && norms.unit === 'count') {
+    if (v <= 0) return 0
+    const limit = norms.limit ?? norms.target
+    return limit === undefined || limit <= 0 ? (Math.min(4, Math.ceil(v)) as 1 | 2 | 3 | 4) : steps(v / limit)
+  }
+  if (habit.direction === 'destructive') {
     const limit = norms.limit ?? norms.target
     if (v === 0) return 4
     if (limit === undefined) return 1
@@ -215,8 +245,7 @@ function amountLevel(direction: Habit['direction'], norms: HabitNorms, v: number
   if (v === 0) return 0
   const target = norms.target
   if (target === undefined || target <= 0) return 4
-  const q = v / target
-  return q < 0.5 ? 1 : q < 1 ? 2 : q < 1.5 ? 3 : 4
+  return steps(v / target)
 }
 
 function cellLevel(habit: Habit, kind: ReturnType<typeof chartKind>, norms: HabitNorms, c: DayCell): HeatLevel {
@@ -230,11 +259,11 @@ function cellLevel(habit: Habit, kind: ReturnType<typeof chartKind>, norms: Habi
   if (kind === 'time') {
     const m = minutesOf(c)
     if (m === null) return 'nodata'
-    const off = m - (norms.target ?? 0)
-    return off <= -30 ? 4 : off <= 0 ? 3 : off <= 30 ? 2 : 1
+    const zone = timeZoneOf(norms, m)
+    return zone === 'onTime' ? 'pos' : zone === 'tolerable' ? 'warn' : 'neg'
   }
   const v = numberOf(c)
-  return v === undefined ? 'nodata' : amountLevel(habit.direction, norms, v)
+  return v === undefined ? 'nodata' : amountHeatLevel(habit, norms, v)
 }
 
 export function heatmapGrid(habit: Habit, reviews: DayReview[], today: DayKey): HeatmapGrid {
@@ -266,5 +295,5 @@ export function heatmapGrid(habit: Habit, reviews: DayReview[], today: DayKey): 
     if (verdicts) week.weekMet = verdicts.get(weekStart) ?? null
     weeks.push(week)
   }
-  return { weeks, monthLabels }
+  return { weeks, monthLabels, tone: heatTone(habit, norms) }
 }

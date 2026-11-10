@@ -46,10 +46,12 @@ describe('Heatmap smoke render', () => {
     expect(html).toContain('Меньше')
     expect(html).toContain('Больше')
   })
-  it('time: earlier/later legend', () => {
+  it('time: zone legend like the time chart', () => {
     const html = render(habit({ kind: 'measured', unit: 'time', better: 'lower', excellent: 420, tolerable: 450 }), 'time')
-    expect(html).toContain('Раньше')
-    expect(html).toContain('Позже')
+    expect(html).toContain('Вовремя')
+    expect(html).toContain('Терпимо')
+    expect(html).toContain('Поздно')
+    expect(html).toContain('heatmap-cell--warn')
   })
   it('weekly: strip under each column', () => {
     const html = render(habit({ kind: 'boolean' }, 'constructive', { perWeek: 3 }), 'weekly')

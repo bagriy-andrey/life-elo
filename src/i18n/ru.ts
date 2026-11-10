@@ -447,9 +447,7 @@ export const ru = {
   },
   'habit.noValue': "—",
   'habit.chart.last30': "Последние 30 дней",
-  'habit.chart.byMonthDone': "Выполнено по месяцам",
-  'habit.chart.byMonthSlips': "Срывы по месяцам",
-  'habit.chart.lessBetter': "меньше — лучше",
+  'habit.chart.byMonthBoth': "Успехи и срывы по месяцам",
   'habit.chart.timeByDay': "Время по дням",
   'habit.chart.byWeek': "По неделям",
   'habit.chart.today': "Сегодня",
@@ -485,7 +483,6 @@ export const ru = {
   'habits.tolerableHint.without': "Позже этого времени — нарушение. Между целью и этим временем — терпимо.",
   'habits.metaTolerable': "{norm}, терпимо до {value}",
   'habit.chart.perDay': "{label} {amount} в день",
-  'habit.chart.daysPerMonth': "дней в месяц",
   'habit.chart.weekNormGood': {
     one: "норма {count} раз, выше — перевыполнение",
     few: "норма {count} раза, выше — перевыполнение",
@@ -499,6 +496,9 @@ export const ru = {
     other: "норма до {count} раза, красным — сверх нормы",
   },
   'habit.weekdays.caption': "% успешных дней",
+  'habit.weekdays.captionMinutes': "в среднем, мин",
+  'habit.weekdays.captionCount': "в среднем, раз",
+  'habit.weekdays.captionTime': "среднее время, высота — % вовремя",
   'habit.weekdays.captionWeeklyGood': "Как часто делаете",
   'habit.weekdays.captionWeeklyBad': "Как часто удерживаетесь",
 }

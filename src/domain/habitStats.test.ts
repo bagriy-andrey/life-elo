@@ -6,6 +6,7 @@ import {
   currentStreak,
   dayCells,
   habitNorms,
+  weekdayAverages,
   weekdayPercent,
   weekResults,
   weekStreaks,
@@ -361,5 +362,24 @@ describe('weekly habits', () => {
     expect(completionPercent(goal(2), [], TODAY)).toBeNull()
     const reviews = [yes('2026-11-02'), yes('2026-11-03'), yes('2026-10-26', false)]
     expect(completionPercent(goal(2), reviews, TODAY)).toBe(50)
+  })
+})
+
+describe('weekdayAverages', () => {
+  it('means answered values per weekday; time in minutes; null without values', () => {
+    const mins = habit({
+      effectiveFrom: '2026-11-01',
+      version: { rule: { kind: 'measured', unit: 'minutes', better: 'higher', excellent: 30 } },
+    })
+    const v = (day: DayKey, value: number | string) => review(day, { kind: 'value', value })
+    const out = weekdayAverages(mins, [v('2026-11-02', 20), v('2026-11-09', 40), v('2026-11-03', 10)], TODAY)
+    expect(out[0]).toBe(30)
+    expect(out[1]).toBe(10)
+    expect(out[2]).toBeNull()
+    const time = habit({
+      effectiveFrom: '2026-11-01',
+      version: { rule: { kind: 'measured', unit: 'time', better: 'lower', excellent: '07:00' } },
+    })
+    expect(weekdayAverages(time, [v('2026-11-02', '07:00'), v('2026-11-09', '07:30')], TODAY)[0]).toBe(435)
   })
 })

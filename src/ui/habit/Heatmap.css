@@ -73,8 +73,21 @@
 .heatmap-cell--pos {
   background: var(--pos);
 }
-.heatmap-cell--neg {
+.heatmap-cell--neg,
+.heatmap--neg .heatmap-cell--4 {
   background: var(--neg);
+}
+.heatmap-cell--warn {
+  background: var(--warn);
+}
+.heatmap--neg .heatmap-cell--1 {
+  background: color-mix(in srgb, var(--neg) 28%, var(--card));
+}
+.heatmap--neg .heatmap-cell--2 {
+  background: color-mix(in srgb, var(--neg) 50%, var(--card));
+}
+.heatmap--neg .heatmap-cell--3 {
+  background: color-mix(in srgb, var(--neg) 75%, var(--card));
 }
 .heatmap-strip {
   display: block;

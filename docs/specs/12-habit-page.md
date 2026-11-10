@@ -115,3 +115,19 @@ Blocks in order:
 - Min touch target 44px, dark and light themes.
 - Pure stats logic (series, %, heatmap levels, chart data) is unit-tested; each new/changed screen has a
   `renderToString` smoke test.
+
+## Revision 2026-11-10 (user)
+Overrides §4.6, §5 and §6 where they differ.
+- Heatmap: no scroll, shows the most recent weeks that fit; title «Активность».
+- **Time:** heatmap cells use the time-chart zones (on time `--pos`, tolerable `--warn`, late `--neg`).
+  Weekday bars: height = % successful days, label = average time, colour = zone of that average.
+- **Yes/no daily:** monthly chart «Успехи и срывы по месяцам» — stacked: successful days `--pos` (bottom),
+  misses/slips `--neg` (top), counts above in both colours, legend. Weekday bars: height = % successful days,
+  no labels (best day bright).
+- **Minutes:** heatmap unchanged; weekday bars: label = average minutes, height = average / max, green shade =
+  heatmap level of the average; caption «в среднем, мин» (no «% успешных дней»).
+- **Steps:** no weekday bars.
+- **Count:** heatmap shades green (constructive) or red (destructive, more times = brighter, 0 = empty);
+  weekday bars: label = average times, same shades.
+- Weekly yes/no: unchanged.
+- Weekday averages: mean of answered values over the last 12 months.

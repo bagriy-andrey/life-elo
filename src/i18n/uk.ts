@@ -448,9 +448,7 @@ export const uk: Dict = {
   },
   'habit.noValue': "—",
   'habit.chart.last30': "Останні 30 днів",
-  'habit.chart.byMonthDone': "Виконано за місяцями",
-  'habit.chart.byMonthSlips': "Зриви за місяцями",
-  'habit.chart.lessBetter': "менше — краще",
+  'habit.chart.byMonthBoth': "Успіхи та зриви за місяцями",
   'habit.chart.timeByDay': "Час за днями",
   'habit.chart.byWeek': "За тижнями",
   'habit.chart.today': "Сьогодні",
@@ -486,7 +484,6 @@ export const uk: Dict = {
   'habits.tolerableHint.without': "Пізніше цього часу — порушення. Між метою та цим часом — терпимо.",
   'habits.metaTolerable': "{norm}, терпимо до {value}",
   'habit.chart.perDay': "{label} {amount} на день",
-  'habit.chart.daysPerMonth': "днів на місяць",
   'habit.chart.weekNormGood': {
     one: "норма {count} раз, вище — перевиконання",
     few: "норма {count} рази, вище — перевиконання",
@@ -500,6 +497,9 @@ export const uk: Dict = {
     other: "норма до {count} разу, червоним — понад норму",
   },
   'habit.weekdays.caption': "% успішних днів",
+  'habit.weekdays.captionMinutes': "у середньому, хв",
+  'habit.weekdays.captionCount': "у середньому, разів",
+  'habit.weekdays.captionTime': "середній час, висота — % вчасно",
   'habit.weekdays.captionWeeklyGood': "Як часто робите",
   'habit.weekdays.captionWeeklyBad': "Як часто утримуєтеся",
 }

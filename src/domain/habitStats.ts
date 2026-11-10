@@ -217,13 +217,33 @@ export function completionPercent(habit: Habit, reviews: DayReview[], today: Day
   return successShare(dayCells(habit, reviews, addDays(today, -WINDOW_DAYS), yesterdayOf(today), today))
 }
 
-/** Mon..Sun: % successful days over the last 12 months; `null` for a weekday with no evaluated days. */
-export function weekdayPercent(habit: Habit, reviews: DayReview[], today: DayKey): (number | null)[] {
+function byWeekday(habit: Habit, reviews: DayReview[], today: DayKey): DayCell[][] {
   const cells = dayCells(habit, reviews, addDays(today, -365), yesterdayOf(today), today)
   const buckets: DayCell[][] = Array.from({ length: 7 }, () => [])
   for (const c of cells) {
     const [y, m, d] = c.day.split('-').map(Number)
     buckets[(new Date(y, m - 1, d).getDay() + 6) % 7].push(c)
   }
-  return buckets.map(successShare)
+  return buckets
+}
+
+/** Mon..Sun: % successful days over the last 12 months; `null` for a weekday with no evaluated days. */
+export function weekdayPercent(habit: Habit, reviews: DayReview[], today: DayKey): (number | null)[] {
+  return byWeekday(habit, reviews, today).map(successShare)
+}
+
+/**
+ * Mon..Sun: mean answered value over the last 12 months (count / minutes / steps; time: minutes after
+ * midnight, night-wrapped by `timeToMinutes`); `null` for a weekday without values.
+ */
+export function weekdayAverages(habit: Habit, reviews: DayReview[], today: DayKey): (number | null)[] {
+  return byWeekday(habit, reviews, today).map((cells) => {
+    const values: number[] = []
+    for (const c of cells) {
+      if (c.status !== 'success' && c.status !== 'fail' && c.status !== 'tolerable') continue
+      const v = typeof c.value === 'number' ? c.value : typeof c.value === 'string' ? timeToMinutes(c.value) : NaN
+      if (Number.isFinite(v)) values.push(v)
+    }
+    return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null
+  })
 }

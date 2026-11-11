@@ -1,6 +1,6 @@
 # 13 — Garmin sync (prefill the yesterday review)
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why

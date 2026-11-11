@@ -45,6 +45,14 @@ const PUSH_BATCH = 200
 const PULL_PAGE = 500
 const DEBOUNCE_MS = 2000
 const synced = new Set<string>(SYNCED_TABLES)
+/** Pull-only tables: written by the server (Edge Function), never queued or pushed. */
+const PULL_ONLY = 'garmin'
+
+let activeEngine: SyncEngine | null = null
+/** Asks the running engine (if any) for a sync now, e.g. after the server stored fresh Garmin rows. */
+export function requestSync(): Promise<void> {
+  return activeEngine?.run() ?? Promise.resolve()
+}
 
 function isNetworkError(e: unknown): boolean {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
@@ -120,6 +128,11 @@ export function createSyncEngine(opts: {
     await applyRemote(async () => {
       if (g !== gen) throw new Cancelled()
       for (const rec of page) {
+        if (rec.tbl === PULL_ONLY) {
+          if (rec.deleted || rec.data == null) await db.garmin.delete(rec.key)
+          else await db.garmin.put({ ...(rec.data as object), day: rec.key } as never)
+          continue
+        }
         if (!synced.has(rec.tbl)) continue
         const entry = await db.outbox.get([rec.tbl, rec.key] as never)
         if (applyDecision(rec, entry) === 'keep-local') continue
@@ -214,6 +227,7 @@ export function createSyncEngine(opts: {
  * await `engine.settled()` afterwards before clearing local data. */
 export function startSync(engine: SyncEngine): () => void {
   engine.enable()
+  activeEngine = engine
   const run = () => void engine.run()
   let timer: ReturnType<typeof setTimeout> | undefined
   let first = true
@@ -242,6 +256,7 @@ export function startSync(engine: SyncEngine): () => void {
     clearTimeout(timer)
     window.removeEventListener('online', run)
     document.removeEventListener('visibilitychange', onVisible)
+    if (activeEngine === engine) activeEngine = null
     engine.cancel()
     engine.status.set({ kind: 'idle' })
   }

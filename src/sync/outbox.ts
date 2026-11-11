@@ -117,6 +117,7 @@ export function applyRemote<T>(fn: () => Promise<T>): Promise<T> {
       db.wellbeing,
       db.rewards,
       db.profile,
+      db.garmin,
       db.outbox,
       db.syncState,
     ],
@@ -139,6 +140,7 @@ export function clearLocalData(): Promise<void> {
       db.wellbeing.clear(),
       db.rewards.clear(),
       db.profile.clear(),
+      db.garmin.clear(),
       db.outbox.clear(),
       db.syncState.clear(),
     ]);

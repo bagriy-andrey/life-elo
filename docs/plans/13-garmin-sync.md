@@ -84,11 +84,12 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   `supabase/functions/garmin-connect/index.ts`, `supabase/functions/garmin-pull/index.ts`,
   `supabase/functions/_shared/garmin.ts`, `supabase/config.toml` — verify: `npx supabase functions deploy`,
   manual curl with a user JWT returns rows; key never appears in responses or logs.
-- [ ] 6. Client data + i18n: Dexie table `garmin` (new db version), sync engine pulls `tbl='garmin'` into it and
+- [x] 6. Client data + i18n: Dexie table `garmin` (new db version), sync engine pulls `tbl='garmin'` into it and
   never queues it in the outbox, wipe/logout clear it; `src/garmin/api.ts` wraps the two functions
   (`connect`, `disconnect`, `pull` with 5 s timeout, 15 min throttle); all i18n keys for steps 7–8 —
   files: `src/db/db.ts`, `src/sync/engine.ts`, `src/sync/wipe.ts`, `src/garmin/api.ts`, `src/i18n/{ru,en,uk}.ts`
   — verify: `npm test` (engine test: garmin rows land in Dexie, are not pushed; wipe clears them).
+  Note: also touched `src/sync/outbox.ts` (clearLocalData/applyRemote include `garmin`); `api.pull` triggers sync via `requestSync()` exported from engine.ts (no App.tsx change); Dexie rows are `GarminDay & { day }`.
 - [ ] 7. Profile → Garmin section (paste key via `PasswordField`, lifetime `Select` 30/90/180/365 days default 365, status, expiry with warning < 7 days,
   «Отключить») and habit sheet «Источник: Garmin» (metric `Select` filtered by the habit rule; activity types
   multi-select for `activity`) — files: `src/ui/Profile.tsx`, `src/ui/Profile.test.tsx`, `src/ui/HabitSheet.tsx`,

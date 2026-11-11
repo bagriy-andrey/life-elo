@@ -77,7 +77,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   policies; `reset_records()` also deletes the caller's `garmin_credentials` row (garmin records are already
   tombstoned by it) — files: `supabase/migrations/20261111000000_garmin.sql` — verify:
   `npx supabase db push --remote`; a signed-in client cannot select `garmin_credentials`.
-- [ ] 5. Edge Functions (Deno, JWT required): `garmin-connect` (POST `{ key, lifetimeDays }` → validate via token exchange → upsert
+- [x] 5. Edge Functions (Deno, JWT required): `garmin-connect` (POST `{ key, lifetimeDays }` → validate via token exchange → upsert
   credentials, return expiry; DELETE → remove row), `garmin-pull` (POST `{ from, to }` ≤ 7 days → reuse cached
   token or exchange, fetch, `parse.ts`, upsert `records` rows `tbl='garmin'` under the user's advisory lock,
   update `last_pull_at`; 401 from Garmin → `{ status: 'key_invalid' }`) — files:

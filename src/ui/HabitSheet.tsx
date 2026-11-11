@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { db, newId } from '../db/db'
 import { dayOf } from '../domain/day'
@@ -16,6 +17,8 @@ import {
 } from '../domain/habitSetup'
 import { settingsOn } from '../domain/settings'
 import type { DayReview, Habit, HabitDirection, HabitVersion, ImpactTier } from '../domain/types'
+import { activityTypeKeys, buildSource, compatibleMetrics, humanizeType, NAMED_ACTIVITY_TYPES } from '../garmin/ui'
+import type { GarminMetric } from '../domain/types'
 import { useI18n } from '../i18n'
 import { BottomSheet, Button, ChipGroup, Field, SegmentedControl, Select, Stepper, TypeCards, WeekDots } from './components'
 import { ruleChoiceLabels, tierLabels, unitLabels } from './labels'
@@ -52,6 +55,14 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
   const [form, setForm] = useState<HabitForm>(current ? formOf(current) : EMPTY_FORM)
   const [error, setError] = useState<SetupError>()
   const [saving, setSaving] = useState(false)
+  const [metric, setMetric] = useState<GarminMetric | ''>(habit?.source?.metric ?? '')
+  const [activityTypes, setActivityTypes] = useState<string[]>(habit?.source?.activityTypes ?? [])
+  const seenTypes = useLiveQuery(
+    async () => [...new Set((await db.garmin.toArray()).flatMap((d) => (d.activities ?? []).map((a) => a.type)))],
+    [],
+  )
+  const metrics = compatibleMetrics(form.kind, direction)
+  const sourceMetric = metric && metrics.includes(metric) ? metric : ''
 
   const set = (patch: Partial<HabitForm>) => setForm((f) => ({ ...f, ...patch }))
   const range = weekRange(direction)
@@ -102,6 +113,7 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
     if (!weeklyGoal.ok) return setError(weeklyGoal.error)
     const reducerError = validateReducer(habit?.id, quota.value, habits, editing ? day : effectiveFrom)
     if (reducerError) return setError(reducerError)
+    const source = buildSource(sourceMetric, activityTypes, form.kind, direction)
     setSaving(true)
     try {
       if (habit) {
@@ -110,12 +122,13 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
           { tier, rule: rule.value, quota: quota.value, weeklyGoal: weeklyGoal.value },
           day,
         )
-        await db.habits.update(habit.id, { versions, name: name.trim(), direction: locked ? habit.direction : direction })
+        await db.habits.update(habit.id, { versions, name: name.trim(), direction: locked ? habit.direction : direction, source })
       } else {
         const version: HabitVersion = { from: effectiveFrom, tier, rule: rule.value }
         if (quota.value) version.quota = quota.value
         if (weeklyGoal.value) version.weeklyGoal = weeklyGoal.value
         await db.habits.add({
+          ...(source ? { source } : {}),
           id: newId(),
           name: name.trim(),
           direction,
@@ -323,6 +336,52 @@ export function HabitSheet({ habit, habits, reviews, effectiveFrom, onClose }: P
               </div>
             )}
           </div>
+          {metrics.length > 0 && (
+            <div className="habit-sheet-group">
+              <span className="habit-sheet-title">{t('garmin.source.label')}</span>
+              <Select
+                label={t('garmin.source.label')}
+                value={sourceMetric ? 'garmin' : 'none'}
+                onChange={(v) => setMetric(v === 'garmin' ? (metrics.includes(metric as GarminMetric) ? (metric as GarminMetric) : metrics[0]!) : '')}
+                options={[
+                  { value: 'none', label: t('garmin.source.none') },
+                  { value: 'garmin', label: t('garmin.source.garmin') },
+                ]}
+              />
+              {sourceMetric && metrics.length > 1 && (
+                <Select
+                  label={t('garmin.metric.label')}
+                  value={sourceMetric}
+                  onChange={setMetric}
+                  options={metrics.map((m) => ({ value: m, label: t(`garmin.metric.${m}`) }))}
+                />
+              )}
+              {sourceMetric === 'activity' && (
+                <>
+                  <span className="habit-sheet-title">{t('garmin.activityTypes')}</span>
+                  <div className="sheet-options" role="group" aria-label={t('garmin.activityTypes')}>
+                    {activityTypeKeys(seenTypes ?? [], activityTypes).map((k) => {
+                      const on = activityTypes.includes(k)
+                      const named = (NAMED_ACTIVITY_TYPES as readonly string[]).includes(k)
+                      return (
+                        <button
+                          key={k}
+                          type="button"
+                          className="sheet-option"
+                          aria-pressed={on}
+                          onClick={() => setActivityTypes((l) => (on ? l.filter((x) => x !== k) : [...l, k]))}
+                        >
+                          {named ? t(`garmin.type.${k as (typeof NAMED_ACTIVITY_TYPES)[number]}`) : humanizeType(k)}
+                          {on && <span className="sheet-check">✓</span>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <span className="habit-sheet-note">{t('garmin.activityTypesHint')}</span>
+                </>
+              )}
+            </div>
+          )}
           {otherError && <span className="field-error">{otherError}</span>}
         </div>
       </BottomSheet>

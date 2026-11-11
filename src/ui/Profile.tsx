@@ -1,6 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
+import { connect, disconnect, GARMIN_LIFETIMES, status as garminStatusCall } from '../garmin/api'
+import type { GarminLifetime, GarminStatus } from '../garmin/api'
+import { keyExpiry } from '../garmin/ui'
 import { saveProfile } from '../db/profile'
 import { addDays, reviewDay, toDayKey } from '../domain/day'
 import { ageOn, validateProfile } from '../domain/profile'
@@ -12,7 +15,7 @@ import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
 import { APP_VERSION } from '../appVersion'
-import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, SegmentedControl, Spinner } from './components'
+import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, PasswordField, SegmentedControl, Select, Spinner } from './components'
 import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
@@ -33,6 +36,8 @@ interface Props {
   version?: string
   /** Deletes all data (server + device); rejects if it could not. */
   onClearData: () => Promise<void>
+  /** Initial Garmin status (test seam); omitted = loaded from the server on mount. */
+  garminStatus?: GarminStatus
 }
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
@@ -280,6 +285,130 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
   )
 }
 
+function GarminSection({ initial }: { initial?: GarminStatus }) {
+  const { t, locale } = useI18n()
+  const [status, setStatus] = useState<GarminStatus | undefined>(initial)
+  const [key, setKey] = useState('')
+  const [visible, setVisible] = useState(false)
+  const [lifetime, setLifetime] = useState<GarminLifetime>(365)
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState<'connect' | 'invalid' | 'disconnect' | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [now] = useState(() => Date.now())
+  useEffect(() => {
+    if (initial) return
+    let live = true
+    void garminStatusCall().then((s) => live && setStatus(s))
+    return () => {
+      live = false
+    }
+  }, [initial])
+
+  const doConnect = async () => {
+    if (busy || !key.trim()) return
+    setBusy(true)
+    setFailed(null)
+    const r = await connect(key.trim(), lifetime)
+    setBusy(false)
+    if (r.kind === 'connected') {
+      setKey('')
+      setVisible(false)
+      setStatus({ kind: 'connected', keyExpiresAt: r.keyExpiresAt, lastPullAt: null })
+    } else setFailed(r.kind === 'key_invalid' ? 'invalid' : 'connect')
+  }
+  const doDisconnect = async () => {
+    if (busy) return
+    setBusy(true)
+    setFailed(null)
+    const r = await disconnect()
+    setBusy(false)
+    setConfirmOpen(false)
+    if (r === 'ok') setStatus({ kind: 'not_connected' })
+    else setFailed('disconnect')
+  }
+
+  const date = (iso: string) => new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+  let body: ReactNode
+  if (!status) {
+    body = <Spinner size={16} />
+  } else if (status.kind === 'error') {
+    body = <p className="muted">{t('garmin.error.status')}</p>
+  } else if (status.kind === 'connected') {
+    const expiry = keyExpiry(status.keyExpiresAt, now)
+    const expires = status.keyExpiresAt ? date(status.keyExpiresAt) : ''
+    const last = status.lastPullAt
+      ? t('garmin.lastSync', { time: new Date(status.lastPullAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) })
+      : t('garmin.neverSynced')
+    body = (
+      <>
+        {expiry === 'expired' ? (
+          <Notice tone="error">
+            <strong>{t('garmin.keyInvalid')}</strong> {t('garmin.keyInvalidHint')}
+          </Notice>
+        ) : (
+          <>
+            <strong>{t('garmin.connected')}</strong>
+            {expires && <span className="muted">{t('garmin.expiresOn', { date: expires })}</span>}
+            {expiry === 'soon' && <Notice tone="error">{t('garmin.expiresSoon', { date: expires })}</Notice>}
+          </>
+        )}
+        <span className="muted">{last}</span>
+        {failed === 'disconnect' && <Notice tone="error">{t('garmin.error.disconnect')}</Notice>}
+        <Button onClick={() => setConfirmOpen(true)} disabled={busy}>{t('garmin.disconnect')}</Button>
+        <Dialog open={confirmOpen} title={t('garmin.disconnect')} onClose={() => !busy && setConfirmOpen(false)}>
+          <div className="dialog-actions">
+            <Button variant="danger" className="clear-btn" onClick={doDisconnect} loading={busy}>
+              {t('garmin.disconnect')}
+            </Button>
+            <Button className="clear-btn" onClick={() => setConfirmOpen(false)} disabled={busy} autoFocus>
+              {t('common.cancel')}
+            </Button>
+          </div>
+        </Dialog>
+      </>
+    )
+  } else {
+    body = (
+      <>
+        <PasswordField
+          label={t('garmin.keyLabel')}
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          visible={visible}
+          onToggleVisible={() => setVisible((v) => !v)}
+          showLabel={t('password.show')}
+          hideLabel={t('password.hide')}
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+        />
+        <span className="muted">{t('garmin.keyHint')}</span>
+        <Select
+          label={t('garmin.lifetimeLabel')}
+          value={String(lifetime)}
+          onChange={(v) => setLifetime(Number(v) as GarminLifetime)}
+          options={GARMIN_LIFETIMES.map((d) => ({ value: String(d), label: t(`garmin.lifetime.${d}`) }))}
+        />
+        {failed === 'invalid' && <Notice tone="error">{t('garmin.keyInvalid')}</Notice>}
+        {failed === 'connect' && <Notice tone="error">{t('garmin.error.connect')}</Notice>}
+        <Button variant="primary" onClick={doConnect} loading={busy} disabled={!key.trim()}>
+          {busy ? t('garmin.connecting') : t('garmin.connect')}
+        </Button>
+      </>
+    )
+  }
+  return (
+    <section className="profile-section">
+      <h3 className="profile-section-title">{t('garmin.title')}</h3>
+      <Card className="stack">
+        <p className="muted">{t('garmin.intro')}</p>
+        {body}
+      </Card>
+    </section>
+  )
+}
+
 function Settings() {
   const { t, lang, setLang } = useI18n()
   const [sheet, setSheet] = useState(false)
@@ -330,7 +459,7 @@ function Settings() {
   )
 }
 
-export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData }: Props) {
+export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -381,6 +510,7 @@ export function Profile({ profile, rating, today, accountSection, accountActions
         <h3 className="profile-section-title">{t('account.title')}</h3>
         {accountSection}
       </section>
+      <GarminSection initial={garminStatus} />
       <Settings />
       <DataSection onClear={onClearData} version={version} />
       {accountActions}

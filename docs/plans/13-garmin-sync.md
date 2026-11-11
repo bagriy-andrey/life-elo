@@ -90,11 +90,12 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   files: `src/db/db.ts`, `src/sync/engine.ts`, `src/sync/wipe.ts`, `src/garmin/api.ts`, `src/i18n/{ru,en,uk}.ts`
   — verify: `npm test` (engine test: garmin rows land in Dexie, are not pushed; wipe clears them).
   Note: also touched `src/sync/outbox.ts` (clearLocalData/applyRemote include `garmin`); `api.pull` triggers sync via `requestSync()` exported from engine.ts (no App.tsx change); Dexie rows are `GarminDay & { day }`.
-- [ ] 7. Profile → Garmin section (paste key via `PasswordField`, lifetime `Select` 30/90/180/365 days default 365, status, expiry with warning < 7 days,
+- [x] 7. Profile → Garmin section (paste key via `PasswordField`, lifetime `Select` 30/90/180/365 days default 365, status, expiry with warning < 7 days,
   «Отключить») and habit sheet «Источник: Garmin» (metric `Select` filtered by the habit rule; activity types
   multi-select for `activity`) — files: `src/ui/Profile.tsx`, `src/ui/Profile.test.tsx`, `src/ui/HabitSheet.tsx`,
   `src/ui/HabitSheet.test.tsx` — verify: `renderToString` smoke tests; manual check at 375 px light/dark.
   Uses existing components only (no `[design-sync]`).
+  Note: pure helpers in `src/garmin/ui.ts` (+test); Notice has no warning tone, so the <7-day warning uses the error tone.
 - [ ] 8. Review prefill: on open, fire `pull(day, day+1)`; when the `garmin` Dexie rows arrive, merge
   `prefillFromGarmin` into `answers` for cards the user hasn't touched; card shows «из Garmin» hint —
   files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`, `src/ui/YesterdayReview.test.tsx`,

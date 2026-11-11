@@ -39,6 +39,29 @@ describe('HabitSheet smoke render', () => {
     expect(html).toContain('терпимо, позже')
   })
 
+  it('shows the Garmin source for a linked steps habit', () => {
+    const h: Habit = {
+      ...base({ rule: { kind: 'measured', unit: 'steps', better: 'higher', excellent: 10000 } as never }),
+      source: { kind: 'garmin', metric: 'steps' },
+    }
+    const html = render(h)
+    expect(html).toContain('Источник')
+    expect(html).toContain('Garmin')
+  })
+
+  it('shows activity types for a linked boolean habit', () => {
+    const h: Habit = { ...base(), source: { kind: 'garmin', metric: 'activity', activityTypes: ['yoga'] } }
+    const html = render(h)
+    expect(html).toContain('Виды активности')
+    expect(html).toContain('Йога')
+    expect(html).toContain('Силовая')
+  })
+
+  it('hides the source control when no metric is compatible', () => {
+    const h = base({ rule: { kind: 'measured', unit: 'count', better: 'lower', excellent: 1 } as never })
+    expect(render(h)).not.toContain('Источник')
+  })
+
   it('locked habit shows the direction note', () => {
     expect(render(base(), answered)).toContain('Направление нельзя поменять')
   })

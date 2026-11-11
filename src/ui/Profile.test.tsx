@@ -2,6 +2,7 @@ import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import type { Profile as ProfileData } from '../domain/profile'
 import type { DayKey } from '../domain/types'
+import type { GarminStatus } from '../garmin/api'
 import { I18nProvider } from '../i18n'
 import { Profile, ProfileEdit } from './Profile'
 
@@ -14,10 +15,10 @@ const profile = {
   createdAt: Date.UTC(2026, 0, 5),
 } as unknown as ProfileData
 
-const render = (p: ProfileData | null, rating = 12.3) =>
+const render = (p: ProfileData | null, rating = 12.3, garminStatus?: GarminStatus) =>
   renderToString(
     <I18nProvider>
-      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} />
+      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} garminStatus={garminStatus} />
     </I18nProvider>,
   )
 
@@ -66,6 +67,35 @@ describe('Profile smoke render', () => {
     } finally {
       delete (globalThis as { localStorage?: unknown }).localStorage
     }
+  })
+})
+
+describe('Profile Garmin section', () => {
+  it('not connected: key field, lifetime, connect', () => {
+    const html = render(profile, 1, { kind: 'not_connected' })
+    expect(html).toContain('Ключ Personal API')
+    expect(html).toContain('1 год')
+    expect(html).toContain('Подключить')
+    expect(html).not.toContain('Отключить')
+  })
+
+  it('connected: status, expiry, disconnect', () => {
+    const at = new Date(Date.now() + 100 * 86_400_000).toISOString()
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: null })
+    expect(html).toContain('Подключено')
+    expect(html).toContain('Ключ действует до')
+    expect(html).toContain('Синхронизации ещё не было')
+    expect(html).toContain('Отключить')
+    expect(html).not.toContain('скоро истечёт')
+  })
+
+  it('connected with an expired key shows the invalid state', () => {
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: '2020-01-01T00:00:00Z', lastPullAt: null })
+    expect(html).toContain('Ключ недействителен')
+  })
+
+  it('status error is neutral text', () => {
+    expect(render(profile, 1, { kind: 'error' })).toContain('Не удалось узнать статус Garmin')
   })
 })
 

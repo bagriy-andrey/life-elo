@@ -27,6 +27,9 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   - sport (yes/no) of day X → «yes» if any activity on X has a type from the habit's chosen list
     (types are picked per habit in the habit sheet); no matching activity → no prefill (not «no»).
 - WHEN data for a habit is missing (watch not synced, no sleep record) THE card SHALL stay unanswered.
+- Key expiry (user decision 2026-11-11, option 2): the API does not expose it, so WHEN connecting THE user SHALL
+  pick the key lifetime (30 / 90 / 180 days / 1 year, default 1 year); `key_expires_at = connect time + lifetime`;
+  the profile SHALL warn when < 7 days remain and show «Ключ недействителен» after a Garmin 401.
 - Garmin data never changes an already confirmed day; editing a past day uses the stored values as hints only.
 - «Удалить все данные» SHALL also delete the stored key and all Garmin records (other devices drop them on sync).
 - Rating/streaks still derived by replay; Garmin raw records sync like other records; no new tier/coefficient.
@@ -71,7 +74,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   policies; `reset_records()` also deletes the caller's `garmin_credentials` row (garmin records are already
   tombstoned by it) — files: `supabase/migrations/20261111000000_garmin.sql` — verify:
   `npx supabase db push --remote`; a signed-in client cannot select `garmin_credentials`.
-- [ ] 5. Edge Functions (Deno, JWT required): `garmin-connect` (POST key → validate via token exchange → upsert
+- [ ] 5. Edge Functions (Deno, JWT required): `garmin-connect` (POST `{ key, lifetimeDays }` → validate via token exchange → upsert
   credentials, return expiry; DELETE → remove row), `garmin-pull` (POST `{ from, to }` ≤ 7 days → reuse cached
   token or exchange, fetch, `parse.ts`, upsert `records` rows `tbl='garmin'` under the user's advisory lock,
   update `last_pull_at`; 401 from Garmin → `{ status: 'key_invalid' }`) — files:
@@ -83,7 +86,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   (`connect`, `disconnect`, `pull` with 5 s timeout, 15 min throttle); all i18n keys for steps 7–8 —
   files: `src/db/db.ts`, `src/sync/engine.ts`, `src/sync/wipe.ts`, `src/garmin/api.ts`, `src/i18n/{ru,en,uk}.ts`
   — verify: `npm test` (engine test: garmin rows land in Dexie, are not pushed; wipe clears them).
-- [ ] 7. Profile → Garmin section (paste key via `PasswordField`, status, expiry with warning < 7 days,
+- [ ] 7. Profile → Garmin section (paste key via `PasswordField`, lifetime `Select` 30/90/180/365 days default 365, status, expiry with warning < 7 days,
   «Отключить») and habit sheet «Источник: Garmin» (metric `Select` filtered by the habit rule; activity types
   multi-select for `activity`) — files: `src/ui/Profile.tsx`, `src/ui/Profile.test.tsx`, `src/ui/HabitSheet.tsx`,
   `src/ui/HabitSheet.test.tsx` — verify: `renderToString` smoke tests; manual check at 375 px light/dark.

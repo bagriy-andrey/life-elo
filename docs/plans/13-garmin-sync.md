@@ -69,7 +69,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   mapping above (bedtime reads `day+1`, wake reads `day`), only for linked + compatible habits —
   files: `src/domain/garminPrefill.ts`, `src/domain/garminPrefill.test.ts` — verify: `npm test`
   (each metric, missing data → absent, type filter, incompatible rule ignored).
-- [ ] 4. Migration: `records.tbl` check adds `'garmin'`; table `garmin_credentials(user_id pk → auth.users
+- [x] 4. Migration: `records.tbl` check adds `'garmin'`; table `garmin_credentials(user_id pk → auth.users
   on delete cascade, api_key text, key_expires_at, token text, token_expires_at, last_pull_at)` with RLS and no
   policies; `reset_records()` also deletes the caller's `garmin_credentials` row (garmin records are already
   tombstoned by it) — files: `supabase/migrations/20261111000000_garmin.sql` — verify:

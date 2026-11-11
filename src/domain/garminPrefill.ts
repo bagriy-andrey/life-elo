@@ -1,4 +1,5 @@
 import { addDays } from './day'
+import { isApplicable } from './reviewFlow'
 import { settingsOn } from './settings'
 import type { DayKey, GarminDay, Habit, HabitEntry } from './types'
 
@@ -42,7 +43,7 @@ export function prefillFromGarmin(
 ): Record<string, HabitEntry> {
   const out: Record<string, HabitEntry> = {}
   for (const habit of habits) {
-    if (!habit.active) continue
+    if (!isApplicable(habit, day)) continue
     const entry = entryFor(habit, day, garminByDay)
     if (entry) out[habit.id] = entry
   }

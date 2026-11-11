@@ -38,6 +38,10 @@ describe('prefillFromGarmin', () => {
       sport: { kind: 'value', value: true },
     })
   })
+  it('skips habits before their effectiveFrom', () => {
+    const late = habit('steps', 'steps', measured('steps'), { effectiveFrom: '2026-11-11' })
+    expect(prefillFromGarmin([late], '2026-11-10', g)).toEqual({})
+  })
   it('leaves missing data absent', () => {
     expect(prefillFromGarmin(habits, '2026-11-11', g)).toEqual({
       wake: { kind: 'value', value: '06:00' },

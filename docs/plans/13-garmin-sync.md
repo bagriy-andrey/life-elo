@@ -101,7 +101,8 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`, `src/ui/YesterdayReview.test.tsx`,
   `src/App.tsx` — verify: smoke test with prefilled answers; manual: offline review still works.
   Note: SwipeCard (components untouched) has no preselect state, so boolean cards show a «из Garmin: <answer>» line and the user still swipes; App.tsx unchanged.
-- [ ] 9. Docs + version: `docs/setup/backend.md` (deploy functions, `SUPABASE_SERVICE_ROLE_KEY` is provided to
+- [x] 9. Docs + version: `docs/setup/backend.md` (deploy functions, `SUPABASE_SERVICE_ROLE_KEY` is provided to
   functions by Supabase), AGENTS.md «Stack»/«Layout» lines for `supabase/functions/` and `src/garmin/`,
   `chore: version 0.13.0` — files: `docs/setup/backend.md`, `AGENTS.md`, `package.json` — verify:
   `npm test`, `npm run lint`, `npm run build`.
+  (Note: version bump done separately by build-plan.)

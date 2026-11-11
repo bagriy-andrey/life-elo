@@ -5,7 +5,7 @@ Product source of truth: `LIFE_ELO_PRODUCT_CONTEXT.md` — read it before produc
 
 ## Stack
 Vite + React + TypeScript PWA (`vite-plugin-pwa`). Dexie (IndexedDB) is the app's read model and works offline;
-Supabase (Auth + Postgres/RLS, no custom server) provides accounts and sync; hosting on Vercel. Setup: `docs/setup/backend.md`.
+Supabase (Auth + Postgres/RLS; Edge Functions only for Garmin) provides accounts and sync; hosting on Vercel. Setup: `docs/setup/backend.md`.
 Target: installed on iPhone via Safari → "Add to Home Screen". UI language: ru/en/uk via `src/i18n` (ru is the key source of truth).
 
 Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run build`.
@@ -16,7 +16,8 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - `src/db/` — Dexie schema. Rating/streaks are never stored; they are derived by replaying confirmed reviews.
 - `src/auth/` — Supabase client, `AuthProvider`, `context.ts` (`useAuth`), validation, error texts.
 - `src/sync/` — outbox, merge rules, remote calls, sync engine (raw records only: reviews, wellbeing, profile, tombstones).
-- `supabase/` — SQL migrations and email templates (the whole backend).
+- `src/garmin/` — Garmin parser (`parse.ts`, also used by the function), api wrapper, UI helpers.
+- `supabase/` — SQL migrations, email templates, `functions/` (`garmin-connect`, `garmin-pull`, `_shared/`).
 - `src/ui/` — screens; `YesterdayReview.tsx` is the mandatory next-morning review modal (mounted from `App.tsx`).
 
 ## Rules that must hold
@@ -29,6 +30,7 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
   data and pulls; local data is never uploaded into an account).
 - Profile is synced between devices; language and theme are per device (localStorage, not synced).
 - «Удалить все данные» wipes the account everywhere: server tombstones, other devices clear on their next sync.
+- Garmin data only prefills the review; it never confirms a day or changes Elo directly.
 - Reward Coins (future) are separate from Elo; spending never lowers Elo.
 - `RULESET_V1` numbers are agreed (product context §6.5); tuning goes through a new ruleset version. Ask the user before choosing any coefficient not in §6.5.
 
@@ -40,6 +42,7 @@ Short, durable, non-obvious lessons. Compress or replace entries; keep this sect
   Text inputs go through `Field` (global input styles live in `src/index.css`).
 - Unit tests don't render JSX: add a `renderToString` smoke test per new/changed screen (see `src/ui/Profile.test.tsx`).
 - Supabase CLI: `npx supabase db push --remote` (without `--remote` it targets a local Docker DB and fails).
+  Hosted mutations (`db push`, `functions deploy`) need the user's own `--yes`: agents stop and hand the command over.
 - Age/birth use the calendar date `toDayKey(new Date())` (`dayOf` is now the same calendar day; the 04:00 wrap lives only in `timeToMinutes`).
 
 ## Workflow: plan → build → verify

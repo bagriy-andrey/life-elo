@@ -227,7 +227,7 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
     const initial = prev?.kind === 'value' && typeof prev.value !== 'boolean' ? prev.value : undefined
     return (
       <YesterdayNumeric
-        key={`${c.habitId}${fromGarmin.has(c.habitId) ? ':garmin' : ''}`}
+        key={c.habitId}
         unit={unit}
         title={h.name}
         typeLabel={t(unit === 'time' ? 'yr.type.time' : 'yr.type.numeric')}

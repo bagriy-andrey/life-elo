@@ -23,6 +23,17 @@ interface Props {
 export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initial, hint, onConfirm, onNotApplicable }: Props) {
   const { t, locale } = useI18n()
   const [draft, setDraft] = useState(initial === undefined ? '' : String(initial))
+  // Late Garmin value: adopt a changed `initial` only while the user hasn't typed.
+  const [dirty, setDirty] = useState(false)
+  const [seen, setSeen] = useState(initial)
+  if (seen !== initial) {
+    setSeen(initial)
+    if (!dirty) setDraft(initial === undefined ? '' : String(initial))
+  }
+  const edit = (v: string) => {
+    setDirty(true)
+    setDraft(v)
+  }
   const isTime = unit === 'time'
   const parsed = isTime ? parseTime(draft) : parseNumeric(draft, unit)
   const errorKey = (e: ParseError) => (e === 'invalid' && isTime ? 'yr.err.time' : (`yr.err.${e}` as const))
@@ -34,7 +45,7 @@ export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initi
   const step = (dir: 1 | -1) => {
     if (isTime) return
     const base = parsed.ok ? (parsed.value as number) : 0
-    setDraft(String(Math.max(0, base + dir * stepFor(unit))))
+    edit(String(Math.max(0, base + dir * stepFor(unit))))
   }
 
   const submit = (e: FormEvent) => {
@@ -62,7 +73,7 @@ export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initi
                 className="yr-num-input"
                 type="time"
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(e) => edit(e.target.value)}
               />
             </Field>
           ) : (
@@ -76,7 +87,7 @@ export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initi
                     inputMode="numeric"
                     placeholder="0"
                     value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
+                    onChange={(e) => edit(e.target.value)}
                   />
                 </Field>
                 <button type="button" className="yr-step" aria-label={t('yr.num.more')} onClick={() => step(1)}>+</button>

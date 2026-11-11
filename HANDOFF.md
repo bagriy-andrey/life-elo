@@ -9,6 +9,4 @@ Key lives only in .env.local (GARMIN_PERSONAL_API_KEY, gitignored) — never pri
 /build-plan docs/plans/13-garmin-sync.md (step 2: pure parser).
 ## Broken / open questions
 - User: review spike findings (step 1 verify criterion).
-- User decision before step 7: Garmin API does not expose the Personal API key expiry —
-  drop «expiry + warning < 7 days» (show «Подключено» + «ключ недействителен» on 401) or let the user enter the lifetime.
 - Lint: 3 pre-existing react-refresh warnings.

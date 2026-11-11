@@ -52,6 +52,9 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   metric per rule: `steps` ↔ measured `steps`; `bedtime`/`wake` ↔ measured `time`; `activity` ↔ `boolean`
   constructive. The engine ignores `source`.
 - **Times** are formatted `HH:MM` and fed through the existing `classifyZone`/`timeToMinutes` (04:00 wrap).
+- **Rollout order:** garmin rows are written with record schema 5 = Dexie v5 (step 6). A client on v4 stops pulling
+  («update-app») once such a row exists, so Garmin must not be connected until the v5 build is merged, deployed
+  and opened on every device (step 9 docs say so).
 - i18n: all new keys (ru source + en + uk) in step 6, so later steps don't touch `src/i18n/*`.
 
 ## Steps

@@ -309,4 +309,27 @@ describe('sync engine', () => {
     expect(await db.habits.count()).toBe(0)
     expect((await getSyncState()).cursor).toBe(0)
   })
+
+  it('pulls garmin rows into Dexie, never queues or pushes them, tombstone deletes', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    const rec = (key: string, deleted = false): RemoteRecord => ({
+      tbl: 'garmin',
+      key,
+      data: deleted ? null : { steps: 1234, activities: [] },
+      deleted,
+      schema: 5,
+      client_updated_at: new Date(1000).toISOString(),
+      rev: ++remote.rev,
+    })
+    remote.rows.set('garmin/2026-11-10', rec('2026-11-10'))
+    await e.run()
+    expect(await db.garmin.get('2026-11-10')).toEqual({ day: '2026-11-10', steps: 1234, activities: [] })
+    expect(await db.outbox.count()).toBe(0)
+    expect(remote.pushes).toBe(0)
+    remote.rows.set('garmin/2026-11-10', rec('2026-11-10', true))
+    await e.run()
+    expect(await db.garmin.count()).toBe(0)
+    expect(remote.pushes).toBe(0)
+  })
 })

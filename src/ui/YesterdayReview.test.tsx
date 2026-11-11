@@ -16,7 +16,7 @@ const habit = (id: string, name: string, createdAt: number, extra: Partial<Habit
 const render = (
   rating: number,
   habits: Habit[],
-  initialState?: { answers?: Record<string, HabitEntry>; screen?: 'cards' | 'summary' | 'done'; index?: number },
+  initialState?: { answers?: Record<string, HabitEntry>; screen?: 'cards' | 'summary' | 'done'; index?: number; fromGarmin?: string[] },
 ) =>
   renderToString(
     <I18nProvider>
@@ -125,5 +125,22 @@ describe('YesterdayReview stage B, summary, done', () => {
     expect(html).toContain('+1.5')
     expect(html).toContain('Зарядка: 3 дня подряд')
     expect(html).toContain('Продолжить')
+  })
+})
+
+describe('YesterdayReview Garmin prefill', () => {
+  const steps = measured('s', 'Шаги', 1, 'steps', 8000, 'higher')
+  const run = habit('r', 'Бег', 2)
+  it('numeric card shows prefilled value and the Garmin hint', () => {
+    const html = render(0, [steps], { answers: { s: { kind: 'value', value: 9123 } }, fromGarmin: ['s'] })
+    expect(html).toContain('9123')
+    expect(html).toContain('из Garmin')
+  })
+  it('boolean card shows the Garmin hint', () => {
+    const html = render(0, [run], { answers: { r: { kind: 'value', value: true } }, fromGarmin: ['r'] })
+    expect(html).toContain('из Garmin')
+  })
+  it('no hint without Garmin answers', () => {
+    expect(render(0, [steps], { answers: { s: { kind: 'value', value: 9123 } } })).not.toContain('из Garmin')
   })
 })

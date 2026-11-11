@@ -174,6 +174,25 @@
 - [ ] «Удалить все данные» на A: после синхронизации данные исчезают и на B, и не возвращаются с сервера.
 - [ ] Установка на iPhone: Safari, Поделиться, На экран «Домой».
 
+## 10. Garmin (Edge Functions)
+
+Единственный серверный код в проекте: функции `garmin-connect` и `garmin-pull` в `supabase/functions/`
+(общий код в `_shared/garmin.ts`; `garmin-pull` импортирует `src/garmin/parse.ts`, CLI загружает его вместе с функцией).
+
+- Миграции: `20261111000000_garmin.sql` и `20261111010000_garmin_vault.sql` (применяются как в разделе 7, `npx supabase db push --remote`).
+- **Vault.** Ключ и токен Garmin хранятся зашифрованными в Supabase Vault; в `garmin_credentials` только id секретов.
+  Доступ только через RPC `garmin_*` (security definer, только `service_role`) из Edge Functions; секреты не логируются.
+  Отключение и «Удалить все данные» удаляют и секреты Vault.
+- Деплой: `npx supabase functions deploy garmin-connect garmin-pull`. В прогонах агентов CLI требует
+  собственный `--yes` пользователя: агент останавливается и передаёт команду.
+- Переменные окружения Supabase выдаёт сам (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `SUPABASE_DB_URL`). Дополнительных секретов не нужно.
+- Как подключить: Garmin Connect, Personal API key, затем Профиль, Garmin, вставить ключ и выбрать срок хранения.
+- **Порядок выката.** Записи Garmin имеют схему записей 5 = Dexie v5. Подключайте Garmin только после того, как
+  сборка с v5 задеплоена и открыта на каждом устройстве: старые клиенты перестают подтягивать данные
+  («update-app»).
+- `.env.local` с `GARMIN_PERSONAL_API_KEY` нужен только для локальных проверок, в git не попадает.
+
 ## Заметки
 
 - Связывание аккаунтов Google и почта+пароль с одним адресом: проверено 2026-11-06 — аккаунт, созданный по почте

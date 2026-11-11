@@ -1,0 +1,35 @@
+{
+  "_note": "Per-date responses of GET /sleep-service/sleep/dailySleep?date=D, trimmed to parser-relevant fields; stages/scores/ids removed.",
+  "responses": {
+    "2026-11-09": {
+      "calendarDate": "2026-11-09",
+      "sleepTimeSeconds": 29880,
+      "napTimeSeconds": 0,
+      "sleepWindowConfirmed": true,
+      "sleepStartTimestampGMT": 1794183400000,
+      "sleepEndTimestampGMT": 1794213400000,
+      "sleepStartTimestampLocal": 1794187000000,
+      "sleepEndTimestampLocal": 1794217000000
+    },
+    "2026-11-10": {
+      "calendarDate": "2026-11-10",
+      "sleepTimeSeconds": 30660,
+      "napTimeSeconds": 0,
+      "sleepWindowConfirmed": true,
+      "sleepStartTimestampGMT": 1794263947000,
+      "sleepEndTimestampGMT": 1794295147000,
+      "sleepStartTimestampLocal": 1794267547000,
+      "sleepEndTimestampLocal": 1794298747000
+    },
+    "2026-11-11": {
+      "calendarDate": "2026-11-11",
+      "sleepTimeSeconds": 33660,
+      "napTimeSeconds": 0,
+      "sleepWindowConfirmed": true,
+      "sleepStartTimestampGMT": 1794348174000,
+      "sleepEndTimestampGMT": 1794382074000,
+      "sleepStartTimestampLocal": 1794351774000,
+      "sleepEndTimestampLocal": 1794385674000
+    }
+  }
+}

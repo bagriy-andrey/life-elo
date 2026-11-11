@@ -1,19 +1,17 @@
 # Handoff
-Updated: 2026-11-09 by Claude Code
-Branch: habit-page (from main). Plan: docs/plans/12-habit-page.md — done, v0.12.6 (fix rounds: delete dialog row, «Деструктивная», heatmap without
-scroll, charts per habit type, last-7-days bars — see spec «Revision 2026-11-10»). Spec: docs/specs/12-habit-page.md.
-Built: habit page `/habits/:id` (stats, chart by type, 12-month heatmap, weekday bars), ⋮ `Menu` on list cards
-and page, delete dialog, sheet without Пауза/Удалить + «Терпимо до» (= `rule.tolerable`; +30 min default is display-only).
-Steps were built by parallel implementers in worktrees, merged here; verifier PASS on the whole plan.
+Updated: 2026-11-11 by Claude Code
+Branch: garmin-sync (from main)
+Plan: docs/plans/13-garmin-sync.md — done, v0.13.0 (all 9 steps verifier PASS). Spec: docs/specs/13-garmin.md.
+Built: Garmin Personal API → Edge Functions garmin-connect/garmin-pull (deployed, migration applied to LifeElo),
+Dexie v5 `garmin` table (pull-only), Профиль → Garmin (key + lifetime), habit «Источник», review prefill «из Garmin».
 ## In progress
 Nothing uncommitted.
 ## Next step (user)
-1. Manual check in `npm run dev` at 375px, light/dark: list → page for daily yes/no (both directions), minutes,
-   time with tolerable, weekly yes/no; ⋮ menu (flip above near the bottom), pause badge, delete from page.
-2. design-sync done (2026-11-10): 27 components incl. Menu.
-3. PR for `habit-page` is open: review, merge, deploy.
+1. Manual check in `npm run dev` at 375px light/dark: Profile Garmin section, habit sheet source + activity types,
+   review prefill (steps/time inputs, sport hint line; late rows fill only untouched inputs; offline review).
+2. Rollout order: open PR → merge → Vercel deploy → open the app on EVERY device (Dexie v5) → only then paste the key
+   (schema-5 garmin rows make v4 clients stop pulling, «update-app»). Then live check: review shows Garmin values.
+3. Run `/design-sync` (pending from earlier TabBar work, not plan 13).
 ## Broken / open questions
-- Minor (verifier): `placeMenu` export in `Menu.tsx` gives an oxlint fast-refresh warning; HabitCard is
-  `role=button` with a nested ⋮ button (a11y); «Назад» pushes `/habits` instead of history.back.
-- Carried over: SegmentedControl track not pill-in-tray; destructive weekly quota after overrun (v1 rule);
-  email-change link opens in Safari; Resend sender limits; Google sign-in in iOS PWA unverified.
+- UI to eyeball: expiry warning uses error tone (Notice has no warning tone); sport card shows a text hint only (SwipeCard has no preselect).
+- Lint: 3 pre-existing react-refresh warnings. Carried over from HANDOFF 12: Menu a11y, SegmentedControl track, Google sign-in in iOS PWA.

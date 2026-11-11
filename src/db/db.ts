@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie'
 import type { Profile } from '../domain/profile'
 import type {
   DayReview,
+  GarminDay,
   Habit,
   HabitEntry,
   HabitEvent,
@@ -11,6 +12,9 @@ import type {
 import { installOutbox, type OutboxEntry, type SyncState } from '../sync/outbox'
 import { buildReview } from './confirm'
 import { migrateHabit, migrateReview, type LegacyHabit, type LegacyReview } from './migrate'
+
+/** Garmin day as cached in Dexie: the server record's key (calendar date) is stored as `day`. */
+export type GarminRow = GarminDay & { day: string }
 
 /**
  * Local-only storage (IndexedDB) on the device.
@@ -24,6 +28,7 @@ export const db = new Dexie('life-elo') as Dexie & {
   wellbeing: EntityTable<WellbeingCheckIn, 'day'>
   rewards: EntityTable<Reward, 'id'>
   profile: EntityTable<Profile, 'id'>
+  garmin: EntityTable<GarminRow, 'day'>
   outbox: EntityTable<OutboxEntry, 'tbl'>
   syncState: EntityTable<SyncState, 'id'>
 }
@@ -54,6 +59,10 @@ db.version(3).stores({ profile: 'id' })
 // v4: sync outbox (pending changes) and sync state; filled by the DBCore middleware in src/sync/outbox.ts.
 db.version(4).stores({ outbox: '[tbl+key]', syncState: 'id' })
 installOutbox(db)
+
+// v5: Garmin cache (server-written raw records, pull-only: not in SYNCED_TABLES, never queued).
+// Must equal RECORD_SCHEMA in supabase/functions/garmin-pull.
+db.version(5).stores({ garmin: 'day' })
 
 export const newId = () => crypto.randomUUID()
 

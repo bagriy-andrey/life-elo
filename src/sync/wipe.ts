@@ -31,6 +31,7 @@ export async function wipeAccountData({ engine, remote }: WipeDeps): Promise<voi
         db.wellbeing.clear(),
         db.rewards.clear(),
         db.profile.clear(),
+        db.garmin.clear(),
         db.outbox.clear(),
       ])
       await setSyncState({ cursor: 0 })

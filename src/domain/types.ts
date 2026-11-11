@@ -57,7 +57,28 @@ export interface Habit {
   active: boolean
   /** First day the habit is tracked. */
   effectiveFrom: DayKey
+  /** Optional input link (prefill only); the engine ignores it. */
+  source?: HabitSource
   createdAt: number
+}
+
+export type GarminMetric = 'steps' | 'bedtime' | 'wake' | 'activity'
+
+/** Where a habit's review answer can be prefilled from. Not scoring. */
+export interface HabitSource {
+  kind: 'garmin'
+  metric: GarminMetric
+  /** Garmin activity type keys (metric `activity`). */
+  activityTypes?: string[]
+}
+
+/** Garmin data for one calendar date (watch-local times). Raw record, synced from the server. */
+export interface GarminDay {
+  steps?: number
+  /** Local `HH:MM` of the sleep that ends on this date. */
+  sleepStart?: string
+  sleepEnd?: string
+  activities: { type: string; minutes: number }[]
 }
 
 /** A provisional log entry made during the day. Only confirmed reviews drive rating. */

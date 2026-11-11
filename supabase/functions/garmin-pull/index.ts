@@ -31,13 +31,15 @@ Deno.serve(async (req) => {
     if (span < 0 || span > 7) return json({ error: 'bad_range' }, 400)
 
     const admin = adminClient()
-    const { data: cred, error: credErr } = await admin
-      .from('garmin_credentials')
-      .select('api_key, token, token_expires_at')
-      .eq('user_id', userId)
-      .maybeSingle()
+    const { data: rows0, error: credErr } = await admin.rpc('garmin_get_secrets', { p_user: userId })
     if (credErr) throw credErr
-    if (!cred) return json({ status: 'not_connected' })
+    const cred = (Array.isArray(rows0) ? rows0[0] : rows0) as {
+      api_key: string | null
+      token: string | null
+      token_expires_at: string | null
+    } | null
+    if (!cred || !cred.api_key) return json({ status: 'not_connected' })
+    const apiKey = cred.api_key
 
     let token: string | null =
       cred.token && cred.token_expires_at && Date.parse(cred.token_expires_at) - Date.now() > 3600_000
@@ -45,11 +47,13 @@ Deno.serve(async (req) => {
         : null
 
     const refresh = async (): Promise<string> => {
-      const ex = await exchangeKey(cred.api_key)
-      await admin
-        .from('garmin_credentials')
-        .update({ token: ex.token, token_expires_at: ex.expiresAt })
-        .eq('user_id', userId)
+      const ex = await exchangeKey(apiKey)
+      const { error: saveErr } = await admin.rpc('garmin_save_token', {
+        p_user: userId,
+        p_token: ex.token,
+        p_token_expires_at: ex.expiresAt,
+      })
+      if (saveErr) throw saveErr
       return ex.token
     }
 

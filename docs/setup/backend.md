@@ -179,7 +179,10 @@
 Единственный серверный код в проекте: функции `garmin-connect` и `garmin-pull` в `supabase/functions/`
 (общий код в `_shared/garmin.ts`; `garmin-pull` импортирует `src/garmin/parse.ts`, CLI загружает его вместе с функцией).
 
-- Миграция: `20261111000000_garmin.sql` (применяется как в разделе 7, `npx supabase db push --remote`).
+- Миграции: `20261111000000_garmin.sql` и `20261111010000_garmin_vault.sql` (применяются как в разделе 7, `npx supabase db push --remote`).
+- **Vault.** Ключ и токен Garmin хранятся зашифрованными в Supabase Vault; в `garmin_credentials` только id секретов.
+  Доступ только через RPC `garmin_*` (security definer, только `service_role`) из Edge Functions; секреты не логируются.
+  Отключение и «Удалить все данные» удаляют и секреты Vault.
 - Деплой: `npx supabase functions deploy garmin-connect garmin-pull`. В прогонах агентов CLI требует
   собственный `--yes` пользователя: агент останавливается и передаёт команду.
 - Переменные окружения Supabase выдаёт сам (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,

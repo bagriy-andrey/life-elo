@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     }
 
     if (req.method === 'DELETE') {
-      const { error } = await db.from('garmin_credentials').delete().eq('user_id', userId)
+      const { error } = await db.rpc('garmin_delete', { p_user: userId })
       if (error) throw error
       return json({ status: 'disconnected' })
     }
@@ -42,12 +42,12 @@ Deno.serve(async (req) => {
         throw e
       }
       const keyExpiresAt = new Date(Date.now() + lifetimeDays * 86400000).toISOString()
-      const { error } = await db.from('garmin_credentials').upsert({
-        user_id: userId,
-        api_key: key,
-        key_expires_at: keyExpiresAt,
-        token: exchanged.token,
-        token_expires_at: exchanged.expiresAt,
+      const { error } = await db.rpc('garmin_save_key', {
+        p_user: userId,
+        p_key: key,
+        p_key_expires_at: keyExpiresAt,
+        p_token: exchanged.token,
+        p_token_expires_at: exchanged.expiresAt,
       })
       if (error) throw error
       return json({ status: 'connected', keyExpiresAt })

@@ -65,7 +65,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   type keys — files: `src/garmin/parse.ts`, `src/garmin/parse.test.ts`, `src/domain/types.ts` (`GarminDay`,
   `HabitSource`) — verify: `npm test` on fixtures (missing sleep, no activities, sleep crossing midnight).
   `parse.ts` has no Deno/Node-only imports (it is reused by the Edge Function).
-- [ ] 3. Pure prefill: `prefillFromGarmin(habits, day, garminByDay) → Record<habitId, HabitEntry>` with the
+- [x] 3. Pure prefill: `prefillFromGarmin(habits, day, garminByDay) → Record<habitId, HabitEntry>` with the
   mapping above (bedtime reads `day+1`, wake reads `day`), only for linked + compatible habits —
   files: `src/domain/garminPrefill.ts`, `src/domain/garminPrefill.test.ts` — verify: `npm test`
   (each metric, missing data → absent, type filter, incompatible rule ignored).

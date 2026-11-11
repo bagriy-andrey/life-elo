@@ -52,7 +52,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
 - i18n: all new keys (ru source + en + uk) in step 6, so later steps don't touch `src/i18n/*`.
 
 ## Steps
-- [ ] 1. Spike with the user's key (user-assisted): exchange key → token at
+- [x] 1. Spike with the user's key (user-assisted): exchange key → token at
   `https://personal.connectapi.garmin.com/personalapitoken-service/personal-api/personal-api-key/token`
   (`Authorization: ApiKey <key>`), confirm base URL and the endpoints for daily steps/summary, daily sleep and
   activity list (Swagger), rate limits if any. Save anonymised responses as fixtures and write the findings

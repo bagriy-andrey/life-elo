@@ -61,7 +61,7 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   activity list (Swagger), rate limits if any. Save anonymised responses as fixtures and write the findings
   (URLs, params, field names, time zones of sleep timestamps) — files: `docs/specs/13-garmin.md`,
   `src/garmin/fixtures/{token,steps,sleep,activities}.json` — verify: findings reviewed by the user; key not committed.
-- [ ] 2. Pure parser: Garmin responses → `GarminDay` per calendar date; activity types normalised to Garmin
+- [x] 2. Pure parser: Garmin responses → `GarminDay` per calendar date; activity types normalised to Garmin
   type keys — files: `src/garmin/parse.ts`, `src/garmin/parse.test.ts`, `src/domain/types.ts` (`GarminDay`,
   `HabitSource`) — verify: `npm test` on fixtures (missing sleep, no activities, sleep crossing midnight).
   `parse.ts` has no Deno/Node-only imports (it is reused by the Edge Function).

@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { confirmDay } from '../db/db'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { AuthContext } from '../auth/context'
+import { pull as pullGarmin } from '../garmin/api'
+import { mergeGarminPrefill, prefillFromGarmin } from '../domain/garminPrefill'
+import { confirmDay, db } from '../db/db'
 import { buildReview, DayLockedError } from '../db/confirm'
 import { addDays } from '../domain/day'
 import {
@@ -13,7 +17,7 @@ import {
 import { deadlineShowsRating, timeLeft } from '../domain/reviewDeadline'
 import { reviewOutcome, type ReviewOutcome } from '../domain/reviewOutcome'
 import { settingsOn } from '../domain/settings'
-import type { DayKey, DayReview, Habit, HabitEntry } from '../domain/types'
+import type { DayKey, DayReview, GarminDay, Habit, HabitEntry } from '../domain/types'
 import { RULESET_V2 } from '../engine/config'
 import { quotaZone, weeklyQuotaUsage } from '../engine/quota'
 import { replay } from '../engine/rating'
@@ -37,7 +41,7 @@ interface Props {
   /** True while this modal's own save is in flight/done; false if it failed. Lets the parent tell our review from a remote one. */
   onSaving?: (active: boolean) => void
   /** Preview/test seam: start from given answers/screen (e.g. the summary). */
-  initialState?: { answers?: Record<string, HabitEntry>; screen?: Screen; index?: number }
+  initialState?: { answers?: Record<string, HabitEntry>; screen?: Screen; index?: number; fromGarmin?: string[] }
 }
 
 type Screen = 'cards' | 'summary' | 'done'
@@ -78,6 +82,36 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<'closed' | 'save' | null>(null)
   const [outcome, setOutcome] = useState<ReviewOutcome | null>(null)
+  // Habits whose current answer came from Garmin; `touched` = answered by the user (never overwritten).
+  const [fromGarmin, setFromGarmin] = useState<Set<string>>(() => new Set(initialState?.fromGarmin))
+  const touched = useRef<Set<string>>(
+    new Set(Object.keys(initialState?.answers ?? {}).filter((id) => !initialState?.fromGarmin?.includes(id))),
+  )
+  const signedIn = !!useContext(AuthContext)?.session
+  const confirmedDay = reviews.some((r) => r.day === day)
+  const prefillOn = signedIn && !confirmedDay && screen !== 'done'
+
+  useEffect(() => {
+    if (signedIn && !confirmedDay) void pullGarmin(day, addDays(day, 1))
+    // Once per opened day; the api never throws and handles not_connected/offline.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day, signedIn])
+
+  const garminRows = useLiveQuery(
+    async () => (await db.garmin.bulkGet([day, addDays(day, 1)])).filter((r) => r !== undefined),
+    [day],
+  )
+  useEffect(() => {
+    if (!prefillOn || !garminRows?.length) return
+    const byDay: Record<string, GarminDay> = {}
+    for (const r of garminRows) byDay[r.day] = r
+    const prefill = prefillFromGarmin(habits, day, byDay)
+    setAnswers((prev) => {
+      const m = mergeGarminPrefill(prefill, cards.map((c) => c.habitId), prev, touched.current)
+      if (m.applied.length) setFromGarmin((f) => new Set([...f, ...m.applied]))
+      return m.applied.length ? m.answers : prev
+    })
+  }, [garminRows, habits, day, cards, prefillOn])
 
   const left = timeLeft(now)
   const deadline =
@@ -90,6 +124,13 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
   const habit = card && habits.find((h) => h.id === card.habitId)
 
   const answer = (c: ReviewCard, entry: HabitEntry) => {
+    touched.current.add(c.habitId)
+    setFromGarmin((f) => {
+      if (!f.has(c.habitId)) return f
+      const n = new Set(f)
+      n.delete(c.habitId)
+      return n
+    })
     setAnswers((prev) => ({ ...prev, [c.habitId]: entry }))
     if (editing) {
       setEditing(null)
@@ -154,6 +195,11 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
             note={usage.used >= usage.limit ? t('yr.quota.exhausted') : t('yr.quota.used', { n: usage.used, limit: usage.limit })}
           />
         )}
+        {fromGarmin.has(c.habitId) && answers[c.habitId] && (
+          <p className="yr-garmin-hint">
+            {t('garmin.fromGarmin')}: {t(`yr.good.${kind === 'quota' ? 'quota' : dir}`)}
+          </p>
+        )}
         {goal && <p className="yr-week-note">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>}
       </SwipeCard>
     )
@@ -181,13 +227,14 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
     const initial = prev?.kind === 'value' && typeof prev.value !== 'boolean' ? prev.value : undefined
     return (
       <YesterdayNumeric
-        key={c.habitId}
+        key={`${c.habitId}${fromGarmin.has(c.habitId) ? ':garmin' : ''}`}
         unit={unit}
         title={h.name}
         typeLabel={t(unit === 'time' ? 'yr.type.time' : 'yr.type.numeric')}
         question={t(unit === 'time' ? 'yr.q.time' : c.quota || unit === 'count' ? 'yr.howMany' : 'yr.num.label')}
         goal={c.quota ? undefined : goalText(h)}
         initial={initial}
+        hint={fromGarmin.has(c.habitId) && initial !== undefined ? t('garmin.fromGarmin') : undefined}
         onConfirm={(value) => answer(c, { kind: 'value', value })}
         onNotApplicable={() => answer(c, { kind: 'not_applicable' })}
       />

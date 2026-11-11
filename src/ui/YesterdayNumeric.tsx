@@ -13,12 +13,14 @@ interface Props {
   goal?: string
   /** Previously given answer (kept across back/forward and summary edits). */
   initial?: number | string
+  /** Small note under the input (e.g. «из Garmin»). */
+  hint?: string
   onConfirm: (value: number | string) => void
   onNotApplicable: () => void
 }
 
 /** Numeric (integer + stepper) or time (HH:MM) answer card of the yesterday review. */
-export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initial, onConfirm, onNotApplicable }: Props) {
+export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initial, hint, onConfirm, onNotApplicable }: Props) {
   const { t, locale } = useI18n()
   const [draft, setDraft] = useState(initial === undefined ? '' : String(initial))
   const isTime = unit === 'time'
@@ -83,6 +85,7 @@ export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initi
             </>
           )}
           {goal && <span className="yr-num-goal">{goal}</span>}
+          {hint && initial !== undefined && draft === String(initial) && <span className="yr-garmin-hint">{hint}</span>}
         </div>
         {!isTime && <span className="yr-num-hint">{t('yr.num.hint')}</span>}
       </div>

@@ -96,10 +96,11 @@ No scoring change: Garmin values only **prefill** the review; the user still con
   `src/ui/HabitSheet.test.tsx` — verify: `renderToString` smoke tests; manual check at 375 px light/dark.
   Uses existing components only (no `[design-sync]`).
   Note: pure helpers in `src/garmin/ui.ts` (+test); Notice has no warning tone, so the <7-day warning uses the error tone.
-- [ ] 8. Review prefill: on open, fire `pull(day, day+1)`; when the `garmin` Dexie rows arrive, merge
+- [x] 8. Review prefill: on open, fire `pull(day, day+1)`; when the `garmin` Dexie rows arrive, merge
   `prefillFromGarmin` into `answers` for cards the user hasn't touched; card shows «из Garmin» hint —
   files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`, `src/ui/YesterdayReview.test.tsx`,
   `src/App.tsx` — verify: smoke test with prefilled answers; manual: offline review still works.
+  Note: SwipeCard (components untouched) has no preselect state, so boolean cards show a «из Garmin: <answer>» line and the user still swipes; App.tsx unchanged.
 - [ ] 9. Docs + version: `docs/setup/backend.md` (deploy functions, `SUPABASE_SERVICE_ROLE_KEY` is provided to
   functions by Supabase), AGENTS.md «Stack»/«Layout» lines for `supabase/functions/` and `src/garmin/`,
   `chore: version 0.13.0` — files: `docs/setup/backend.md`, `AGENTS.md`, `package.json` — verify:

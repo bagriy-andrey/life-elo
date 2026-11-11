@@ -49,3 +49,25 @@ export function prefillFromGarmin(
   }
   return out
 }
+
+/**
+ * Fills `answers` from a Garmin prefill for habits that have a card and that the user hasn't answered
+ * (`touched`). Returns the new answers and the ids that now hold a Garmin value (those prefilled earlier
+ * are refreshed, so late-arriving rows still show up). Never overwrites a touched answer.
+ */
+export function mergeGarminPrefill(
+  prefill: Record<string, HabitEntry>,
+  cardIds: readonly string[],
+  answers: Record<string, HabitEntry>,
+  touched: ReadonlySet<string>,
+): { answers: Record<string, HabitEntry>; applied: string[] } {
+  const next = { ...answers }
+  const applied: string[] = []
+  for (const id of cardIds) {
+    const entry = prefill[id]
+    if (!entry || touched.has(id)) continue
+    next[id] = entry
+    applied.push(id)
+  }
+  return { answers: next, applied }
+}

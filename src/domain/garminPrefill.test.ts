@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { prefillFromGarmin } from './garminPrefill'
+import { mergeGarminPrefill, prefillFromGarmin } from './garminPrefill'
 import type { GarminDay, GarminMetric, Habit, ZonedRule } from './types'
 
 const measured = (unit: 'steps' | 'time' | 'count'): ZonedRule => ({
@@ -62,5 +62,18 @@ describe('prefillFromGarmin', () => {
       habit('f', 'activity', { kind: 'boolean' }, { direction: 'destructive' }),
     ]
     expect(prefillFromGarmin(hs, '2026-11-10', g)).toEqual({})
+  })
+})
+
+describe('mergeGarminPrefill', () => {
+  const v = (value: number | boolean) => ({ kind: 'value', value }) as const
+  it('fills only card habits and respects touched ids', () => {
+    const m = mergeGarminPrefill({ a: v(1), b: v(2), c: v(3) }, ['a', 'b'], { b: v(9) }, new Set(['b']))
+    expect(m.answers).toEqual({ a: v(1), b: v(9) })
+    expect(m.applied).toEqual(['a'])
+  })
+  it('refreshes untouched earlier values and keeps others', () => {
+    const m = mergeGarminPrefill({ a: v(5) }, ['a', 'b'], { a: v(1), b: v(2) }, new Set())
+    expect(m.answers).toEqual({ a: v(5), b: v(2) })
   })
 })

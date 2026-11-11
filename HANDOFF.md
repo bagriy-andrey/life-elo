@@ -1,19 +1,14 @@
 # Handoff
-Updated: 2026-11-09 by Claude Code
-Branch: habit-page (from main). Plan: docs/plans/12-habit-page.md — done, v0.12.6 (fix rounds: delete dialog row, «Деструктивная», heatmap without
-scroll, charts per habit type, last-7-days bars — see spec «Revision 2026-11-10»). Spec: docs/specs/12-habit-page.md.
-Built: habit page `/habits/:id` (stats, chart by type, 12-month heatmap, weekday bars), ⋮ `Menu` on list cards
-and page, delete dialog, sheet without Пауза/Удалить + «Терпимо до» (= `rule.tolerable`; +30 min default is display-only).
-Steps were built by parallel implementers in worktrees, merged here; verifier PASS on the whole plan.
+Updated: 2026-11-11 by Claude Code
+Branch: garmin-sync (from main)
+Plan: docs/plans/13-garmin-sync.md, step 1 of 9 done (verifier PASS, commit 110a28e)
 ## In progress
-Nothing uncommitted.
-## Next step (user)
-1. Manual check in `npm run dev` at 375px, light/dark: list → page for daily yes/no (both directions), minutes,
-   time with tolerable, weekly yes/no; ⋮ menu (flip above near the bottom), pause badge, delete from page.
-2. design-sync done (2026-11-10): 27 components incl. Menu.
-3. PR for `habit-page` is open: review, merge, deploy.
+Nothing uncommitted. Spike findings: docs/specs/13-garmin.md; fixtures in src/garmin/fixtures/.
+Key lives only in .env.local (GARMIN_PERSONAL_API_KEY, gitignored) — never print or commit it.
+## Next step
+/build-plan docs/plans/13-garmin-sync.md (step 2: pure parser).
 ## Broken / open questions
-- Minor (verifier): `placeMenu` export in `Menu.tsx` gives an oxlint fast-refresh warning; HabitCard is
-  `role=button` with a nested ⋮ button (a11y); «Назад» pushes `/habits` instead of history.back.
-- Carried over: SegmentedControl track not pill-in-tray; destructive weekly quota after overrun (v1 rule);
-  email-change link opens in Safari; Resend sender limits; Google sign-in in iOS PWA unverified.
+- User: review spike findings (step 1 verify criterion).
+- User decision before step 7: Garmin API does not expose the Personal API key expiry —
+  drop «expiry + warning < 7 days» (show «Подключено» + «ключ недействителен» on 401) or let the user enter the lifetime.
+- Lint: 3 pre-existing react-refresh warnings.

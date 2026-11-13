@@ -1,5 +1,5 @@
 import { cx } from './cx'
-import { corridorRect, scaleX, SCALE_WIDTH } from './rangeScaleMath'
+import { corridorLabelX, corridorRect, scaleX, SCALE_WIDTH, TRACK_PAD } from './rangeScaleMath'
 import './RangeScale.css'
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
 export function RangeScale({ min, max, value, corridor, tone, lowLabel, highLabel, corridorLabel, className }: Props) {
   const rect = corridor ? corridorRect(corridor.low, corridor.high, min, max) : null
   const cx0 = scaleX(value, min, max)
-  const rightHalf = rect ? rect.x > SCALE_WIDTH * 0.6 : false
+  const labelX = rect && corridorLabel ? corridorLabelX(rect, corridorLabel, lowLabel, highLabel) : null
   return (
     <svg
       className={cx('rscale', className)}
@@ -29,16 +29,11 @@ export function RangeScale({ min, max, value, corridor, tone, lowLabel, highLabe
       preserveAspectRatio="xMinYMid meet"
       aria-hidden="true"
     >
-      <rect className="rscale-bar" x="0" y="12" width={SCALE_WIDTH} height="8" rx="4" />
+      <rect className="rscale-bar" x={TRACK_PAD} y="12" width={SCALE_WIDTH - 2 * TRACK_PAD} height="8" rx="4" />
       {rect && <rect className="rscale-corridor" x={rect.x} y="12" width={rect.width} height="8" rx="4" />}
       <circle className={`rscale-dot rscale-${tone}`} cx={cx0} cy="16" r="7" />
-      {rect && corridorLabel && (
-        <text
-          className="rscale-label"
-          x={rightHalf ? rect.x + rect.width : rect.x}
-          y="36"
-          textAnchor={rightHalf ? 'end' : 'start'}
-        >
+      {labelX !== null && (
+        <text className="rscale-label" x={labelX} y="36">
           {corridorLabel}
         </text>
       )}

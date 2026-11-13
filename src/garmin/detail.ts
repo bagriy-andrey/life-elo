@@ -123,3 +123,19 @@ export function buildDetail(raw: GarminDetailRaw | null | undefined, day: string
   }
   return out
 }
+
+/**
+ * Tracks which days had an optional detail call that ERRORED (as opposed to returning no data).
+ * `fail(day)` marks one day; `fail(null)` (a range call) marks every day. Such days must not overwrite stored detail.
+ */
+export function createFailureTracker(): { fail: (day: string | null) => void; isFailed: (day: string) => boolean } {
+  const days = new Set<string>()
+  let all = false
+  return {
+    fail: (day) => {
+      if (day === null) all = true
+      else days.add(day)
+    },
+    isFailed: (day) => all || days.has(day),
+  }
+}

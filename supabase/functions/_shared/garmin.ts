@@ -58,19 +58,49 @@ export async function exchangeKey(key: string): Promise<{ token: string; expires
   return { token, expiresAt }
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/** Runs async tasks with at most `max` in flight. */
+export function createLimiter(max: number): <T>(fn: () => Promise<T>) => Promise<T> {
+  let active = 0
+  const queue: Array<() => void> = []
+  const next = () => {
+    active--
+    queue.shift()?.()
+  }
+  return async <T>(fn: () => Promise<T>): Promise<T> => {
+    if (active >= max) await new Promise<void>((resolve) => queue.push(resolve))
+    active++
+    try {
+      return await fn()
+    } finally {
+      next()
+    }
+  }
+}
+
+/** GET; retries once on 429/503 (Retry-After honoured, backoff 800 ms, capped at 3 s). */
 export async function garminGet(path: string, token: string): Promise<unknown> {
-  const res = await fetch(`${GARMIN_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-  })
-  if (res.status === 401 || res.status === 403) throw new KeyInvalidError('token rejected')
-  if (res.status === 204) return null
-  if (!res.ok) throw new Error(`garmin ${res.status}`)
-  const text = await res.text()
-  if (!text.trim()) return null
-  try {
-    return JSON.parse(text)
-  } catch {
-    return null
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${GARMIN_BASE}${path}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    })
+    if (res.status === 401 || res.status === 403) throw new KeyInvalidError('token rejected')
+    if ((res.status === 429 || res.status === 503) && attempt === 0) {
+      const ra = Number(res.headers.get('Retry-After'))
+      await res.body?.cancel()
+      await sleep(Math.min(3000, Number.isFinite(ra) && ra > 0 ? ra * 1000 : 800))
+      continue
+    }
+    if (res.status === 204) return null
+    if (!res.ok) throw new Error(`garmin ${res.status}`)
+    const text = await res.text()
+    if (!text.trim()) return null
+    try {
+      return JSON.parse(text)
+    } catch {
+      return null
+    }
   }
 }
 

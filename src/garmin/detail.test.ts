@@ -107,3 +107,16 @@ describe('buildDetail', () => {
     expect(Object.keys(buildDetail({ hrv }, DAY))).toEqual(['hrv'])
   })
 })
+
+describe('createFailureTracker', () => {
+  it('marks single days and, for a range failure, all days', async () => {
+    const { createFailureTracker } = await import('./detail')
+    const t = createFailureTracker()
+    expect(t.isFailed('2026-11-12')).toBe(false)
+    t.fail('2026-11-12')
+    expect(t.isFailed('2026-11-12')).toBe(true)
+    expect(t.isFailed('2026-11-13')).toBe(false)
+    t.fail(null)
+    expect(t.isFailed('2026-11-13')).toBe(true)
+  })
+})

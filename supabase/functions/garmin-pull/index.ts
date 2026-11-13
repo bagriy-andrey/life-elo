@@ -1,12 +1,13 @@
-import { buildDetail } from '../../../src/garmin/detail.ts'
+import { buildDetail, createFailureTracker } from '../../../src/garmin/detail.ts'
 import { coverage, deviceLastSyncAt, parseGarmin } from '../../../src/garmin/parse.ts'
 import {
   adminClient,
   corsHeaders,
+  createLimiter,
   daysBetween,
   eachDay,
   exchangeKey,
-  garminGet,
+  garminGet as garminGetRaw,
   isDayKey,
   json,
   KeyInvalidError,
@@ -83,15 +84,20 @@ Deno.serve(async (req) => {
     const tomorrowUtc = new Date(today.getTime() + 86400000).toISOString().slice(0, 10)
     const summaryEnd = tomorrowUtc > to ? tomorrowUtc : to
 
+    let failures = createFailureTracker()
     const fetchAll = async (tok: string) => {
       stage = 'garmin'
+      failures = createFailureTracker()
       const dates = eachDay(from, to)
       // A failing detail call only drops that part (stage name logged, never bodies); 401/403 still means key_invalid.
-      const optional = async (name: string, path: string): Promise<unknown> => {
+      const limit = createLimiter(6)
+      const garminGet = (path: string, t: string) => limit(() => garminGetRaw(path, t))
+      const optional = async (name: string, path: string, day: string | null): Promise<unknown> => {
         try {
           return await garminGet(path, tok)
         } catch (e) {
           if (e instanceof KeyInvalidError) throw e
+          failures.fail(day)
           console.error(`garmin-pull detail ${name} ${e instanceof Error ? e.name : 'unknown'}`)
           return null
         }
@@ -104,12 +110,12 @@ Deno.serve(async (req) => {
         ),
         garminGet(`/usersummary-service/v2/dailysummaries?startDate=${from}&endDate=${summaryEnd}`, tok),
         Promise.all(dates.map((d) => garminGet(`/sleep-service/sleep/dailySleep?date=${d}`, tok))),
-        Promise.all(dates.map((d) => optional('heartRate', `/wellness-service/wellness/dailyHeartRate?date=${d}`))),
-        Promise.all(dates.map((d) => optional('hrv', `/hrv-service/hrv/${d}`))),
+        Promise.all(dates.map((d) => optional('heartRate', `/wellness-service/wellness/dailyHeartRate?date=${d}`, d))),
+        Promise.all(dates.map((d) => optional('hrv', `/hrv-service/hrv/${d}`, d))),
         Promise.all(
-          dates.map((d) => optional('spo2', `/wellness-service/wellness/daily/spo2acclimation/${d}`)),
+          dates.map((d) => optional('spo2', `/wellness-service/wellness/daily/spo2acclimation/${d}`, d)),
         ),
-        optional('bodyBattery', `/wellness-service/wellness/bodyBattery/reports/daily?startDate=${from}&endDate=${to}`),
+        optional('bodyBattery', `/wellness-service/wellness/bodyBattery/reports/daily?startDate=${from}&endDate=${to}`, null),
       ])
       const sleepByDate: Record<string, unknown> = {}
       const hrByDate: Record<string, unknown> = {}
@@ -147,7 +153,10 @@ Deno.serve(async (req) => {
       .filter(([date]) => date >= from && date <= to)
       .map(([date, data]) => ({ key: date, data }))
 
-    const detailRows = eachDay(from, to)
+    const allDates = eachDay(from, to)
+    const detailSkipped = allDates.filter((d) => failures.isFailed(d)).length
+    const detailRows = allDates
+      .filter((d) => !failures.isFailed(d))
       .map((date) => {
         const data = buildDetail(
           {
@@ -187,6 +196,7 @@ Deno.serve(async (req) => {
       deviceLastSyncAt: deviceLastSyncAt(raw.summaries),
       coverage: coverage(days, from, to),
       detailDays: detailRows.length,
+      detailSkipped,
     })
   } catch (e) {
     console.error(`garmin-pull failed: ${stage} ${e instanceof Error ? e.name : 'unknown'}`)

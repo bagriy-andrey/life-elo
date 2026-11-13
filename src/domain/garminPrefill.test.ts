@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeGarminPrefill, prefillFromGarmin } from './garminPrefill'
+import { garminEvidence, mergeGarminPrefill, prefillFromGarmin } from './garminPrefill'
 import type { GarminDay, GarminMetric, Habit, ZonedRule } from './types'
 
 const measured = (unit: 'steps' | 'time' | 'count'): ZonedRule => ({
@@ -62,6 +62,28 @@ describe('prefillFromGarmin', () => {
       habit('f', 'activity', { kind: 'boolean' }, { direction: 'destructive' }),
     ]
     expect(prefillFromGarmin(hs, '2026-11-10', g)).toEqual({})
+  })
+})
+
+describe('garminEvidence', () => {
+  it('returns entry + evidence per metric (bedtime from day+1)', () => {
+    const ev = garminEvidence(habits, '2026-11-10', g)
+    expect(ev.steps).toEqual({ entry: { kind: 'value', value: 8000 }, evidence: { kind: 'steps', value: 8000 } })
+    expect(ev.bed.evidence).toEqual({ kind: 'bedtime', value: '23:40' })
+    expect(ev.wake.evidence).toEqual({ kind: 'wake', value: '07:10' })
+    expect(ev.sport.evidence).toEqual({ kind: 'activity', type: 'running', minutes: 30 })
+  })
+  it('uses the matching activity, not the first one', () => {
+    const d: Record<string, GarminDay> = {
+      '2026-11-10': { activities: [{ type: 'swimming', minutes: 5 }, { type: 'cycling', minutes: 45 }] },
+    }
+    expect(garminEvidence(habits, '2026-11-10', d).sport.evidence).toEqual({ kind: 'activity', type: 'cycling', minutes: 45 })
+  })
+  it('missing data, unbound and not applicable habits get no key', () => {
+    expect(garminEvidence(habits, '2026-11-01', g)).toEqual({})
+    const unbound = habit('u', 'steps', measured('steps'), { source: undefined })
+    const late = habit('l', 'steps', measured('steps'), { effectiveFrom: '2026-11-11' })
+    expect(garminEvidence([unbound, late], '2026-11-10', g)).toEqual({})
   })
 })
 

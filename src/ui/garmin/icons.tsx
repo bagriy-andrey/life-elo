@@ -24,3 +24,10 @@ export const BatteryIcon = () =>
     </>,
   )
 export const ActivityIcon = () => svg(<path d="M22 12h-4l-3 9L9 3l-3 9H2" />)
+export const WatchIcon = () =>
+  svg(
+    <>
+      <circle cx="12" cy="12" r="6" />
+      <path d="M12 9v3l1.5 1.5M9 6l.5-3h5l.5 3M9 18l.5 3h5l.5-3" />
+    </>,
+  )

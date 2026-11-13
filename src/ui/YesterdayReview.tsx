@@ -1,10 +1,9 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthContext } from '../auth/context'
-import { pull as pullGarmin, type PullResult } from '../garmin/api'
+import type { PullResult } from '../garmin/api'
 import { reviewGarminStatus } from '../domain/garminStatus'
-import { mergeGarminPrefill, prefillFromGarmin } from '../domain/garminPrefill'
-import { confirmDay, db } from '../db/db'
+import { mergeGarminPrefill } from '../domain/garminPrefill'
+import { confirmDay } from '../db/db'
 import { buildReview, DayLockedError } from '../db/confirm'
 import { addDays, toDayKey } from '../domain/day'
 import {
@@ -25,6 +24,8 @@ import { replay } from '../engine/rating'
 import { classifyZone } from '../engine/zones'
 import { useI18n } from '../i18n'
 import { Button, FullScreenModal, Notice, ProgressSegments, QuotaDots, SwipeCard, type SwipeAnswer } from './components'
+import { GarminHint } from './garmin/GarminHint'
+import { useGarminPrefill } from './garmin/useGarminPrefill'
 import { YesterdayDone } from './YesterdayDone'
 import { YesterdayNumeric } from './YesterdayNumeric'
 import './YesterdayReview.css'
@@ -92,33 +93,23 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
   const confirmedDay = reviews.some((r) => r.day === day)
   const prefillOn = signedIn && !confirmedDay && screen !== 'done'
 
-  const [garminPull, setGarminPull] = useState<PullResult | undefined>(initialState?.garminPull)
-  const refreshGarmin = () => {
-    setGarminPull(undefined)
-    void pullGarmin(day, addDays(day, 1), { force: true }).then(setGarminPull)
-  }
+  const { suggestions, rows: garminRows, pull: garminPull, refresh: refreshGarmin } = useGarminPrefill({
+    day,
+    habits,
+    enabled: signedIn && !confirmedDay,
+    initialPull: initialState?.garminPull,
+  })
 
   useEffect(() => {
-    if (signedIn && !confirmedDay) void pullGarmin(day, addDays(day, 1)).then(setGarminPull)
-    // Once per opened day; the api never throws and handles not_connected/offline.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [day, signedIn])
-
-  const garminRows = useLiveQuery(
-    async () => (await db.garmin.bulkGet([day, addDays(day, 1)])).filter((r) => r !== undefined),
-    [day],
-  )
-  useEffect(() => {
-    if (!prefillOn || !garminRows?.length) return
-    const byDay: Record<string, GarminDay> = {}
-    for (const r of garminRows) byDay[r.day] = r
-    const prefill = prefillFromGarmin(habits, day, byDay)
+    if (!prefillOn) return
+    const prefill = Object.fromEntries(Object.entries(suggestions).map(([id, s]) => [id, s.entry]))
+    if (!Object.keys(prefill).length) return
     setAnswers((prev) => {
       const m = mergeGarminPrefill(prefill, cards.map((c) => c.habitId), prev, touched.current)
       if (m.applied.length) setFromGarmin((f) => new Set([...f, ...m.applied]))
       return m.applied.length ? m.answers : prev
     })
-  }, [garminRows, habits, day, cards, prefillOn])
+  }, [suggestions, cards, prefillOn])
 
   const garminStatus = useMemo(() => {
     const rows: Record<string, GarminDay> = {}
@@ -217,9 +208,12 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
           />
         )}
         {fromGarmin.has(c.habitId) && answers[c.habitId] && (
-          <p className="yr-garmin-hint">
-            {t('garmin.fromGarmin')}: {t(`yr.good.${kind === 'quota' ? 'quota' : dir}`)}
-          </p>
+          <>
+            {suggestions[c.habitId] && <GarminHint evidence={suggestions[c.habitId].evidence} className="yr-garmin-ev" />}
+            <p className="yr-garmin-hint">
+              {t('garmin.fromGarmin')}: {t(`yr.good.${kind === 'quota' ? 'quota' : dir}`)}
+            </p>
+          </>
         )}
         {goal && <p className="yr-week-note">{t('review.weekProgress', { done: goal.done, target: goal.target })}</p>}
       </SwipeCard>
@@ -255,7 +249,11 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
         question={t(unit === 'time' ? 'yr.q.time' : c.quota || unit === 'count' ? 'yr.howMany' : 'yr.num.label')}
         goal={c.quota ? undefined : goalText(h)}
         initial={initial}
-        hint={fromGarmin.has(c.habitId) && initial !== undefined ? t('garmin.fromGarmin') : undefined}
+        hint={
+          fromGarmin.has(c.habitId) && initial !== undefined ? (
+            suggestions[c.habitId] ? <GarminHint evidence={suggestions[c.habitId].evidence} className="yr-garmin-ev" /> : t('garmin.fromGarmin')
+          ) : undefined
+        }
         onConfirm={(value) => answer(c, { kind: 'value', value })}
         onNotApplicable={() => answer(c, { kind: 'not_applicable' })}
       />

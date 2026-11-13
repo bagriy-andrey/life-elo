@@ -730,10 +730,12 @@ export const en: Dict = {
     other: '{count} answers are suggested from Garmin data. Check them and confirm the day.',
   },
   'garmin.review.hint': 'Garmin: {evidence}',
-  'garmin.review.ev.steps': '{n} steps',
-  'garmin.review.ev.bedtime': 'fell asleep at {time}',
-  'garmin.review.ev.wake': 'woke up at {time}',
-  'garmin.review.ev.activity': '{type} · {min} min',
-  'garmin.review.notTracked': 'Garmin does not track this',
+  'garmin.review.ev.steps': {
+    one: '**{n}** step',
+    other: '**{n}** steps',
+  },
+  'garmin.review.ev.bedtime': 'fell asleep at **{time}**',
+  'garmin.review.ev.wake': 'woke up at **{time}**',
+  'garmin.review.ev.activity': '**{type} · {min} min**',
   'garmin.review.openDay': 'Garmin data for this day ›',
 }

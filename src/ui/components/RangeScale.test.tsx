@@ -9,7 +9,7 @@ describe('RangeScale', () => {
   it('clamps values and corridor to the scale', () => {
     expect(scaleX(10, 34, 82)).toBe(TRACK_PAD)
     expect(scaleX(200, 34, 82)).toBe(SCALE_WIDTH - TRACK_PAD)
-    expect(scaleX(34, 5, 5)).toBe(0)
+    expect(scaleX(34, 5, 5)).toBe(TRACK_PAD)
     expect(corridorRect(20, 100, 34, 82)).toEqual({ x: TRACK_PAD, width: SCALE_WIDTH - 2 * TRACK_PAD })
     expect(corridorRect(90, 100, 34, 82)).toBeNull()
     const html = renderToString(<RangeScale {...base} value={999} />)

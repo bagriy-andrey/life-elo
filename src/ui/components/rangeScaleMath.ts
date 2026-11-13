@@ -11,7 +11,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), h
 
 /** Position of a value on the scale in viewBox units; clamped to the inset track. Degenerate range -> 0. */
 export function scaleX(value: number, min: number, max: number): number {
-  if (!(max > min)) return 0
+  if (!(max > min)) return TRACK_PAD
   return (clamp(value, min, max) - min) / (max - min) * TRACK_WIDTH + TRACK_PAD
 }
 

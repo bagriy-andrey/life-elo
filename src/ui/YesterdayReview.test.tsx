@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import type { DayKey, Habit, HabitEntry } from '../domain/types'
+import type { PullResult } from '../garmin/api'
 import { I18nProvider } from '../i18n'
 import { YesterdayDone } from './YesterdayDone'
 import { YesterdayReview } from './YesterdayReview'
@@ -16,7 +17,7 @@ const habit = (id: string, name: string, createdAt: number, extra: Partial<Habit
 const render = (
   rating: number,
   habits: Habit[],
-  initialState?: { answers?: Record<string, HabitEntry>; screen?: 'cards' | 'summary' | 'done'; index?: number; fromGarmin?: string[] },
+  initialState?: { answers?: Record<string, HabitEntry>; screen?: 'cards' | 'summary' | 'done'; index?: number; fromGarmin?: string[]; garminPull?: PullResult },
 ) =>
   renderToString(
     <I18nProvider>
@@ -142,5 +143,30 @@ describe('YesterdayReview Garmin prefill', () => {
   })
   it('no hint without Garmin answers', () => {
     expect(render(0, [steps], { answers: { s: { kind: 'value', value: 9123 } } })).not.toContain('из Garmin')
+  })
+})
+
+describe('YesterdayReview Garmin status line', () => {
+  const habits = [habit('a', 'Зарядка', 1)]
+  const cases: [string, PullResult | undefined, string, boolean][] = [
+    ['loading', undefined, 'Загружаем данные Garmin', false],
+    ['error', { kind: 'timeout' }, 'долгое ожидание', true],
+    ['key_invalid', { kind: 'key_invalid' }, 'Ключ Garmin недействителен', true],
+    ['no_data', { kind: 'ok', lastPullAt: '2026-11-04T08:00:00Z', coverage: {} }, 'ещё не прислал', true],
+  ]
+  for (const [name, pull, text, refresh] of cases) {
+    it(`renders ${name}`, () => {
+      const html = render(0, habits, { garminPull: pull })
+      expect(html).toContain(text)
+      expect(html.includes('>Обновить<')).toBe(refresh)
+    })
+  }
+  it('hides when not connected', () => {
+    const html = render(0, habits, { garminPull: { kind: 'not_connected' } })
+    expect(html).not.toContain('yr-garmin ')
+  })
+  it('hides on the done screen', () => {
+    const html = render(0, habits, { screen: 'done', garminPull: { kind: 'timeout' } })
+    expect(html).not.toContain('долгое ожидание')
   })
 })

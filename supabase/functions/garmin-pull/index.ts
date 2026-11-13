@@ -1,5 +1,4 @@
-import postgres from 'npm:postgres@3'
-import { parseGarmin } from '../../../src/garmin/parse.ts'
+import { coverage, deviceLastSyncAt, parseGarmin } from '../../../src/garmin/parse.ts'
 import {
   adminClient,
   corsHeaders,
@@ -16,9 +15,20 @@ import {
 /** Client Dexie schema number (db.verno in src/db/db.ts); bump together with new Dexie versions. */
 const RECORD_SCHEMA = 5
 
+type Stage = 'token' | 'garmin' | 'db' | 'unknown'
+
+/**
+ * POST { from, to } (<= 8 days). Responses (all HTTP 200 unless noted, so supabase-js `invoke` yields the body):
+ *   { status: 'ok', lastPullAt, deviceLastSyncAt?, coverage: { [day]: { steps, sleep, activities } } }
+ *   { status: 'error', stage: 'token' | 'garmin' | 'db' | 'unknown' }
+ *   { status: 'key_invalid' } | { status: 'not_connected' }
+ *   401 unauthorized, 400 bad_request / bad_range, 405.
+ * Every attempt writes last_attempt_at + last_error (stage or null); success also last_pull_at.
+ */
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
+  let stage: Stage = 'unknown'
   try {
     const userId = await userIdFrom(req)
     if (!userId) return json({ error: 'unauthorized' }, 401)
@@ -31,6 +41,14 @@ Deno.serve(async (req) => {
     if (span < 0 || span > 7) return json({ error: 'bad_range' }, 400)
 
     const admin = adminClient()
+    const record = async (error: string | null, ok = false): Promise<string> => {
+      const now = new Date().toISOString()
+      const patch: Record<string, string | null> = { last_attempt_at: now, last_error: error }
+      if (ok) patch.last_pull_at = now
+      await admin.from('garmin_credentials').update(patch).eq('user_id', userId)
+      return now
+    }
+
     const { data: rows0, error: credErr } = await admin.rpc('garmin_get_secrets', { p_user: userId })
     if (credErr) throw credErr
     const cred = (Array.isArray(rows0) ? rows0[0] : rows0) as {
@@ -47,6 +65,7 @@ Deno.serve(async (req) => {
         : null
 
     const refresh = async (): Promise<string> => {
+      stage = 'token'
       const ex = await exchangeKey(apiKey)
       const { error: saveErr } = await admin.rpc('garmin_save_token', {
         p_user: userId,
@@ -57,21 +76,29 @@ Deno.serve(async (req) => {
       return ex.token
     }
 
+    // The watch's last upload is read from today's dailysummaries entry. The user's local "today" is unknown here, so
+    // query up to max(to, UTC today + 1 day): a day-after bound covers any UTC offset.
+    const today = new Date()
+    const tomorrowUtc = new Date(today.getTime() + 86400000).toISOString().slice(0, 10)
+    const summaryEnd = tomorrowUtc > to ? tomorrowUtc : to
+
     const fetchAll = async (tok: string) => {
+      stage = 'garmin'
       const dates = eachDay(from, to)
-      const [steps, activities, sleeps] = await Promise.all([
+      const [steps, activities, summaries, sleeps] = await Promise.all([
         garminGet(`/usersummary-service/stats/steps/daily/${from}/${to}`, tok),
         garminGet(
           `/activitylist-service/activities/search/activities?start=0&limit=100&startDate=${from}&endDate=${to}`,
           tok,
         ),
+        garminGet(`/usersummary-service/v2/dailysummaries?startDate=${from}&endDate=${summaryEnd}`, tok),
         Promise.all(dates.map((d) => garminGet(`/sleep-service/sleep/dailySleep?date=${d}`, tok))),
       ])
       const sleepByDate: Record<string, unknown> = {}
       dates.forEach((d, i) => {
         if (sleeps[i]) sleepByDate[d] = sleeps[i]
       })
-      return { steps, activities, sleepByDate }
+      return { steps, activities, summaries, sleepByDate }
     }
 
     let raw
@@ -85,7 +112,10 @@ Deno.serve(async (req) => {
         raw = await fetchAll(await refresh())
       }
     } catch (e) {
-      if (e instanceof KeyInvalidError) return json({ status: 'key_invalid' })
+      if (e instanceof KeyInvalidError) {
+        await record('key_invalid')
+        return json({ status: 'key_invalid' })
+      }
       throw e
     }
 
@@ -94,34 +124,37 @@ Deno.serve(async (req) => {
       .filter(([date]) => date >= from && date <= to)
       .map(([date, data]) => ({ key: date, data }))
 
+    stage = 'db'
     if (rows.length > 0) {
-      // One statement under the user's advisory lock, like push_records, so rev order = commit order.
-      const sql = postgres(Deno.env.get('SUPABASE_DB_URL')!, { max: 1, prepare: false })
-      try {
-        await sql.begin(async (tx) => {
-          await tx`select pg_advisory_xact_lock(hashtext(${userId}::text))`
-          await tx`
-            insert into public.records as r (user_id, tbl, key, data, deleted, schema, client_updated_at, rev)
-            select ${userId}::uuid, 'garmin', x.key, x.data, false, ${RECORD_SCHEMA}::int, now(),
-                   nextval('public.records_rev_seq')
-            from jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) as x(key text, data jsonb)
-            on conflict (user_id, tbl, key) do update
-              set data = excluded.data, deleted = false, schema = excluded.schema,
-                  client_updated_at = excluded.client_updated_at,
-                  rev = nextval('public.records_rev_seq')`
-        })
-      } finally {
-        await sql.end({ timeout: 5 })
-      }
+      const { error: upErr } = await admin.rpc('garmin_upsert_records', {
+        p_user: userId,
+        p_rows: rows,
+        p_schema: RECORD_SCHEMA,
+      })
+      if (upErr) throw upErr
     }
 
-    await admin
-      .from('garmin_credentials')
-      .update({ last_pull_at: new Date().toISOString() })
-      .eq('user_id', userId)
-    return json({ status: 'ok', days: rows.length })
+    const lastPullAt = await record(null, true)
+    return json({
+      status: 'ok',
+      lastPullAt,
+      deviceLastSyncAt: deviceLastSyncAt(raw.summaries),
+      coverage: coverage(days, from, to),
+    })
   } catch (e) {
-    console.error('garmin-pull failed:', e instanceof Error ? e.name : 'unknown')
-    return json({ error: 'internal' }, 500)
+    console.error(`garmin-pull failed: ${stage} ${e instanceof Error ? e.name : 'unknown'}`)
+    // Best effort: record the failed attempt (stage only, never secrets).
+    try {
+      const userId = await userIdFrom(req)
+      if (userId) {
+        await adminClient()
+          .from('garmin_credentials')
+          .update({ last_attempt_at: new Date().toISOString(), last_error: stage })
+          .eq('user_id', userId)
+      }
+    } catch {
+      // ignore
+    }
+    return json({ status: 'error', stage })
   }
 })

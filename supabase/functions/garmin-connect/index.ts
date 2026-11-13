@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     if (req.method === 'GET') {
       const { data, error } = await db
         .from('garmin_credentials')
-        .select('key_expires_at, last_pull_at')
+        .select('key_expires_at, last_pull_at, last_attempt_at, last_error')
         .eq('user_id', userId)
         .maybeSingle()
       if (error) throw error
@@ -20,6 +20,8 @@ Deno.serve(async (req) => {
         connected: !!data,
         keyExpiresAt: data?.key_expires_at ?? null,
         lastPullAt: data?.last_pull_at ?? null,
+        lastAttemptAt: data?.last_attempt_at ?? null,
+        lastError: data?.last_error ?? null,
       })
     }
 

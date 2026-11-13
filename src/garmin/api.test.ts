@@ -18,8 +18,8 @@ afterEach(() => vi.useRealTimers())
 
 describe('garmin api', () => {
   it('status maps connected / not connected / failure', async () => {
-    invoke.mockResolvedValueOnce({ data: { connected: true, keyExpiresAt: 'x', lastPullAt: null }, error: null })
-    expect(await status()).toEqual({ kind: 'connected', keyExpiresAt: 'x', lastPullAt: null })
+    invoke.mockResolvedValueOnce({ data: { connected: true, keyExpiresAt: 'x', lastPullAt: null, lastAttemptAt: 'a', lastError: 'key_invalid' }, error: null })
+    expect(await status()).toEqual({ kind: 'connected', keyExpiresAt: 'x', lastPullAt: null, lastAttemptAt: 'a', lastError: 'key_invalid' })
     invoke.mockResolvedValueOnce({ data: { connected: false }, error: null })
     expect(await status()).toEqual({ kind: 'not_connected' })
     invoke.mockRejectedValueOnce(new Error('boom'))
@@ -36,29 +36,54 @@ describe('garmin api', () => {
     expect(await disconnect()).toBe('ok')
   })
 
-  it('pull triggers a sync and is throttled per range for 15 minutes', async () => {
-    invoke.mockResolvedValue({ data: { status: 'ok', days: 2 }, error: null })
-    expect(await pull('2026-11-10', '2026-11-11')).toBe('ok')
+  const ok = { status: 'ok', lastPullAt: 'L', deviceLastSyncAt: 'D', coverage: { '2026-11-11': { steps: true, sleep: false, activities: 0 } } }
+
+  it('pull returns coverage, triggers a sync and is throttled per range for 15 minutes', async () => {
+    invoke.mockResolvedValue({ data: ok, error: null })
+    expect(await pull('2026-11-10', '2026-11-11')).toEqual({
+      kind: 'ok',
+      lastPullAt: 'L',
+      deviceLastSyncAt: 'D',
+      coverage: ok.coverage,
+    })
     expect(requestSync).toHaveBeenCalledTimes(1)
-    expect(await pull('2026-11-10', '2026-11-11')).toBe('throttled')
+    expect(await pull('2026-11-10', '2026-11-11')).toEqual({ kind: 'throttled' })
     expect(invoke).toHaveBeenCalledTimes(1)
-    expect(await pull('2026-11-09', '2026-11-10')).toBe('ok')
+    expect((await pull('2026-11-09', '2026-11-10')).kind).toBe('ok')
     vi.advanceTimersByTime(15 * 60 * 1000 + 1)
-    expect(await pull('2026-11-10', '2026-11-11')).toBe('ok')
+    expect((await pull('2026-11-10', '2026-11-11')).kind).toBe('ok')
   })
 
-  it('pull passes through key_invalid and does not throttle errors', async () => {
+  it('force bypasses the throttle; deviceLastSyncAt is optional', async () => {
+    invoke.mockResolvedValue({ data: { status: 'ok', lastPullAt: 'L', coverage: {} }, error: null })
+    expect(await pull('a', 'b')).toEqual({ kind: 'ok', lastPullAt: 'L', coverage: {} })
+    expect((await pull('a', 'b', { force: true })).kind).toBe('ok')
+    expect(invoke).toHaveBeenCalledTimes(2)
+  })
+
+  it('pull maps key_invalid / not_connected / stage errors / network, never throttling failures', async () => {
     invoke.mockResolvedValueOnce({ data: { status: 'key_invalid' }, error: null })
-    expect(await pull('a', 'b')).toBe('key_invalid')
+    expect(await pull('a', 'b')).toEqual({ kind: 'key_invalid' })
+    invoke.mockResolvedValueOnce({ data: { status: 'not_connected' }, error: null })
+    expect(await pull('a', 'b')).toEqual({ kind: 'not_connected' })
+    invoke.mockResolvedValueOnce({ data: { status: 'error', stage: 'garmin' }, error: null })
+    expect(await pull('a', 'b')).toEqual({ kind: 'error', stage: 'garmin' })
+    invoke.mockResolvedValueOnce({ data: { status: 'error', stage: 'weird' }, error: null })
+    expect(await pull('a', 'b')).toEqual({ kind: 'error', stage: 'unknown' })
     invoke.mockRejectedValueOnce(new Error('net'))
-    expect(await pull('a', 'b')).toBe('error')
+    expect(await pull('a', 'b')).toEqual({ kind: 'offline' })
     expect(requestSync).not.toHaveBeenCalled()
   })
 
-  it('pull resolves to error after 5 s without throwing', async () => {
+  it('pull resolves to timeout after 20 s without throwing', async () => {
     invoke.mockImplementation(() => new Promise(() => {}))
     const p = pull('2026-11-10', '2026-11-11')
-    await vi.advanceTimersByTimeAsync(5001)
-    expect(await p).toBe('error')
+    await vi.advanceTimersByTimeAsync(19_000)
+    let settled = false
+    void p.then(() => (settled = true))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(settled).toBe(false)
+    await vi.advanceTimersByTimeAsync(1001)
+    expect(await p).toEqual({ kind: 'timeout' })
   })
 })

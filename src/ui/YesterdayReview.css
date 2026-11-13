@@ -112,3 +112,17 @@
 .yr-done-streaks ul { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
 .yr-week-note { margin: 0; font-size: var(--text-sm); color: var(--muted); text-align: center; }
 .yr-garmin-hint { margin: 0; font-size: var(--text-sm); color: var(--muted); text-align: center; }
+
+.yr-garmin { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--text-sm); color: var(--muted); }
+.yr-garmin-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.yr-garmin-complete .yr-garmin-dot { background: var(--pos); }
+.yr-garmin-complete .yr-garmin-text { color: var(--pos); }
+.yr-garmin-partial .yr-garmin-dot, .yr-garmin-no_data .yr-garmin-dot { background: var(--warn); }
+.yr-garmin-error .yr-garmin-dot, .yr-garmin-key_invalid .yr-garmin-dot { background: var(--neg); }
+.yr-garmin-error .yr-garmin-text, .yr-garmin-key_invalid .yr-garmin-text { color: var(--neg); }
+.yr-garmin-text { flex: 1 1 200px; min-width: 0; }
+.yr-garmin-refresh {
+  min-height: 44px; min-width: 44px; padding: 0 12px; background: none; border: 0;
+  font: inherit; font-weight: 600; color: var(--accent); cursor: pointer;
+}
+.yr-garmin-refresh:disabled { color: var(--muted); cursor: default; }

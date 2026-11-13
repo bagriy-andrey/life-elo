@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activityTypeKeys, buildSource, compatibleMetrics, humanizeType, keyExpiry } from './ui'
+import { activityTypeKeys, buildSource, compatibleMetrics, garminDaysView, humanizeType, keyExpiry } from './ui'
 
 describe('garmin ui helpers', () => {
   it('filters metrics by rule', () => {
@@ -36,5 +36,23 @@ describe('garmin ui helpers', () => {
     expect(keyExpiry('2026-11-10T00:00:00Z', now)).toBe('expired')
     expect(keyExpiry('2026-11-17T00:00:00Z', now)).toBe('soon')
     expect(keyExpiry('2026-12-11T00:00:00Z', now)).toBe('ok')
+  })
+})
+
+describe('garminDaysView', () => {
+  const rows = [
+    { day: '2026-11-10', steps: 100, activities: [] },
+    { day: '2026-11-12', steps: 9000, sleepStart: '23:40', sleepEnd: '07:10', activities: [{ type: 'paddelball', minutes: 126 }] },
+    { day: '2026-11-11', activities: [] },
+  ]
+  it('sorts newest first and keeps same-row sleep', () => {
+    const v = garminDaysView(rows)
+    expect(v.map((d) => d.day)).toEqual(['2026-11-12', '2026-11-11', '2026-11-10'])
+    expect(v[0]).toEqual({ day: '2026-11-12', steps: 9000, sleepStart: '23:40', sleepEnd: '07:10', activities: [{ type: 'paddelball', minutes: 126 }] })
+    expect(v[1]).toEqual({ day: '2026-11-11', activities: [] })
+  })
+  it('limits and handles empty', () => {
+    expect(garminDaysView(rows, 2)).toHaveLength(2)
+    expect(garminDaysView([])).toEqual([])
   })
 })

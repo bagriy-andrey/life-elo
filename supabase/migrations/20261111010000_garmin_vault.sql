@@ -1,18 +1,8 @@
 -- Garmin credentials move from plaintext columns to Supabase Vault (encrypted at rest).
--- The table is empty in production; refuse to run if it is not (no data migration).
-do $$ begin
-  if exists (select 1 from public.garmin_credentials where api_key is not null or token is not null) then
-    raise exception 'garmin_credentials not empty';
-  end if;
-end $$;
-
+-- Existing plaintext rows are moved into Vault by the data migration below, then the plaintext columns are dropped.
 alter table public.garmin_credentials
   add column api_key_secret_id uuid,
   add column token_secret_id uuid;
-alter table public.garmin_credentials
-  drop column api_key,
-  drop column token;
-
 -- Internal helper: create or update a Vault secret by id, falling back to a leftover secret with the same name.
 create or replace function public.garmin_upsert_secret(p_id uuid, p_name text, p_secret text) returns uuid
 language plpgsql security definer set search_path = '' as $$
@@ -99,6 +89,30 @@ begin
   end if;
   perform public.garmin_delete(auth.uid());
 end $$;
+
+-- Data migration (same transaction): plaintext -> Vault secrets. Never logs values; re-runnable per row.
+do $$
+declare
+  r record;
+begin
+  for r in select user_id, api_key, token from public.garmin_credentials
+           where api_key is not null or token is not null loop
+    if r.api_key is not null then
+      update public.garmin_credentials
+        set api_key_secret_id = public.garmin_upsert_secret(api_key_secret_id, 'garmin_key_' || r.user_id::text, r.api_key)
+        where user_id = r.user_id;
+    end if;
+    if r.token is not null then
+      update public.garmin_credentials
+        set token_secret_id = public.garmin_upsert_secret(token_secret_id, 'garmin_token_' || r.user_id::text, r.token)
+        where user_id = r.user_id;
+    end if;
+  end loop;
+end $$;
+
+alter table public.garmin_credentials
+  drop column api_key,
+  drop column token;
 
 revoke all on function public.garmin_upsert_secret(uuid, text, text) from public, anon, authenticated;
 revoke all on function public.garmin_save_key(uuid, text, timestamptz, text, timestamptz) from public, anon, authenticated;

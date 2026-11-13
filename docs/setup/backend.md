@@ -179,14 +179,22 @@
 Единственный серверный код в проекте: функции `garmin-connect` и `garmin-pull` в `supabase/functions/`
 (общий код в `_shared/garmin.ts`; `garmin-pull` импортирует `src/garmin/parse.ts`, CLI загружает его вместе с функцией).
 
-- Миграции: `20261111000000_garmin.sql` и `20261111010000_garmin_vault.sql` (применяются как в разделе 7, `npx supabase db push --remote`).
+- Миграции: `20261111000000_garmin.sql`, `20261111010000_garmin_vault.sql`, `20261113000000_garmin_status.sql` и `20261113010000_garmin_upsert_rpc.sql`
+  (применяются как в разделе 7, `npx supabase db push --remote`).
+- **Когда синхронизируется:** при открытии утреннего обзора (вчера + сегодня), сразу после подключения (7 дней),
+  при запуске и возвращении в приложение (не чаще раза в 15 мин), по кнопке «Синхронизировать сейчас» в профиле
+  и «Обновить» в обзоре. Таймаут клиента 20 с, обзор не блокируется.
+- **Статус:** `garmin-pull` пишет `last_attempt_at`, `last_error` (этап: `token` | `garmin` | `db` | `unknown`
+  или `key_invalid`, без секретов) и `last_pull_at` при успехе; профиль показывает их. Обзор показывает,
+  полные ли данные за вчера: «полные», если часы выгрузили данные после местной полуночи (`wellnessChronology`
+  из `dailysummaries`, иначе есть запись сна за сегодня) — см. `docs/specs/13-garmin.md`.
+- Записи Garmin пишутся RPC `garmin_upsert_records` (security definer, только `service_role`), а не прямым Postgres-подключением: оно не работало из Edge Functions.
 - **Vault.** Ключ и токен Garmin хранятся зашифрованными в Supabase Vault; в `garmin_credentials` только id секретов.
   Доступ только через RPC `garmin_*` (security definer, только `service_role`) из Edge Functions; секреты не логируются.
   Отключение и «Удалить все данные» удаляют и секреты Vault.
 - Деплой: `npx supabase functions deploy garmin-connect garmin-pull`. В прогонах агентов CLI требует
   собственный `--yes` пользователя: агент останавливается и передаёт команду.
-- Переменные окружения Supabase выдаёт сам (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
-  `SUPABASE_DB_URL`). Дополнительных секретов не нужно.
+- Переменные окружения Supabase выдаёт сам (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). Дополнительных секретов не нужно.
 - Как подключить: Garmin Connect, Personal API key, затем Профиль, Garmin, вставить ключ и выбрать срок хранения.
 - **Порядок выката.** Записи Garmin имеют схему записей 5 = Dexie v5. Подключайте Garmin только после того, как
   сборка с v5 задеплоена и открыта на каждом устройстве: старые клиенты перестают подтягивать данные

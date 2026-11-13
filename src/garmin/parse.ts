@@ -67,3 +67,52 @@ export function parseGarmin(raw: GarminRaw | null | undefined): Record<string, G
   }
   return out
 }
+
+/**
+ * ISO time of the watch's latest uploaded data: `endTimestampGmt` (no `Z` in the API) of the latest calendarDate in a
+ * `usersummary-service/v2/dailysummaries` response (`{ data: [...] }`). Undefined when missing/garbage.
+ * See docs/specs/13-garmin.md «Last sync / data completeness».
+ */
+export function deviceLastSyncAt(response: unknown): string | undefined {
+  const list = Array.isArray(response) ? response : obj(response)?.data
+  if (!Array.isArray(list)) return undefined
+  let bestDate = ''
+  let best: string | undefined
+  for (const item of list) {
+    const o = obj(item)
+    const date = typeof o?.calendarDate === 'string' ? o.calendarDate : ''
+    const end = obj(o?.wellnessChronology)?.endTimestampGmt
+    if (!DAY_RE.test(date) || typeof end !== 'string') continue
+    const ms = Date.parse(`${end}Z`)
+    if (Number.isNaN(ms) || date < bestDate) continue
+    bestDate = date
+    best = new Date(ms).toISOString()
+  }
+  return best
+}
+
+export interface DayCoverage {
+  steps: boolean
+  sleep: boolean
+  activities: number
+}
+
+/** Per-day data presence for every day in [from..to] (inclusive, YYYY-MM-DD). */
+export function coverage(
+  days: Record<string, GarminDay>,
+  from: string,
+  to: string,
+): Record<string, DayCoverage> {
+  const out: Record<string, DayCoverage> = {}
+  const end = Date.parse(`${to}T00:00:00Z`)
+  for (let t = Date.parse(`${from}T00:00:00Z`); t <= end; t += 86400000) {
+    const key = new Date(t).toISOString().slice(0, 10)
+    const d = days[key]
+    out[key] = {
+      steps: d?.steps !== undefined,
+      sleep: d?.sleepStart !== undefined || d?.sleepEnd !== undefined,
+      activities: d?.activities.length ?? 0,
+    }
+  }
+  return out
+}

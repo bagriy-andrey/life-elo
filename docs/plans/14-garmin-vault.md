@@ -1,6 +1,6 @@
 # 14 — Garmin credentials in Supabase Vault
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -24,8 +24,8 @@ or backups). The user asked for secure storage (2026-11-11): keep secrets encryp
 (none)
 
 ## Decisions
-- Table is empty in production (checked 2026-11-11: 0 rows), so the migration drops `api_key` / `token`
-  columns without a data migration; it asserts emptiness first (`raise exception` if any row has them).
+- Production had 1 row with plaintext credentials (user connected 2026-11-11), so the migration moves them into Vault
+  (same helper, names `garmin_key_<user>` / `garmin_token_<user>`, secret ids set) in one transaction, then drops `api_key` / `token`.
 - RPCs (public schema, service_role only): `garmin_save_key(p_user uuid, p_key text, p_key_expires_at timestamptz,
   p_token text, p_token_expires_at timestamptz)`, `garmin_get_secrets(p_user uuid) returns (api_key, token,
   token_expires_at, key_expires_at, last_pull_at)`, `garmin_save_token(p_user, p_token, p_token_expires_at)`,
@@ -36,11 +36,11 @@ or backups). The user asked for secure storage (2026-11-11): keep secrets encryp
 - Version: `0.14.0`.
 
 ## Steps
-- [ ] 1. Migration `supabase/migrations/20261111010000_garmin_vault.sql`: emptiness assert; add secret-id columns;
+- [x] 1. Migration `supabase/migrations/20261111010000_garmin_vault.sql`: emptiness assert; add secret-id columns;
   drop `api_key`, `token`; the four RPCs + updated `delete_own_garmin_credentials()` (deletes Vault secrets too);
   grants as above. Apply: the user runs `npx supabase db push --remote --yes`; then read-only check of columns,
   function owners/grants — files: the migration — verify: remote read-only query.
-- [ ] 2. Edge Functions use the RPCs (connect: save/delete/status; pull: get secrets, save refreshed token);
+- [x] 2. Edge Functions use the RPCs (connect: save/delete/status; pull: get secrets, save refreshed token);
   redeploy (user runs `npx supabase functions deploy garmin-connect garmin-pull --yes`); smoke check
   (401 without user, CORS) — files: `supabase/functions/_shared/garmin.ts`, `supabase/functions/garmin-connect/index.ts`,
   `supabase/functions/garmin-pull/index.ts`, `docs/setup/backend.md` (Vault note) — verify: verifier code review + smoke.

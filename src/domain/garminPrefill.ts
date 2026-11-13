@@ -94,3 +94,16 @@ export function mergeGarminPrefill(
   }
   return { answers: next, applied }
 }
+
+/**
+ * Review screen merge: the user's own entries (incl. reset → unknown) win; habits the user has not touched
+ * get the Garmin suggestion; habits without a suggestion (unbound, no data) get nothing.
+ */
+export function effectiveEntries(
+  entries: Record<string, HabitEntry>,
+  suggestions: Record<string, GarminSuggestion>,
+): Record<string, HabitEntry> {
+  const out = { ...entries }
+  for (const [id, s] of Object.entries(suggestions)) if (!(id in out)) out[id] = s.entry
+  return out
+}

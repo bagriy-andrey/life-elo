@@ -4,6 +4,7 @@ import { confirmDay } from '../db/db'
 import { DayLockedError } from '../db/confirm'
 import { addDays, dayOf, isDayLocked } from '../domain/day'
 import { settingsOn } from '../domain/settings'
+import { effectiveEntries } from '../domain/garminPrefill'
 import { weeklyGoalNote } from '../domain/reviewFlow'
 import type { DayReview, GarminDay, Habit, HabitEntry, Zone } from '../domain/types'
 import { classifyZone } from '../engine/zones'
@@ -88,11 +89,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   })
   const hintCount = Object.keys(suggestions).length
   const shown = (id: string): HabitEntry | undefined => entries[id] ?? suggestions[id]?.entry
-  const effective = (): Entries => {
-    const out: Entries = { ...entries }
-    for (const [id, s] of Object.entries(suggestions)) if (!(id in out)) out[id] = s.entry
-    return out
-  }
+  const effective = (): Entries => effectiveEntries(entries, suggestions)
 
   const set = (id: string, e: HabitEntry) => setEntries((prev) => ({ ...prev, [id]: e }))
 

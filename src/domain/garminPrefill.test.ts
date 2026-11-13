@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { garminEvidence, mergeGarminPrefill, prefillFromGarmin } from './garminPrefill'
+import { effectiveEntries, garminEvidence, mergeGarminPrefill, prefillFromGarmin } from './garminPrefill'
 import type { GarminDay, GarminMetric, Habit, ZonedRule } from './types'
 
 const measured = (unit: 'steps' | 'time' | 'count'): ZonedRule => ({
@@ -97,5 +97,17 @@ describe('mergeGarminPrefill', () => {
   it('refreshes untouched earlier values and keeps others', () => {
     const m = mergeGarminPrefill({ a: v(5) }, ['a', 'b'], { a: v(1), b: v(2) }, new Set())
     expect(m.answers).toEqual({ a: v(5), b: v(2) })
+  })
+})
+
+describe('effectiveEntries', () => {
+  const sug = (n: number) => ({ entry: { kind: 'value', value: n } as const, evidence: { kind: 'steps', value: n } as const })
+  it('untouched habits get the suggestion, touched (incl. unknown) win, unbound get nothing', () => {
+    const out = effectiveEntries(
+      { b: { kind: 'value', value: 9 }, c: { kind: 'unknown' } },
+      { a: sug(1), b: sug(2), c: sug(3) },
+    )
+    expect(out).toEqual({ a: { kind: 'value', value: 1 }, b: { kind: 'value', value: 9 }, c: { kind: 'unknown' } })
+    expect('unbound' in out).toBe(false)
   })
 })

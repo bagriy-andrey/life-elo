@@ -34,7 +34,8 @@
     "ProgressBar": "/** Horizontal meter (value of max, clamped). Visible text beside it is the caller's. */\n  value: number;\n  max: number;\n  /** Fill color; accent when omitted. */\n  tone?: \"accent\" | \"pos\" | \"neg\" | \"warn\";\n  /** Accessible name (role=progressbar). */\n  label: string;\n  /** Bar height: sm 6px, md 8px (default). */\n  size?: \"sm\" | \"md\";\n  className?: string;",
     "FactGrid": "/** Two-column grid of facts: muted small label above a bold tabular value, optional muted hint below. */\n  items: { label: string; value: string; hint?: string }[];\n  className?: string;",
     "SegmentBar": "/** Decorative (aria-hidden) 14px pill bar; segment widths are shares of the total, zero segments omitted. Values are shown in LegendRows beside it. */\n  segments: { key: string; label: string; value: number; color: \"tier-weak\" | \"tier-medium\" | \"tier-strong\" | \"pos\" | \"neg\" | \"warn\" | \"muted\" }[];\n  className?: string;",
-    "LegendRow": "/** Legend line: color swatch, name, value text, percent text (grid 12px 1fr auto 40px). */\n  color: \"tier-weak\" | \"tier-medium\" | \"tier-strong\" | \"pos\" | \"neg\" | \"warn\" | \"muted\";\n  name: string;\n  value: string;\n  percent: string;\n  className?: string;"
+    "LegendRow": "/** Legend line: color swatch, name, value text, percent text (grid 12px 1fr auto 40px). */\n  color: \"tier-weak\" | \"tier-medium\" | \"tier-strong\" | \"pos\" | \"neg\" | \"warn\" | \"muted\";\n  name: string;\n  value: string;\n  percent: string;\n  className?: string;",
+    "RangeScale": "/** Decorative (aria-hidden) range scale: 8px bar, optional normal corridor, value dot (clamped). State the value in text beside it. */\n  min: number;\n  max: number;\n  value: number;\n  /** Normal range; omit for bar + dot only. */\n  corridor?: { low: number; high: number };\n  tone: \"accent\" | \"pos\" | \"neg\" | \"warn\";\n  lowLabel: string;\n  highLabel: string;\n  /** Text under the corridor, e.g. \"норма 56–64\". */\n  corridorLabel?: string;\n  className?: string;"
   },
   "overrides": {
     "TabBar": {
@@ -134,6 +135,9 @@
       "cardMode": "column"
     },
     "LegendRow": {
+      "cardMode": "column"
+    },
+    "RangeScale": {
       "cardMode": "column"
     }
   },

@@ -1,0 +1,9 @@
+.rscale { display: block; width: 100%; height: auto; max-height: 40px; }
+.rscale-bar { fill: var(--border); }
+.rscale-corridor { fill: var(--pos); opacity: 0.55; }
+.rscale-dot { stroke: var(--card); stroke-width: 3; }
+.rscale-accent { fill: var(--accent); }
+.rscale-pos { fill: var(--pos); }
+.rscale-neg { fill: var(--neg); }
+.rscale-warn { fill: var(--warn); }
+.rscale-label { fill: var(--muted); font-size: 10px; }

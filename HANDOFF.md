@@ -1,12 +1,13 @@
 # Handoff
 Updated: 2026-11-13 by Claude Code
-Branch: garmin-all-data (on top of garmin-sync-status / PR #15)
-Plan: docs/plans/17-garmin-day-page.md — done, v0.17.0 (migration applied, garmin-pull v4 deployed, schema checked).
+Branch: garmin-all-data
+Plan: docs/plans/18-garmin-redesign.md — done, v0.18.0 (20/20 steps, report + screenshots in docs/plans/18-screens/)
 ## In progress
-Nothing uncommitted. PR open for garmin-all-data (contains PR #15 too).
+Nothing uncommitted. No schema/server changes in plan 18 (status cache is localStorage only).
 ## Next step (user)
-1. Merge → Vercel → open the app on every device (Dexie v6; v5 devices show «update-app» once a v6 client pushes).
-2. Профиль → Garmin → «Синхронизировать сейчас» → «Посмотреть данные синхронизации» → tap a day → day page.
-3. Eyeball 375px light/dark: day page sections, charts, «Все поля». `/design-sync` still pending (TabBar).
+1. Run `/design-sync` (new components: MetricTile, WeekChart, SegmentBar/LegendRow, RangeScale, ProgressBar, FactGrid; TabBar still pending).
+2. Eyeball on the phone: Home «Тело» → tile → day page section; week day switching; Обзор дня hints; Profile Garmin block.
 ## Broken / open questions
-- Fitness age item exists but the endpoint isn't fetched. Lint: 3 pre-existing react-refresh warnings.
+- `src/sync/engine.test.ts` flaked once under full-suite load ("release is not a function"), passed on rerun.
+- Lint: only pre-existing react-refresh warnings (SegmentBar exports `segmentShares`, Menu, tabIcons, i18n).
+- Fixtures have no night ending 13.11 → Home sleep tile shows no score in screenshots (data, not code).

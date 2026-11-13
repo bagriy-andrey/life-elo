@@ -43,6 +43,8 @@ interface Props {
   garminStatus?: GarminStatus
   /** Test seam: number of cached Garmin days; omitted = live `db.garmin.count()`. */
   garminDayCount?: number
+  /** Opens `/garmin/:day` (the data sheet closes first). */
+  onOpenGarminDay?: (day: string) => void
 }
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
@@ -290,7 +292,7 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
   )
 }
 
-function GarminSection({ initial, dayCount }: { initial?: GarminStatus; dayCount?: number }) {
+function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatus; dayCount?: number; onOpenDay?: (day: string) => void }) {
   const { t, locale } = useI18n()
   const [status, setStatus] = useState<GarminStatus | undefined>(initial)
   const [key, setKey] = useState('')
@@ -410,7 +412,12 @@ function GarminSection({ initial, dayCount }: { initial?: GarminStatus; dayCount
           {syncing ? t('garmin.syncing') : t('garmin.syncNow')}
         </Button>
         {hasData && <Button onClick={() => setDataOpen(true)}>{t('garmin.viewData')}</Button>}
-        <GarminDataSheet open={dataOpen} onClose={() => setDataOpen(false)} lastPullAt={status.lastPullAt} />
+        <GarminDataSheet open={dataOpen} onClose={() => setDataOpen(false)} lastPullAt={status.lastPullAt}
+          onOpenDay={(day) => {
+            setDataOpen(false)
+            onOpenDay?.(day)
+          }}
+        />
         {failed === 'disconnect' && <Notice tone="error">{t('garmin.error.disconnect')}</Notice>}
         <Button onClick={() => setConfirmOpen(true)} disabled={busy || syncing}>{t('garmin.disconnect')}</Button>
         <Dialog open={confirmOpen} title={t('garmin.disconnect')} onClose={() => !busy && setConfirmOpen(false)}>
@@ -517,7 +524,7 @@ function Settings() {
   )
 }
 
-export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus, garminDayCount }: Props) {
+export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus, garminDayCount, onOpenGarminDay }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -568,7 +575,7 @@ export function Profile({ profile, rating, today, accountSection, accountActions
         <h3 className="profile-section-title">{t('account.title')}</h3>
         {accountSection}
       </section>
-      <GarminSection initial={garminStatus} dayCount={garminDayCount} />
+      <GarminSection initial={garminStatus} dayCount={garminDayCount} onOpenDay={onOpenGarminDay} />
       <Settings />
       <DataSection onClear={onClearData} version={version} />
       {accountActions}

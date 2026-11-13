@@ -1,0 +1,177 @@
+{
+ "hrvSummary": {
+  "calendarDate": "2026-11-12",
+  "weeklyAvg": 55,
+  "lastNightAvg": 54,
+  "lastNight5MinHigh": 75,
+  "baseline": {
+   "lowUpper": 53,
+   "balancedLow": 56,
+   "balancedUpper": 64,
+   "markerValue": 0.24308777
+  },
+  "status": "UNBALANCED",
+  "feedbackPhrase": "HRV_UNBALANCED_12",
+  "createTimeStamp": "2026-11-12T06:09:08.139"
+ },
+ "hrvReadings": [
+  {
+   "hrvValue": 35,
+   "readingTimeGMT": "2026-11-11T22:06:33.0",
+   "readingTimeLocal": "2026-11-11T23:06:33.0"
+  },
+  {
+   "hrvValue": 28,
+   "readingTimeGMT": "2026-11-11T22:21:33.0",
+   "readingTimeLocal": "2026-11-11T23:21:33.0"
+  },
+  {
+   "hrvValue": 48,
+   "readingTimeGMT": "2026-11-11T22:41:33.0",
+   "readingTimeLocal": "2026-11-11T23:41:33.0"
+  },
+  {
+   "hrvValue": 40,
+   "readingTimeGMT": "2026-11-11T22:56:33.0",
+   "readingTimeLocal": "2026-11-11T23:56:33.0"
+  },
+  {
+   "hrvValue": 56,
+   "readingTimeGMT": "2026-11-11T23:11:33.0",
+   "readingTimeLocal": "2026-11-12T00:11:33.0"
+  },
+  {
+   "hrvValue": 50,
+   "readingTimeGMT": "2026-11-11T23:31:33.0",
+   "readingTimeLocal": "2026-11-12T00:31:33.0"
+  },
+  {
+   "hrvValue": 51,
+   "readingTimeGMT": "2026-11-11T23:46:33.0",
+   "readingTimeLocal": "2026-11-12T00:46:33.0"
+  },
+  {
+   "hrvValue": 41,
+   "readingTimeGMT": "2026-11-12T00:01:33.0",
+   "readingTimeLocal": "2026-11-12T01:01:33.0"
+  },
+  {
+   "hrvValue": 58,
+   "readingTimeGMT": "2026-11-12T00:16:33.0",
+   "readingTimeLocal": "2026-11-12T01:16:33.0"
+  },
+  {
+   "hrvValue": 42,
+   "readingTimeGMT": "2026-11-12T00:36:33.0",
+   "readingTimeLocal": "2026-11-12T01:36:33.0"
+  },
+  {
+   "hrvValue": 47,
+   "readingTimeGMT": "2026-11-12T00:51:33.0",
+   "readingTimeLocal": "2026-11-12T01:51:33.0"
+  },
+  {
+   "hrvValue": 61,
+   "readingTimeGMT": "2026-11-12T01:06:33.0",
+   "readingTimeLocal": "2026-11-12T02:06:33.0"
+  },
+  {
+   "hrvValue": 58,
+   "readingTimeGMT": "2026-11-12T01:26:33.0",
+   "readingTimeLocal": "2026-11-12T02:26:33.0"
+  },
+  {
+   "hrvValue": 69,
+   "readingTimeGMT": "2026-11-12T01:41:33.0",
+   "readingTimeLocal": "2026-11-12T02:41:33.0"
+  },
+  {
+   "hrvValue": 53,
+   "readingTimeGMT": "2026-11-12T01:56:33.0",
+   "readingTimeLocal": "2026-11-12T02:56:33.0"
+  },
+  {
+   "hrvValue": 62,
+   "readingTimeGMT": "2026-11-12T02:16:33.0",
+   "readingTimeLocal": "2026-11-12T03:16:33.0"
+  },
+  {
+   "hrvValue": 54,
+   "readingTimeGMT": "2026-11-12T02:31:33.0",
+   "readingTimeLocal": "2026-11-12T03:31:33.0"
+  },
+  {
+   "hrvValue": 50,
+   "readingTimeGMT": "2026-11-12T02:46:33.0",
+   "readingTimeLocal": "2026-11-12T03:46:33.0"
+  },
+  {
+   "hrvValue": 58,
+   "readingTimeGMT": "2026-11-12T03:06:33.0",
+   "readingTimeLocal": "2026-11-12T04:06:33.0"
+  },
+  {
+   "hrvValue": 56,
+   "readingTimeGMT": "2026-11-12T03:21:33.0",
+   "readingTimeLocal": "2026-11-12T04:21:33.0"
+  },
+  {
+   "hrvValue": 40,
+   "readingTimeGMT": "2026-11-12T03:36:33.0",
+   "readingTimeLocal": "2026-11-12T04:36:33.0"
+  },
+  {
+   "hrvValue": 56,
+   "readingTimeGMT": "2026-11-12T03:56:33.0",
+   "readingTimeLocal": "2026-11-12T04:56:33.0"
+  },
+  {
+   "hrvValue": 62,
+   "readingTimeGMT": "2026-11-12T04:11:33.0",
+   "readingTimeLocal": "2026-11-12T05:11:33.0"
+  },
+  {
+   "hrvValue": 71,
+   "readingTimeGMT": "2026-11-12T04:26:33.0",
+   "readingTimeLocal": "2026-11-12T05:26:33.0"
+  },
+  {
+   "hrvValue": 52,
+   "readingTimeGMT": "2026-11-12T04:41:33.0",
+   "readingTimeLocal": "2026-11-12T05:41:33.0"
+  },
+  {
+   "hrvValue": 53,
+   "readingTimeGMT": "2026-11-12T05:01:33.0",
+   "readingTimeLocal": "2026-11-12T06:01:33.0"
+  },
+  {
+   "hrvValue": 69,
+   "readingTimeGMT": "2026-11-12T05:16:33.0",
+   "readingTimeLocal": "2026-11-12T06:16:33.0"
+  },
+  {
+   "hrvValue": 66,
+   "readingTimeGMT": "2026-11-12T05:31:33.0",
+   "readingTimeLocal": "2026-11-12T06:31:33.0"
+  },
+  {
+   "hrvValue": 52,
+   "readingTimeGMT": "2026-11-12T05:51:33.0",
+   "readingTimeLocal": "2026-11-12T06:51:33.0"
+  },
+  {
+   "hrvValue": 56,
+   "readingTimeGMT": "2026-11-12T06:06:33.0",
+   "readingTimeLocal": "2026-11-12T07:06:33.0"
+  }
+ ],
+ "startTimestampGMT": "2026-11-11T22:03:50.0",
+ "endTimestampGMT": "2026-11-12T06:06:33.0",
+ "startTimestampLocal": "2026-11-11T23:03:50.0",
+ "endTimestampLocal": "2026-11-12T07:06:33.0",
+ "sleepStartTimestampGMT": "2026-11-11T22:03:50.0",
+ "sleepEndTimestampGMT": "2026-11-12T06:06:50.0",
+ "sleepStartTimestampLocal": "2026-11-11T23:03:50.0",
+ "sleepEndTimestampLocal": "2026-11-12T07:06:50.0"
+}

@@ -1,0 +1,68 @@
+.line-series {
+  --line-series-color: var(--accent);
+  --line-series-band: color-mix(in srgb, var(--pos) 16%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.line-series--empty {
+  min-height: 24px;
+}
+.line-series__readout {
+  min-height: 1.4em;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+.line-series__readout span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.line-series__plot {
+  touch-action: pan-y;
+  cursor: crosshair;
+  min-height: 44px;
+}
+.line-series__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.line-series__band {
+  fill: var(--line-series-band);
+}
+.line-series__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+}
+.line-series__guide {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.line-series__line {
+  fill: none;
+  stroke: var(--line-series-color);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.line-series__dot {
+  fill: var(--line-series-color);
+  stroke: var(--card);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.line-series__lbl {
+  fill: var(--muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}

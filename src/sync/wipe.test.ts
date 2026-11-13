@@ -62,4 +62,11 @@ describe('wipeAccountData', () => {
     await wipeAccountData({ engine, remote })
     expect(await db.garmin.count()).toBe(0)
   })
+
+  it('clears cached garmin detail rows', async () => {
+    await db.garminDetail.put({ day: '2026-11-10', summary: { a: 1 } })
+    const { remote, engine } = setup()
+    await wipeAccountData({ engine, remote })
+    expect(await db.garminDetail.count()).toBe(0)
+  })
 })

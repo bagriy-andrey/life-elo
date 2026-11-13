@@ -22,6 +22,7 @@ import { Spinner, TabBar } from './ui/components'
 import { tabIcons } from './ui/tabIcons'
 import { setBackgroundInert } from './ui/components/focus'
 import { HabitPage } from './ui/HabitPage'
+import { GarminDayPage } from './ui/GarminDayPage'
 import { Habits } from './ui/Habits'
 import { Home } from './ui/Home'
 import { Profile } from './ui/Profile'
@@ -38,8 +39,11 @@ function MainApp() {
   const { t } = useI18n()
   useGarminAutoPull(true)
   const [route, navigate] = useRoute()
+  // Back from the Garmin day page uses history only when the page was opened from inside the app.
+  const garminFromApp = useRef(false)
   const tab = route.tab
   const passwordOpen = route.tab === 'profile' && !!route.password
+  const garminDay = route.tab === 'profile' ? route.garminDay : undefined
   const [now, setNow] = useState(() => new Date())
   const yesterday = reviewDay(now)
   const today = toDayKey(now)
@@ -141,12 +145,26 @@ function MainApp() {
             onDone={() => setTab('home')}
           />
         )}
+        {dataReady && tab === 'profile' && garminDay && (
+          <GarminDayPage
+            key={garminDay}
+            day={garminDay}
+            onBack={() => {
+              if (garminFromApp.current) history.back()
+              else navigate({ tab: 'profile' }, { replace: true })
+            }}
+          />
+        )}
         {dataReady && tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => navigate({ tab: 'profile' })} />}
-        {dataReady && tab === 'profile' && !passwordOpen && profile !== undefined && (
+        {dataReady && tab === 'profile' && !garminDay && !passwordOpen && profile !== undefined && (
           <Profile
             profile={profile}
             rating={result.rating}
             today={today}
+            onOpenGarminDay={(day) => {
+              garminFromApp.current = true
+              navigate({ tab: 'profile', garminDay: day })
+            }}
             onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
             accountSection={<AccountSection engine={syncEngine} />}
             accountActions={<AccountActions engine={syncEngine} onPassword={() => navigate({ tab: 'profile', password: true })} />}

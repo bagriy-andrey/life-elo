@@ -5,11 +5,19 @@ export type Route =
   | { tab: 'home' }
   | { tab: 'review'; /** Day being reviewed; yesterday when omitted. */ day?: string }
   | { tab: 'habits'; /** Habit page when set; the list otherwise. */ id?: string }
-  | { tab: 'profile'; password?: boolean }
+  | { tab: 'profile'; password?: boolean; /** Garmin day page (`/garmin/:day`); lives under the profile tab. */ garminDay?: string }
 
 export type Tab = Route['tab']
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
+
+/** A real calendar day key (`2026-02-30` is rejected). */
+function isDayKey(s: string): boolean {
+  if (!DAY.test(s)) return false
+  const [y, m, d] = s.split('-').map(Number)
+  const dt = new Date(Date.UTC(y, m - 1, d))
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d
+}
 
 /** Unknown paths fall back to home. */
 export function parseRoute(pathname: string): Route {
@@ -24,6 +32,7 @@ export function parseRoute(pathname: string): Route {
       return { tab: 'home' }
     }
   }
+  if (first === 'garmin') return second && isDayKey(second) ? { tab: 'profile', garminDay: second } : { tab: 'profile' }
   if (first === 'profile' && second === undefined) return { tab: 'profile' }
   if (first === 'profile' && second === 'password') return { tab: 'profile', password: true }
   return { tab: 'home' }
@@ -38,7 +47,7 @@ export function routePath(route: Route): string {
     case 'habits':
       return route.id ? `/habits/${encodeURIComponent(route.id)}` : '/habits'
     case 'profile':
-      return route.password ? '/profile/password' : '/profile'
+      return route.garminDay ? `/garmin/${route.garminDay}` : route.password ? '/profile/password' : '/profile'
   }
 }
 

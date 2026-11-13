@@ -46,7 +46,7 @@ const PULL_PAGE = 500
 const DEBOUNCE_MS = 2000
 const synced = new Set<string>(SYNCED_TABLES)
 /** Pull-only tables: written by the server (Edge Function), never queued or pushed. */
-const PULL_ONLY = 'garmin'
+const PULL_ONLY = new Set(['garmin', 'garmin_detail'])
 
 let activeEngine: SyncEngine | null = null
 /** Asks the running engine (if any) for a sync now, e.g. after the server stored fresh Garmin rows. */
@@ -128,9 +128,10 @@ export function createSyncEngine(opts: {
     await applyRemote(async () => {
       if (g !== gen) throw new Cancelled()
       for (const rec of page) {
-        if (rec.tbl === PULL_ONLY) {
-          if (rec.deleted || rec.data == null) await db.garmin.delete(rec.key)
-          else await db.garmin.put({ ...(rec.data as object), day: rec.key } as never)
+        if (PULL_ONLY.has(rec.tbl)) {
+          const cache = rec.tbl === 'garmin' ? db.garmin : db.garminDetail
+          if (rec.deleted || rec.data == null) await cache.delete(rec.key)
+          else await cache.put({ ...(rec.data as object), day: rec.key } as never)
           continue
         }
         if (!synced.has(rec.tbl)) continue

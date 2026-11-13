@@ -1,0 +1,85 @@
+[
+ {
+  "activityId": 25054989486,
+  "startTimeLocal": "2026-11-12 14:19:37",
+  "startTimeGMT": "2026-11-12 13:19:37",
+  "activityType": {
+   "typeId": 13,
+   "typeKey": "strength_training",
+   "parentTypeId": 29
+  },
+  "eventType": {
+   "typeId": 9,
+   "typeKey": "uncategorized"
+  },
+  "isFavorite": false,
+  "isPR": false,
+  "isAutoCalcCalories": false,
+  "isParent": false,
+  "distance": 0.0,
+  "duration": 4146.953125,
+  "elapsedDuration": 4146.953125,
+  "movingDuration": 4146.953125,
+  "averageSpeed": 0.0,
+  "hasImages": false,
+  "calories": 353.0,
+  "bmrCalories": 101.0,
+  "averageHR": 110.0,
+  "maxHR": 148.0,
+  "steps": 250,
+  "privacy": {
+   "typeId": 2,
+   "typeKey": "private"
+  },
+  "hasVideo": false,
+  "beginTimestamp": 1794489577000,
+  "sportTypeId": 4,
+  "aerobicTrainingEffect": 0.8999999761581421,
+  "anaerobicTrainingEffect": 0.0,
+  "isElevationCorrected": false,
+  "summarizedExerciseSets": [
+   {
+    "category": "CURL",
+    "reps": 125,
+    "volume": 0,
+    "duration": 4146953.125,
+    "sets": 1,
+    "maxWeight": 0
+   }
+  ],
+  "isDecoDive": false,
+  "summarizedDiveInfo": {
+   "summarizedDiveGases": []
+  },
+  "manufacturer": "GARMIN",
+  "lapCount": 1,
+  "waterEstimated": 679.0,
+  "totalSets": 1,
+  "activeSets": 1,
+  "totalReps": 125,
+  "trainingEffectLabel": "AEROBIC_BASE",
+  "activityTrainingLoad": 9.869338989257812,
+  "minActivityLapDuration": 4146.953125,
+  "aerobicTrainingEffectMessage": "MINOR_AEROBIC_BENEFIT_6",
+  "anaerobicTrainingEffectMessage": "NO_ANAEROBIC_BENEFIT_0",
+  "splitSummaries": [],
+  "isManualActivity": false,
+  "moderateIntensityMinutes": 45,
+  "vigorousIntensityMinutes": 0,
+  "differenceBodyBattery": -5,
+  "hrTimeInZone_1": 2605.972,
+  "hrTimeInZone_2": 460.996,
+  "hrTimeInZone_3": 26.0,
+  "hrTimeInZone_4": 0.0,
+  "hrTimeInZone_5": 0.0,
+  "endTimeGMT": "2026-11-12 14:28:43",
+  "qualifyingDive": false,
+  "autoCalcCalories": false,
+  "favorite": false,
+  "elevationCorrected": false,
+  "decoDive": false,
+  "pr": false,
+  "parent": false,
+  "manualActivity": false
+ }
+]

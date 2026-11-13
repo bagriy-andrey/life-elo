@@ -16,7 +16,8 @@ Commands: `npm run dev`, `npm test` (Vitest), `npm run lint` (oxlint), `npm run 
 - `src/db/` — Dexie schema. Rating/streaks are never stored; they are derived by replaying confirmed reviews.
 - `src/auth/` — Supabase client, `AuthProvider`, `context.ts` (`useAuth`), validation, error texts.
 - `src/sync/` — outbox, merge rules, remote calls, sync engine (raw records only: reviews, wellbeing, profile, tombstones).
-- `src/garmin/` — Garmin parser (`parse.ts`, also used by the function), api wrapper, UI helpers.
+- `src/garmin/` — Garmin parser (`parse.ts`, also used by the function), api wrapper, UI helpers, day-detail builder and view-model (`garminDayDetailView`).
+- `src/ui/garmin/` — screen-local SVG charts for the Garmin day page (`GarminDayPage.tsx`).
 - `supabase/` — SQL migrations, email templates, `functions/` (`garmin-connect`, `garmin-pull`, `_shared/`).
 - `src/ui/` — screens; `YesterdayReview.tsx` is the mandatory next-morning review modal (mounted from `App.tsx`).
 

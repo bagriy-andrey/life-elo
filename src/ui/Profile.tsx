@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
-import { connect, disconnect, GARMIN_LIFETIMES, status as garminStatusCall } from '../garmin/api'
+import { connect, disconnect, pull as garminPull, GARMIN_LIFETIMES, status as garminStatusCall } from '../garmin/api'
 import type { GarminLifetime, GarminStatus } from '../garmin/api'
 import { keyExpiry } from '../garmin/ui'
 import { saveProfile } from '../db/profile'
@@ -313,7 +313,9 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
     if (r.kind === 'connected') {
       setKey('')
       setVisible(false)
-      setStatus({ kind: 'connected', keyExpiresAt: r.keyExpiresAt, lastPullAt: null })
+      setStatus({ kind: 'connected', keyExpiresAt: r.keyExpiresAt, lastPullAt: null, lastAttemptAt: null, lastError: null })
+      const to = toDayKey(new Date())
+      void garminPull(addDays(to, -6), to, { force: true })
     } else setFailed(r.kind === 'key_invalid' ? 'invalid' : 'connect')
   }
   const doDisconnect = async () => {

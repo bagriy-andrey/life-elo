@@ -81,7 +81,7 @@ describe('Profile Garmin section', () => {
 
   it('connected: status, expiry, disconnect', () => {
     const at = new Date(Date.now() + 100 * 86_400_000).toISOString()
-    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: null })
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: null, lastAttemptAt: null, lastError: null })
     expect(html).toContain('Подключено')
     expect(html).toContain('Ключ действует до')
     expect(html).toContain('Синхронизации ещё не было')
@@ -90,7 +90,7 @@ describe('Profile Garmin section', () => {
   })
 
   it('connected with an expired key shows the invalid state', () => {
-    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: '2020-01-01T00:00:00Z', lastPullAt: null })
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: '2020-01-01T00:00:00Z', lastPullAt: null, lastAttemptAt: null, lastError: null })
     expect(html).toContain('Ключ недействителен')
   })
 

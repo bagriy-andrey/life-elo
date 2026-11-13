@@ -8,6 +8,7 @@ import type { DayReview, Habit } from './domain/types'
 import { RULESET_V2 } from './engine/config'
 import { replay } from './engine/rating'
 import { useAuth } from './auth/context'
+import { useGarminAutoPull } from './garmin/useGarminAutoPull'
 import { useI18n } from './i18n'
 import { claimDevice, isClaimedBy } from './sync/firstSignIn'
 import { createSyncEngine, startSync, useSyncStatus } from './sync/engine'
@@ -35,6 +36,7 @@ const NO_REVIEWS: DayReview[] = []
 
 function MainApp() {
   const { t } = useI18n()
+  useGarminAutoPull(true)
   const [route, navigate] = useRoute()
   const tab = route.tab
   const passwordOpen = route.tab === 'profile' && !!route.password

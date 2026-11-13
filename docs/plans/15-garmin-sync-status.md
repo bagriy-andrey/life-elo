@@ -52,11 +52,12 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
   (coverage helper) + test — verify: verifier review; then the user runs
   `npx supabase db push --remote --yes` and `npx supabase functions deploy garmin-connect garmin-pull --yes`;
   smoke (401 without user) and read-only schema check.
-- [ ] 3. Client logic: `src/garmin/api.ts` (20 s timeout, `pull(from, to, { force })`, ok result carries coverage +
+- [x] 3. Client logic: `src/garmin/api.ts` (20 s timeout, `pull(from, to, { force })`, ok result carries coverage +
   deviceLastSyncAt, error carries stage; status carries lastAttemptAt/lastError), `reviewGarminStatus` in
   `src/domain/garminStatus.ts` + tests, triggers: after connect (7 days) and app start/foreground (throttled) —
   files: `src/garmin/api.ts`, `src/garmin/api.test.ts`, `src/domain/garminStatus.ts`, `src/domain/garminStatus.test.ts`,
   `src/App.tsx`, `src/i18n/{ru,en,uk}.ts` (all new keys for steps 4–5) — verify: `npm test`.
+  Note: connect-trigger lives in Profile.doConnect (force pull of 7 days); reviewGarminStatus takes `rows` (no separate deviceLastSyncAt, it is in the pull result) and returns `{state, reason?}`.
 - [ ] 4. Review status line + «Обновить» — files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`,
   `src/ui/YesterdayReview.test.tsx` — verify: smoke tests per state; existing components only.
 - [ ] 5. Profile: last sync / last attempt + error / «Синхронизировать сейчас» / «Повторить» — files:

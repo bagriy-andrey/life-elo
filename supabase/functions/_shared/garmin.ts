@@ -64,13 +64,15 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 export function createLimiter(max: number): <T>(fn: () => Promise<T>) => Promise<T> {
   let active = 0
   const queue: Array<() => void> = []
+  // A finished task hands its slot straight to the next waiter, so `active` never exceeds `max`.
   const next = () => {
-    active--
-    queue.shift()?.()
+    const waiter = queue.shift()
+    if (waiter) waiter()
+    else active--
   }
   return async <T>(fn: () => Promise<T>): Promise<T> => {
     if (active >= max) await new Promise<void>((resolve) => queue.push(resolve))
-    active++
+    else active++
     try {
       return await fn()
     } finally {

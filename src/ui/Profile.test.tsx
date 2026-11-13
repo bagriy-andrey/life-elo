@@ -15,10 +15,10 @@ const profile = {
   createdAt: Date.UTC(2026, 0, 5),
 } as unknown as ProfileData
 
-const render = (p: ProfileData | null, rating = 12.3, garminStatus?: GarminStatus, garminDayCount?: number) =>
+const render = (p: ProfileData | null, rating = 12.3, garminStatus?: GarminStatus) =>
   renderToString(
     <I18nProvider>
-      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} garminStatus={garminStatus} garminDayCount={garminDayCount} />
+      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} garminStatus={garminStatus} />
     </I18nProvider>,
   )
 
@@ -85,20 +85,32 @@ describe('Profile Garmin section', () => {
     expect(html).toContain('Подключено')
     expect(html).toContain('Ключ действует до')
     expect(html).toContain('Синхронизации ещё не было')
+    expect(html).not.toContain('Последняя синхронизация')
     expect(html).toContain('Отключить')
     expect(html).not.toContain('скоро истечёт')
   })
 
-  it('connected: data button only when Garmin rows exist', () => {
-    const st = { kind: 'connected', keyExpiresAt: null, lastPullAt: null, lastAttemptAt: null, lastError: null } as const
-    expect(render(profile, 1, st, 3)).toContain('Посмотреть данные синхронизации')
-    expect(render(profile, 1, st, 0)).not.toContain('Посмотреть данные синхронизации')
-    expect(render(profile, 1, { kind: 'not_connected' }, 3)).not.toContain('Посмотреть данные синхронизации')
+  it('connected: no data-sheet entry, sync status once, round sync button', () => {
+    const at = new Date(Date.now() + 100 * 86_400_000).toISOString()
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: new Date().toISOString(), lastAttemptAt: null, lastError: null })
+    expect(html).not.toContain('Посмотреть данные синхронизации')
+    expect(html.match(/Синхронизировано в/g)).toHaveLength(1)
+    expect(html).toContain('aria-label="Синхронизировать сейчас"')
+    expect(html).toContain('garmin-sync-btn')
+    expect(html).toContain('Шаги, сон и тренировки предлагают ответы')
+    expect(html).toContain('btn-quiet')
   })
 
   it('connected with an expired key shows the invalid state', () => {
     const html = render(profile, 1, { kind: 'connected', keyExpiresAt: '2020-01-01T00:00:00Z', lastPullAt: null, lastAttemptAt: null, lastError: null })
     expect(html).toContain('Ключ недействителен')
+    expect(html).not.toContain('garmin-sync-btn')
+  })
+
+  it('expiring key shows the warning notice', () => {
+    const at = new Date(Date.now() + 2 * 86_400_000).toISOString()
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: null, lastAttemptAt: null, lastError: null })
+    expect(html).toContain('скоро истечёт')
   })
 
   it('status error is neutral text with retry', () => {
@@ -110,7 +122,7 @@ describe('Profile Garmin section', () => {
   it('connected with success: last sync and sync-now, no failure line', () => {
     const at = new Date(Date.now() + 100 * 86_400_000).toISOString()
     const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: '2026-11-13T08:00:00Z', lastAttemptAt: '2026-11-13T08:00:00Z', lastError: null })
-    expect(html).toContain('Последняя синхронизация')
+    expect(html).toContain('Синхронизировано')
     expect(html).toContain('Синхронизировать сейчас')
     expect(html).not.toContain('не удалась')
   })

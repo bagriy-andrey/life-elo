@@ -1,10 +1,9 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
-import { db } from '../db/db'
 import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
 import { connect, disconnect, pull as garminPull, GARMIN_LIFETIMES, status as garminStatusCall } from '../garmin/api'
 import type { GarminErrorReason, GarminLifetime, GarminStatus } from '../garmin/api'
+import { cacheFromStatus, loadStatusCache, saveStatusCache } from '../garmin/statusCache'
 import { keyExpiry } from '../garmin/ui'
 import { saveProfile } from '../db/profile'
 import { addDays, reviewDay, toDayKey } from '../domain/day'
@@ -13,16 +12,17 @@ import type { Profile as ProfileData } from '../domain/profile'
 import type { DayKey, DayReview, Habit } from '../domain/types'
 import { RULESET_V1 } from '../engine/config'
 import { useI18n } from '../i18n'
+import type { I18n } from '../i18n'
 import { loadPrefs, PREFS_KEY, savePrefs, THEMES } from '../i18n/prefs'
 import type { Theme } from '../i18n/prefs'
 import { LANGS } from '../i18n/types'
 import { APP_VERSION } from '../appVersion'
 import { Avatar, BottomSheet, Button, Card, Dialog, Field, Notice, PasswordField, SegmentedControl, Select, Spinner } from './components'
 import { cx } from './components/cx'
+import { formatClock } from './format'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
 import { applyTheme } from './prefs'
-import { GarminDataSheet } from './GarminDataSheet'
 import './Profile.css'
 
 interface Props {
@@ -41,10 +41,6 @@ interface Props {
   onClearData: () => Promise<void>
   /** Initial Garmin status (test seam); omitted = loaded from the server on mount. */
   garminStatus?: GarminStatus
-  /** Test seam: number of cached Garmin days; omitted = live `db.garmin.count()`. */
-  garminDayCount?: number
-  /** Opens `/garmin/:day` (the data sheet closes first). */
-  onOpenGarminDay?: (day: string) => void
 }
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
@@ -292,7 +288,21 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
   )
 }
 
-function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatus; dayCount?: number; onOpenDay?: (day: string) => void }) {
+const SYNC_ICON = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+    <path d="M21 3v5h-5" />
+  </svg>
+)
+
+/** «Синхронизировано в 13:57» / «… вчера в 13:57» (more than 24 h old). */
+function formatSyncedLine(iso: string, now: Date, t: I18n['t']): string {
+  const at = new Date(iso)
+  const key = now.getTime() - at.getTime() > 24 * 3600_000 ? 'garmin.syncedYesterdayAt' : 'garmin.syncedAt'
+  return t(key, { time: formatClock(at) })
+}
+
+function GarminSection({ initial }: { initial?: GarminStatus }) {
   const { t, locale } = useI18n()
   const [status, setStatus] = useState<GarminStatus | undefined>(initial)
   const [key, setKey] = useState('')
@@ -303,14 +313,19 @@ function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatu
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [now] = useState(() => Date.now())
   const [syncing, setSyncing] = useState(false)
-  const [dataOpen, setDataOpen] = useState(false)
-  const liveCount = useLiveQuery(() => db.garmin.count(), [])
-  const hasData = (dayCount ?? liveCount ?? 0) > 0
   const [syncReason, setSyncReason] = useState<GarminErrorReason | 'timeout' | 'offline' | null>(null)
+  /** Keeps the per-device status cache (read by the day page) in step with fresh answers. */
+  const remember = (s: GarminStatus) => {
+    const next = cacheFromStatus(s, loadStatusCache())
+    if (next) saveStatusCache(next)
+  }
   useEffect(() => {
     if (initial) return
     let live = true
-    void garminStatusCall().then((s) => live && setStatus(s))
+    void garminStatusCall().then((s) => {
+      remember(s)
+      if (live) setStatus(s)
+    })
     return () => {
       live = false
     }
@@ -321,7 +336,9 @@ function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatu
     if (retrying.current) return
     retrying.current = true
     setStatus(undefined)
-    setStatus(await garminStatusCall())
+    const s = await garminStatusCall()
+    remember(s)
+    setStatus(s)
     retrying.current = false
   }
   const runPull = async () => {
@@ -332,6 +349,7 @@ function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatu
     if (r.kind === 'error') setSyncReason(r.stage)
     else if (r.kind === 'key_invalid' || r.kind === 'timeout' || r.kind === 'offline') setSyncReason(r.kind)
     const s = await garminStatusCall()
+    remember(s)
     if (s.kind === 'connected') setStatus((cur) => (cur?.kind === 'connected' ? s : cur))
     setSyncing(false)
   }
@@ -386,40 +404,53 @@ function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatu
       (!status.lastPullAt || new Date(status.lastAttemptAt).getTime() > new Date(status.lastPullAt).getTime())
     const when = (iso: string) => new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })
     const last = status.lastPullAt
-      ? t('garmin.lastSync', { time: new Date(status.lastPullAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) })
+      ? formatSyncedLine(status.lastPullAt, new Date(now), t)
       : t('garmin.neverSynced')
     body = (
       <>
         {expiry === 'expired' ? (
-          <Notice tone="error">
-            <strong>{t('garmin.keyInvalid')}</strong> {t('garmin.keyInvalidHint')}
-          </Notice>
+          <>
+            <Notice tone="error">
+              <strong>{t('garmin.keyInvalid')}</strong> {t('garmin.keyInvalidHint')}
+            </Notice>
+            <p className="muted">{t('garmin.intro')}</p>
+          </>
         ) : (
           <>
-            <strong>{t('garmin.connected')}</strong>
-            {expires && <span className="muted">{t('garmin.expiresOn', { date: expires })}</span>}
+            <div className="garmin-status-row">
+              <div className="garmin-status-text">
+                <span className="garmin-connected">
+                  <span className="garmin-dot" aria-hidden="true" />
+                  <strong>{t('garmin.connected')}</strong>
+                </span>
+                <span className="muted garmin-synced">{last}</span>
+              </div>
+              <button
+                type="button"
+                className={'garmin-sync-btn'}
+                aria-label={t('garmin.syncNow')}
+                aria-busy={syncing}
+                disabled={busy || syncing}
+                onClick={syncNow}
+              >
+                {syncing ? <Spinner size={18} /> : SYNC_ICON}
+              </button>
+            </div>
+            <p className="muted">{t('garmin.intro')}</p>
+            {expires && <span className="muted garmin-expires">{t('garmin.expiresOn', { date: expires })}</span>}
             {expiry === 'soon' && <Notice tone="error">{t('garmin.expiresSoon', { date: expires })}</Notice>}
           </>
         )}
-        <span className="muted">{last}</span>
         {lastFailed && status.lastAttemptAt && status.lastError && (
           <span className="garmin-fail">
             {t('garmin.lastAttemptFailed', { time: when(status.lastAttemptAt), reason: t(`garmin.reason.${status.lastError}`) })}
           </span>
         )}
         {syncReason && <span className="garmin-fail">{t('garmin.status.error', { reason: t(`garmin.reason.${syncReason}`) })}</span>}
-        <Button onClick={syncNow} loading={syncing} disabled={busy || syncing}>
-          {syncing ? t('garmin.syncing') : t('garmin.syncNow')}
-        </Button>
-        {hasData && <Button onClick={() => setDataOpen(true)}>{t('garmin.viewData')}</Button>}
-        <GarminDataSheet open={dataOpen} onClose={() => setDataOpen(false)} lastPullAt={status.lastPullAt}
-          onOpenDay={(day) => {
-            setDataOpen(false)
-            onOpenDay?.(day)
-          }}
-        />
         {failed === 'disconnect' && <Notice tone="error">{t('garmin.error.disconnect')}</Notice>}
-        <Button onClick={() => setConfirmOpen(true)} disabled={busy || syncing}>{t('garmin.disconnect')}</Button>
+        <Button variant="quiet" className="neg" onClick={() => setConfirmOpen(true)} disabled={busy || syncing}>
+          {t('garmin.disconnect')}
+        </Button>
         <Dialog open={confirmOpen} title={t('garmin.disconnect')} onClose={() => !busy && setConfirmOpen(false)}>
           <div className="dialog-actions">
             <Button variant="danger" className="clear-btn" onClick={doDisconnect} loading={busy}>
@@ -467,7 +498,7 @@ function GarminSection({ initial, dayCount, onOpenDay }: { initial?: GarminStatu
     <section className="profile-section">
       <h3 className="profile-section-title">{t('garmin.title')}</h3>
       <Card className="stack">
-        <p className="muted">{t('garmin.intro')}</p>
+        {status?.kind !== 'connected' && <p className="muted">{t('garmin.intro')}</p>}
         {body}
       </Card>
     </section>
@@ -524,7 +555,7 @@ function Settings() {
   )
 }
 
-export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus, garminDayCount, onOpenGarminDay }: Props) {
+export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -575,7 +606,7 @@ export function Profile({ profile, rating, today, accountSection, accountActions
         <h3 className="profile-section-title">{t('account.title')}</h3>
         {accountSection}
       </section>
-      <GarminSection initial={garminStatus} dayCount={garminDayCount} onOpenDay={onOpenGarminDay} />
+      <GarminSection initial={garminStatus} />
       <Settings />
       <DataSection onClear={onClearData} version={version} />
       {accountActions}

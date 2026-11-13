@@ -176,10 +176,6 @@ function MainApp() {
             profile={profile}
             rating={result.rating}
             today={today}
-            onOpenGarminDay={(day) => {
-              garminFromApp.current = true
-              navigate({ tab: 'home', garminDay: day })
-            }}
             onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
             accountSection={<AccountSection engine={syncEngine} />}
             accountActions={<AccountActions engine={syncEngine} onPassword={() => navigate({ tab: 'profile', password: true })} />}

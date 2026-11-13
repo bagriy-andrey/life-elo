@@ -1,3 +1,4 @@
+import { buildDetail } from '../../../src/garmin/detail.ts'
 import { coverage, deviceLastSyncAt, parseGarmin } from '../../../src/garmin/parse.ts'
 import {
   adminClient,
@@ -85,7 +86,17 @@ Deno.serve(async (req) => {
     const fetchAll = async (tok: string) => {
       stage = 'garmin'
       const dates = eachDay(from, to)
-      const [steps, activities, summaries, sleeps] = await Promise.all([
+      // A failing detail call only drops that part (stage name logged, never bodies); 401/403 still means key_invalid.
+      const optional = async (name: string, path: string): Promise<unknown> => {
+        try {
+          return await garminGet(path, tok)
+        } catch (e) {
+          if (e instanceof KeyInvalidError) throw e
+          console.error(`garmin-pull detail ${name} ${e instanceof Error ? e.name : 'unknown'}`)
+          return null
+        }
+      }
+      const [steps, activities, summaries, sleeps, hrs, hrvs, spo2s, bodyBattery] = await Promise.all([
         garminGet(`/usersummary-service/stats/steps/daily/${from}/${to}`, tok),
         garminGet(
           `/activitylist-service/activities/search/activities?start=0&limit=100&startDate=${from}&endDate=${to}`,
@@ -93,12 +104,24 @@ Deno.serve(async (req) => {
         ),
         garminGet(`/usersummary-service/v2/dailysummaries?startDate=${from}&endDate=${summaryEnd}`, tok),
         Promise.all(dates.map((d) => garminGet(`/sleep-service/sleep/dailySleep?date=${d}`, tok))),
+        Promise.all(dates.map((d) => optional('heartRate', `/wellness-service/wellness/dailyHeartRate?date=${d}`))),
+        Promise.all(dates.map((d) => optional('hrv', `/hrv-service/hrv/${d}`))),
+        Promise.all(
+          dates.map((d) => optional('spo2', `/wellness-service/wellness/daily/spo2acclimation/${d}`)),
+        ),
+        optional('bodyBattery', `/wellness-service/wellness/bodyBattery/reports/daily?startDate=${from}&endDate=${to}`),
       ])
       const sleepByDate: Record<string, unknown> = {}
+      const hrByDate: Record<string, unknown> = {}
+      const hrvByDate: Record<string, unknown> = {}
+      const spo2ByDate: Record<string, unknown> = {}
       dates.forEach((d, i) => {
         if (sleeps[i]) sleepByDate[d] = sleeps[i]
+        if (hrs[i]) hrByDate[d] = hrs[i]
+        if (hrvs[i]) hrvByDate[d] = hrvs[i]
+        if (spo2s[i]) spo2ByDate[d] = spo2s[i]
       })
-      return { steps, activities, summaries, sleepByDate }
+      return { steps, activities, summaries, sleepByDate, hrByDate, hrvByDate, spo2ByDate, bodyBattery }
     }
 
     let raw
@@ -124,11 +147,34 @@ Deno.serve(async (req) => {
       .filter(([date]) => date >= from && date <= to)
       .map(([date, data]) => ({ key: date, data }))
 
+    const detailRows = eachDay(from, to)
+      .map((date) => {
+        const data = buildDetail(
+          {
+            summaries: raw.summaries,
+            sleep: raw.sleepByDate[date],
+            heartRate: raw.hrByDate[date],
+            hrv: raw.hrvByDate[date],
+            spo2: raw.spo2ByDate[date],
+            bodyBattery: raw.bodyBattery,
+            activities: raw.activities,
+          },
+          date,
+        )
+        return { key: date, data }
+      })
+      .filter((r) => Object.keys(r.data).length > 0)
+
     stage = 'db'
-    if (rows.length > 0) {
+    for (const [tbl, list] of [
+      ['garmin', rows],
+      ['garmin_detail', detailRows],
+    ] as const) {
+      if (list.length === 0) continue
       const { error: upErr } = await admin.rpc('garmin_upsert_records', {
         p_user: userId,
-        p_rows: rows,
+        p_tbl: tbl,
+        p_rows: list,
         p_schema: RECORD_SCHEMA,
       })
       if (upErr) throw upErr
@@ -140,6 +186,7 @@ Deno.serve(async (req) => {
       lastPullAt,
       deviceLastSyncAt: deviceLastSyncAt(raw.summaries),
       coverage: coverage(days, from, to),
+      detailDays: detailRows.length,
     })
   } catch (e) {
     console.error(`garmin-pull failed: ${stage} ${e instanceof Error ? e.name : 'unknown'}`)

@@ -189,6 +189,7 @@
   полные ли данные за вчера: «полные», если часы выгрузили данные после местной полуночи (`wellnessChronology`
   из `dailysummaries`, иначе есть запись сна за сегодня) — см. `docs/specs/13-garmin.md`.
 - Записи Garmin пишутся RPC `garmin_upsert_records` (security definer, только `service_role`), а не прямым Postgres-подключением: оно не работало из Edge Functions.
+- **Детали дня** (`20261113020000_garmin_detail.sql`): таблица записей `garmin_detail` (очищенные данные дня: сводка, сон, пульс, HRV, SpO2, Body Battery, тренировки; ~45 КБ/день, схема записей 5), пишет только `garmin-pull`. RPC теперь `garmin_upsert_records(p_user, p_tbl, p_rows, p_schema)` и не меняет `rev` у неизменённых строк. Выкат: `db push`, затем `functions deploy garmin-pull`; между ними старая функция вызывает удалённую 3-аргументную RPC, и pull даёт этап `db` (безвредно, повторить после деплоя). За день: пульс, HRV, SpO2 по одному запросу, Body Battery одним запросом на диапазон; сбой любого из них только убирает эту часть.
 - **Vault.** Ключ и токен Garmin хранятся зашифрованными в Supabase Vault; в `garmin_credentials` только id секретов.
   Доступ только через RPC `garmin_*` (security definer, только `service_role`) из Edge Functions; секреты не логируются.
   Отключение и «Удалить все данные» удаляют и секреты Vault.

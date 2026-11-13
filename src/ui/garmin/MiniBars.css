@@ -1,0 +1,20 @@
+.mini-bars {
+  --mini-bars-color: var(--accent);
+  min-width: 0;
+}
+.mini-bars--empty {
+  min-height: 24px;
+}
+.mini-bars__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.mini-bars__bar {
+  fill: var(--mini-bars-color);
+}
+.mini-bars__lbl {
+  fill: var(--muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}

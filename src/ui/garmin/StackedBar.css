@@ -1,11 +1,11 @@
 .stacked-bar {
   /* Ordered sequential scale from the accent: strongest first, fading toward the card. */
   --seq-0: var(--accent);
-  --seq-1: color-mix(in srgb, var(--accent) 80%, var(--card));
-  --seq-2: color-mix(in srgb, var(--accent) 62%, var(--card));
-  --seq-3: color-mix(in srgb, var(--accent) 46%, var(--card));
-  --seq-4: color-mix(in srgb, var(--accent) 32%, var(--card));
-  --seq-5: color-mix(in srgb, var(--accent) 20%, var(--card));
+  --seq-1: color-mix(in srgb, var(--accent) 84%, var(--card));
+  --seq-2: color-mix(in srgb, var(--accent) 70%, var(--card));
+  --seq-3: color-mix(in srgb, var(--accent) 57%, var(--card));
+  --seq-4: color-mix(in srgb, var(--accent) 46%, var(--card));
+  --seq-5: color-mix(in srgb, var(--accent) 36%, var(--card));
   display: flex;
   flex-direction: column;
   gap: var(--space-10);

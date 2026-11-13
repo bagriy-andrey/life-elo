@@ -132,6 +132,10 @@ rating engine is not touched.
 5. Sync status shown twice — `src/ui/Account.tsx:104-119` («Синхронизация» row + `↻`) and `src/ui/Profile.tsx:388-390,404` (`garmin.lastSync`), plus the header of `GarminDataSheet.tsx:43-47`. Fix in steps 16–17 (see question 2 about the app-sync indicator).
 
 ## Open questions
+None — all answered 2026-11-13 (see «User decisions» above). Original questions kept for context:
+
+<details>
+
 (RU, for the user; defaults are used if you do not answer, except items 1–2 which block steps.)
 1. Привязка привычек: вариант А (без изменения модели; рекомендую) или Б (ваша `op/value` модель)? Блокирует шаги 18–19. Нужно ли в варианте А расширять метрики (`sleepDuration`, «любая тренировка»)?
 2. «Аккаунт»: убрать строку статуса синхронизации приложения (с кнопкой ↻), как на макете? По умолчанию убираем строку, а ошибку синхронизации показываем `Notice` только когда она есть, кнопка повторной синхронизации остаётся там же только в состоянии ошибки.
@@ -143,6 +147,8 @@ rating engine is not touched.
 8. Макет «Обзор дня» — список привычек (это `Review.tsx`), а обязательная утренняя модалка — карточки со свайпом. План: в `Review.tsx` — макет целиком; в модалке — только строка-подсказка с доказательством (предвыбора в свайп-карточке нет). Ок?
 9. Мои решения без вашего ввода (см. Decisions): цвета уровней стресса «высокий → --neg», «активность → --pos», «низкий → --tier-strong», «средний → --warn», «покой → --tier-weak», «не определено → --muted»; иконки плиток — inline-SVG; подпись «без привязки» не показываем (по ТЗ).
 Scoring coefficients are out of scope (nothing here changes Elo).
+
+</details>
 
 ## Decisions (defaults, no user input needed)
 - **Rating untouched:** no edits in `src/engine/`; prefill is initial value only; `confirmDay` is called only from the user's tap.

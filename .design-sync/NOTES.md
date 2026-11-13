@@ -37,6 +37,10 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
   A preview with only the closed ⋮ trigger trips `[RENDER_THIN]` (a 44px icon button paints almost nothing).
   `dialog-actions--row` (two buttons side by side) is documented only in `dtsPropsFor.Dialog`, not in conventions.md.
 
+- Plan 18 (Garmin redesign) adds MetricTile, WeekChart, SegmentBar + LegendRow, RangeScale, ProgressBar, FactGrid: all i18n-free
+  (texts are props), all have `dtsPropsFor` entries and previews (`cardMode: column`). WeekChart preview needs a 326px-wide box;
+  `goalLabel` ≤5 chars. SegmentBar colors are `var(--tier-*|pos|neg|warn|muted)` tokens.
+
 ## Known render warns
 - none
 

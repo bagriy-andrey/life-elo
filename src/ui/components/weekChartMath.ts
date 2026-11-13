@@ -18,6 +18,8 @@ export const SLEEP_BOTTOM = 104
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi)
 const finite = (n: number | undefined): n is number => typeof n === 'number' && Number.isFinite(n)
 const CHAR_W = 6
+/** Max goal-label length that fits the right gutter. */
+export const GOAL_LABEL_MAX = 5
 
 export const colCenter = (i: number) => (i + 0.5) * COL_W
 

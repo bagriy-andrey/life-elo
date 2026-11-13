@@ -1,6 +1,6 @@
 import { cx } from './cx'
 import {
-  BAR_W, colCenter, gutterLabelX, GUTTER_X, PLOT_PCT, PLOT_W, SLEEP_H, SLEEP_TICKS, sleepStrip,
+  BAR_W, colCenter, GOAL_LABEL_MAX, gutterLabelX, GUTTER_X, PLOT_PCT, PLOT_W, SLEEP_H, SLEEP_TICKS, sleepStrip,
   sleepY, STEPS_BASE, STEPS_H, stepsBar, stepsScale, stepsY, VB_W,
 } from './weekChartMath'
 import './WeekChart.css'
@@ -10,10 +10,11 @@ export interface WeekChartDay {
   weekdayLabel: string
   dayNum: string | number
   steps?: number
-  goal?: number
   /** Sleep strip as fractions of the 22:00-10:00 axis (clamped). */
   sleep?: { startFrac: number; endFrac: number }
   state: 'selected' | 'past' | 'future' | 'today'
+  /** Set when the day is today even though state is 'selected' (aria-current="date"). */
+  isToday?: boolean
   /** Accessible name with the values in words (caller-localized). */
   ariaLabel: string
   /** Short text above the selected day's bar, e.g. «40». */
@@ -24,7 +25,7 @@ interface Props {
   /** Seven days, Monday first. */
   days: WeekChartDay[]
   stepsGoal?: number
-  /** Goal line label in the right gutter, e.g. «11,4к». */
+  /** Goal line label in the right gutter; must be short (≤5 chars, e.g. «11,4к»), longer text is truncated. */
   goalLabel?: string
   stepsCaption: string
   sleepCaption: string
@@ -47,7 +48,9 @@ export function WeekChart({ days, stepsGoal, goalLabel, stepsCaption, sleepCapti
             <>
               <line className="wchart-goal" x1="0" x2={PLOT_W} y1={goalY} y2={goalY} />
               {goalLabel && (
-                <text className="wchart-text" x={gutterLabelX(goalLabel)} y={goalY + 4}>{goalLabel}</text>
+                <text className="wchart-text" x={gutterLabelX(goalLabel.slice(0, GOAL_LABEL_MAX))} y={goalY + 4}>
+                  {goalLabel.slice(0, GOAL_LABEL_MAX)}
+                </text>
               )}
             </>
           )}
@@ -103,7 +106,7 @@ export function WeekChart({ days, stepsGoal, goalLabel, stepsCaption, sleepCapti
             className={cx('wchart-day', `wchart-day-${d.state}`)}
             disabled={d.state === 'future'}
             aria-pressed={d.state === 'future' ? undefined : d.state === 'selected'}
-            aria-current={d.state === 'selected' ? 'true' : d.state === 'today' ? 'date' : undefined}
+            aria-current={d.isToday || d.state === 'today' ? 'date' : undefined}
             aria-label={d.ariaLabel}
             onClick={() => onSelect(d.key)}
           >

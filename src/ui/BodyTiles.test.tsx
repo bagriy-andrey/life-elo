@@ -32,7 +32,7 @@ const render = (state: BodyState, r?: GarminDay, det?: never, syncAt?: string | 
         today={TODAY}
         digest={state === 'ready' ? garminDayDigest(TODAY, TODAY, r, det) : undefined}
         syncAt={syncAt}
-        now={now}
+        now={now ?? new Date()}
         onOpen={noop}
         onConnect={noop}
       />

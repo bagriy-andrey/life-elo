@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react'
+import { useState, type MouseEvent, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import type { GarminDetail } from '../domain/types'
@@ -21,7 +21,7 @@ interface ViewProps {
   digest?: GarminDayDigest
   /** ISO time of the last Garmin sync; hidden when unknown. */
   syncAt?: string | null
-  now?: Date
+  now: Date
   onOpen: (section: GarminSection) => void
   onConnect: () => void
 }
@@ -65,7 +65,7 @@ export function BodyTilesView({ state, today, digest, syncAt, now, onOpen, onCon
   const first = workouts[0]
   const unitMin = tk('garmin.day.unit.min')
   const loadingProps = { loading, loadingLabel: t('common.loading') }
-  const syncText = syncAt ? formatSyncTime(syncAt, now ?? new Date(), t) : undefined
+  const syncText = syncAt ? formatSyncTime(syncAt, now, t) : undefined
 
   return (
     <>
@@ -164,9 +164,11 @@ export function BodyTiles({ today, onOpenGarmin, onOpenProfile }: Props) {
     const [row, detail] = await Promise.all([db.garmin.get(today), db.garminDetail.get(today)])
     return { row, detail }
   }, [today])
+  const [now] = useState(() => new Date())
+  // «Not connected» only when the status says so; while it is unknown and there is nothing to show, stay loading.
   let state: BodyState = 'ready'
-  if (cache?.connected === false || (cache === undefined && data && !data.row && !data.detail)) state = 'notConnected'
-  else if (!data) state = 'loading'
+  if (cache?.connected === false) state = 'notConnected'
+  else if (!data || (cache === undefined && !data.row && !data.detail)) state = 'loading'
   let digest: GarminDayDigest | undefined
   if (data) {
     const { day: _day, ...rest } = (data.detail ?? {}) as GarminDetail & { day?: string }
@@ -179,6 +181,7 @@ export function BodyTiles({ today, onOpenGarmin, onOpenProfile }: Props) {
       today={today}
       digest={digest}
       syncAt={cache?.deviceLastSyncAt ?? cache?.lastPullAt ?? null}
+      now={now}
       onOpen={(s) => onOpenGarmin(today, s)}
       onConnect={onOpenProfile}
     />

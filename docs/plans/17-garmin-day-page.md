@@ -1,6 +1,6 @@
 # 17 — Garmin day page (all data, sections + charts)
 
-Status: done
+Status: approved
 Design input: none
 
 ## Why

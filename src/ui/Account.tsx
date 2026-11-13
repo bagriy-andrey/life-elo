@@ -10,16 +10,13 @@ import { useSyncStatus, type SyncEngine } from '../sync/engine'
 import { performLogout } from '../sync/logout'
 import { clearLocalData } from '../sync/outbox'
 import { Button, Card, Dialog, Field, Notice } from './components'
-import { syncView } from './syncView'
 import './Profile.css'
 
-/** Account rows: login email + sync status with a round resync button. */
+/** Account rows: login method + email. Sync status shows only when it needs attention (error → resync). */
 export function AccountSection({ engine }: { engine: SyncEngine }) {
   const { user, changeEmail } = useAuth()
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
   const status = useSyncStatus()
-  const { tone, label } = syncView(status, t, locale)
-  const syncing = status.kind === 'syncing'
   const canChange = canChangeLoginEmail(user)
   const [open, setOpen] = useState(false)
   const [next, setNext] = useState('')
@@ -101,22 +98,15 @@ export function AccountSection({ engine }: { engine: SyncEngine }) {
           </div>
         </form>
       </Dialog>
-      <div className="profile-row">
-        <span className="muted">{t('account.sync')}</span>
-        <span className="sync-row">
-          <span className={`sync-dot ${tone}`} aria-hidden="true" />
-          <span className="profile-row-value">{label}</span>
-          <button
-            type="button"
-            className={`sync-btn${syncing ? ' spinning' : ''}`}
-            aria-label={t('account.resync')}
-            disabled={syncing}
-            onClick={() => void engine.resync()}
-          >
-            ↻
-          </button>
-        </span>
-      </div>
+      {status.kind === 'error' && (
+        <div className="stack-sm sync-problem">
+          <Notice tone="error">{t('sync.error')}</Notice>
+          <Button className="clear-btn" onClick={() => void engine.resync()}>
+            {t('account.resync')}
+          </Button>
+        </div>
+      )}
+      {status.kind === 'update-required' && <Notice tone="error">{t('sync.updateRequired')}</Notice>}
     </Card>
   )
 }

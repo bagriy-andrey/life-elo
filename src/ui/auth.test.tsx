@@ -44,14 +44,14 @@ describe('Account smoke render', () => {
       </>,
     ))
 
-  it('shows email, heading and status for idle / offline / error', () => {
+  it('shows email and heading; sync notice only on error', () => {
     let html = render()
     expect(html).toContain('a@b.co')
     expect(html).toContain('Аккаунт')
-    expect(html).toContain('Ещё не синхронизировано')
+    expect(html).not.toContain('Синхронизаци')
     expect(html).not.toContain('auth-link')
     syncStatusStore.set({ kind: 'offline' })
-    expect(render()).toContain('Нет сети')
+    expect(render()).not.toContain('Нет сети')
     syncStatusStore.set({ kind: 'error' })
     html = render()
     expect(html).toContain('Ошибка синхронизации')

@@ -1,4 +1,4 @@
-import type { Habit, GarminDay, GarminMetric } from '../domain/types'
+import type { Habit, GarminMetric } from '../domain/types'
 import type { RuleChoice } from '../domain/habitSetup'
 import type { HabitDirection } from '../domain/types'
 
@@ -55,27 +55,4 @@ export function keyExpiry(keyExpiresAt: string | null, now: number): KeyExpiry {
   if (Number.isNaN(at)) return 'unknown'
   if (at <= now) return 'expired'
   return at - now < 7 * DAY_MS ? 'soon' : 'ok'
-}
-
-export interface GarminDayView {
-  day: string
-  steps?: number
-  /** Sleep of the night that ended on `day` (Garmin dates a night by its wake day). */
-  sleepStart?: string
-  sleepEnd?: string
-  activities: { type: string; minutes: number }[]
-}
-
-/** Newest-first view of the cached Garmin rows (format-agnostic), at most `limit` days. */
-export function garminDaysView(rows: readonly (GarminDay & { day: string })[], limit = 30): GarminDayView[] {
-  return [...rows]
-    .sort((a, b) => (a.day < b.day ? 1 : a.day > b.day ? -1 : 0))
-    .slice(0, limit)
-    .map((r) => ({
-      day: r.day,
-      ...(r.steps !== undefined && { steps: r.steps }),
-      ...(r.sleepStart !== undefined && { sleepStart: r.sleepStart }),
-      ...(r.sleepEnd !== undefined && { sleepEnd: r.sleepEnd }),
-      activities: (r.activities ?? []).map((a) => ({ type: a.type, minutes: a.minutes })),
-    }))
 }

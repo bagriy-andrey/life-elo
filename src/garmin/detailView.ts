@@ -82,7 +82,7 @@ export interface DayDetailView {
 export const SLEEP_QUALIFIERS = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR'] as const
 export const HRV_STATUSES = ['BALANCED', 'UNBALANCED', 'LOW', 'POOR'] as const
 export const STRESS_QUALIFIERS = ['calm', 'balanced', 'stressful', 'very_stressful', 'unknown'] as const
-export const BB_EVENT_TYPES = ['SLEEP', 'ACTIVITY', 'RECOVERY'] as const
+export const BB_EVENT_TYPES = ['ACTIVITY', 'RECOVERY'] as const
 export const SLEEP_SCORE_KEYS = [
   'totalDuration',
   'stress',

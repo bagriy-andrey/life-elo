@@ -1,6 +1,6 @@
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import type { SyncEngine } from '../sync/engine'
+import { syncStatusStore, type SyncEngine } from '../sync/engine'
 import { AccountSection } from './Account'
 import { withAuth } from './authTestUtils'
 
@@ -21,5 +21,24 @@ describe('AccountSection login email', () => {
     expect(html).toContain('Вход через Google')
     expect(html).not.toContain('Сменить')
     expect(html).toContain('g@b.co')
+  })
+})
+
+describe('AccountSection sync row', () => {
+  it('has no sync status row while idle', () => {
+    const html = renderToString(withAuth(<AccountSection engine={engine} />, { user: emailUser }))
+    expect(html).not.toContain('Синхронизация')
+    expect(html).not.toContain('Синхронизировано')
+    expect(html).not.toContain('sync-btn')
+  })
+  it('shows a notice and resync only on error', () => {
+    syncStatusStore.set({ kind: 'error' })
+    try {
+      const html = renderToString(withAuth(<AccountSection engine={engine} />, { user: emailUser }))
+      expect(html).toContain('Ошибка синхронизации')
+      expect(html).toContain('Синхронизировать заново')
+    } finally {
+      syncStatusStore.set({ kind: 'idle' })
+    }
   })
 })

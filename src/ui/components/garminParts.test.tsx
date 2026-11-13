@@ -1,3 +1,4 @@
+// @ts-ignore node builtin, no @types/node in this project
 import { readFileSync } from 'node:fs'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'

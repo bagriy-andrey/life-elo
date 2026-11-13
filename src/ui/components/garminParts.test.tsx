@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { FactGrid, ProgressBar } from './index'
@@ -11,6 +12,11 @@ describe('ProgressBar', () => {
     expect(html).toContain('width:50%')
     expect(html).toContain('meter-pos')
     expect(html).toContain('meter-sm')
+  })
+  it('CSS heights: sm 6px, md 8px', () => {
+    const css = readFileSync(new URL('./ProgressBar.css', import.meta.url), 'utf8')
+    expect(css).toMatch(/\.meter-sm\s*\{\s*height:\s*var\(--space-6\)/)
+    expect(css).toMatch(/\.meter-md\s*\{\s*height:\s*var\(--space-8\)/)
   })
   it('clamps over/under and a zero max', () => {
     expect(renderToString(<ProgressBar value={20} max={10} label="x" />)).toContain('width:100%')

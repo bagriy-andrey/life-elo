@@ -5,7 +5,7 @@
   background: var(--border);
 }
 .meter-sm { height: var(--space-6); }
-.meter-md { height: var(--space-10); }
+.meter-md { height: var(--space-8); }
 .meter-fill { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .meter-pos .meter-fill { background: var(--pos); }
 .meter-neg .meter-fill { background: var(--neg); }

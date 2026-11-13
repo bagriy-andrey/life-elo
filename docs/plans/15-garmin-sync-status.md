@@ -58,7 +58,7 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
   files: `src/garmin/api.ts`, `src/garmin/api.test.ts`, `src/domain/garminStatus.ts`, `src/domain/garminStatus.test.ts`,
   `src/App.tsx`, `src/i18n/{ru,en,uk}.ts` (all new keys for steps 4–5) — verify: `npm test`.
   Note: connect-trigger lives in Profile.doConnect (force pull of 7 days); reviewGarminStatus takes `rows` (no separate deviceLastSyncAt, it is in the pull result) and returns `{state, reason?}`.
-- [ ] 4. Review status line + «Обновить» — files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`,
+- [x] 4. Review status line + «Обновить» — files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`,
   `src/ui/YesterdayReview.test.tsx` — verify: smoke tests per state; existing components only.
 - [ ] 5. Profile: last sync / last attempt + error / «Синхронизировать сейчас» / «Повторить» — files:
   `src/ui/Profile.tsx`, `src/ui/Profile.test.tsx` — verify: smoke tests.

@@ -1,11 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthContext } from '../auth/context'
-import { pull as pullGarmin } from '../garmin/api'
+import { pull as pullGarmin, type PullResult } from '../garmin/api'
+import { reviewGarminStatus } from '../domain/garminStatus'
 import { mergeGarminPrefill, prefillFromGarmin } from '../domain/garminPrefill'
 import { confirmDay, db } from '../db/db'
 import { buildReview, DayLockedError } from '../db/confirm'
-import { addDays } from '../domain/day'
+import { addDays, toDayKey } from '../domain/day'
 import {
   buildCards,
   entryForYesNo,
@@ -41,7 +42,7 @@ interface Props {
   /** True while this modal's own save is in flight/done; false if it failed. Lets the parent tell our review from a remote one. */
   onSaving?: (active: boolean) => void
   /** Preview/test seam: start from given answers/screen (e.g. the summary). */
-  initialState?: { answers?: Record<string, HabitEntry>; screen?: Screen; index?: number; fromGarmin?: string[] }
+  initialState?: { answers?: Record<string, HabitEntry>; screen?: Screen; index?: number; fromGarmin?: string[]; garminPull?: PullResult }
 }
 
 type Screen = 'cards' | 'summary' | 'done'
@@ -91,8 +92,14 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
   const confirmedDay = reviews.some((r) => r.day === day)
   const prefillOn = signedIn && !confirmedDay && screen !== 'done'
 
+  const [garminPull, setGarminPull] = useState<PullResult | undefined>(initialState?.garminPull)
+  const refreshGarmin = () => {
+    setGarminPull(undefined)
+    void pullGarmin(day, addDays(day, 1), { force: true }).then(setGarminPull)
+  }
+
   useEffect(() => {
-    if (signedIn && !confirmedDay) void pullGarmin(day, addDays(day, 1))
+    if (signedIn && !confirmedDay) void pullGarmin(day, addDays(day, 1)).then(setGarminPull)
     // Once per opened day; the api never throws and handles not_connected/offline.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day, signedIn])
@@ -112,6 +119,20 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
       return m.applied.length ? m.answers : prev
     })
   }, [garminRows, habits, day, cards, prefillOn])
+
+  const garminStatus = useMemo(() => {
+    const rows: Record<string, GarminDay> = {}
+    for (const r of garminRows ?? []) rows[r.day] = r
+    return reviewGarminStatus({ pull: garminPull, day, today: toDayKey(now), rows })
+  }, [garminPull, garminRows, day, now])
+  const showGarmin =
+    (signedIn || (!!initialState && 'garminPull' in initialState)) && !confirmedDay && screen !== 'done' && garminStatus.state !== 'hidden'
+  const garminText =
+    garminStatus.state === 'error'
+      ? t('garmin.status.error', { reason: t(`garmin.reason.${garminStatus.reason}`) })
+      : garminStatus.state === 'hidden'
+        ? ''
+        : t(`garmin.status.${garminStatus.state === 'no_data' ? 'noData' : garminStatus.state === 'key_invalid' ? 'keyInvalid' : garminStatus.state}`)
 
   const left = timeLeft(now)
   const deadline =
@@ -304,6 +325,17 @@ export function YesterdayReview({ day, habits, reviews, rating, onClose, onSavin
         <header className="yr-head">
           <h2 className="yr-title">{screen === 'summary' && !editing ? t('yr.summary.title') : t('yr.title')}</h2>
           <p className="yr-deadline">{deadline}</p>
+          {showGarmin && (
+            <p className={`yr-garmin yr-garmin-${garminStatus.state}`} role="status">
+              <span className="yr-garmin-dot" aria-hidden="true" />
+              <span className="yr-garmin-text">{garminText}</span>
+              {garminStatus.state !== 'complete' && garminStatus.state !== 'loading' && (
+                <button type="button" className="yr-garmin-refresh" onClick={refreshGarmin}>
+                  {t('garmin.status.refresh')}
+                </button>
+              )}
+            </p>
+          )}
           {showCards && screen !== 'done' &&
             (editing ? (
               <p className="progress-counter">{counter}</p>

@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { buildDetail, type GarminDetailRaw } from '../garmin/detail'
+import type { GarminDetail } from '../domain/types'
 import { I18nProvider } from '../i18n'
 import { GarminDayPage } from './GarminDayPage'
 import summaries from '../garmin/fixtures/detail-summaries.json'
@@ -55,38 +56,75 @@ describe('GarminDayPage header', () => {
   })
 })
 
-describe('GarminDayPage smoke render', () => {
-  it('renders every section, charts and the collapsed all-fields list', () => {
+const SECTION_IDS = ['sleep', 'recovery', 'activity', 'stress', 'breath']
+
+describe('GarminDayPage sections', () => {
+  it('renders every section with its id, charts and the dev all-fields list', () => {
     const html = render({ detail })
     expect(html).toContain('‹ Главная')
     expect(html).toContain('чт, 12 ноября')
-    for (const s of ['Активность', 'Пульс', 'HRV', 'Стресс', 'Body Battery', 'Сон', 'Дыхание и SpO2', 'Тренировки']) {
-      expect(html).toContain(`>${s}</h2>`)
-    }
+    for (const id of SECTION_IDS) expect(html).toContain(`id="${id}"`)
+    for (const s of ['Сон', 'Восстановление', 'Активность', 'Стресс', 'Дыхание и SpO2']) expect(html).toContain(`>${s}</h2>`)
     expect(html).toContain('<svg')
-    expect(html).toContain('stacked-bar')
+    expect(html).toContain('segbar')
     expect(html).toContain('Фазы сна')
-    expect(html).toContain('Время в пульсовых зонах')
+    expect(html).toContain('Глубокий')
+    expect(html).toContain('Бодрствование')
+    expect(html).toContain('role="progressbar"')
+    expect(html).not.toContain('stacked-bar')
+    expect(html).not.toContain('Подробных данных нет')
+    expect(html).not.toContain('garmin-page-rows')
+    // «Все поля» only behind the dev flag (vitest runs with DEV on)
     expect(html).toContain('<details')
     expect(html).not.toContain('<details open')
     expect(html).toContain('<dt>summary<!-- -->.<wbr/>')
-    expect(html).toMatch(/\d+ точек/)
-    expect(html).not.toContain('Подробных данных нет')
   })
 
-  it('summary-only shows the row and the sync hint', () => {
+  it('summary-only shows steps, workouts, «—» for the rest and the sync hint', () => {
     const html = render({ detail: undefined, row: { steps: 9876, activities: [{ type: 'rowing', minutes: 30 }] } })
     expect(html).toContain('Подробных данных нет')
-    expect(html).toContain('Шаги')
-    expect(html).toContain('Rowing')
+    expect(html).toContain('9\u00a0876')
+    expect(html.replaceAll('<!-- -->', '')).toContain('Rowing · 30 мин')
+    expect(html).toContain('—')
     expect(html).not.toContain('<details')
   })
 
-  it('empty day renders only the header and hint', () => {
+  it('empty day shows one muted empty state and no sections', () => {
     const html = render({})
-    expect(html).toContain('‹ Главная')
-    expect(html).toContain('Подробных данных нет')
+    expect(html).toContain('Данных Garmin за этот день нет')
     expect(html).not.toContain('<h2')
+    expect(html).not.toContain('<details')
+  })
+
+  it('partial day: steps, goal, «пока нет» workouts, sections intact', () => {
+    const partial = {
+      summary: { movement: { steps: { value: 40, goal: 11400 } }, bodyBattery: { latestValue: 98, chargedValue: 62, drainedValue: 4 } },
+    } as unknown as GarminDetail
+    const html = renderToString(
+      <I18nProvider>
+        <GarminDayPage day="2026-11-13" today="2026-11-13" onBack={() => {}} sync={{ at, now: new Date(2026, 10, 13, 15, 0) }} data={{ detail: partial, row: { steps: 40, activities: [] } }} />
+      </I18nProvider>,
+    )
+    expect(html).toContain('день идёт')
+    expect(html).toContain('цель 11\u00a0400')
+    expect(html).toContain('до 13:57')
+    expect(html).toContain('+62')
+    expect(html).toContain('−4')
+    expect(html).toContain('пока нет')
+    for (const id of SECTION_IDS) expect(html).toContain(`id="${id}"`)
+  })
+
+  it('HRV with a baseline shows the corridor and the word; without it no corridor', () => {
+    const withBase = (baseline: unknown) =>
+      ({ hrv: { hrvSummary: { lastNightAvg: 55, status: 'UNBALANCED', ...(baseline ? { baseline } : {}) }, hrvReadings: [{ hrvValue: 34 }, { hrvValue: 82 }] } }) as unknown as GarminDetail
+    const a = render({ detail: withBase({ balancedLow: 56, balancedUpper: 64 }) })
+    expect(a).toContain('норма 56–64')
+    expect(a).toContain('ниже нормы')
+    expect(a).toContain('rscale-corridor')
+    const b = render({ detail: withBase(undefined) })
+    expect(b).not.toContain('rscale-corridor')
+    expect(b).not.toContain('норма')
+    expect(b).toContain('Не в балансе')
   })
 
   it('long all-fields key gets <wbr> and the tree css never breaks letter by letter', () => {

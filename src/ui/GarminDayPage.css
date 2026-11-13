@@ -42,3 +42,26 @@
 .garmin-page-tree-row dt { color: var(--muted); min-width: 0; overflow-wrap: break-word; word-break: normal; font-family: ui-monospace, monospace; }
 .garmin-page-back:focus-visible,
 .garmin-page-fields summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.garmin-sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-12); }
+.garmin-cap { color: var(--muted); font-size: var(--text-xs); }
+.garmin-small { font-size: var(--text-sm); }
+.garmin-split { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-12); min-width: 0; }
+.garmin-baseline { align-items: baseline; font-size: var(--text-sm); }
+.garmin-col { display: flex; flex-direction: column; min-width: 0; }
+.garmin-col-end { align-items: flex-end; text-align: right; }
+.garmin-big { font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
+.garmin-big-unit { font-size: var(--text-md); font-weight: 400; color: var(--muted); }
+.garmin-status { font-size: var(--text-sm); }
+.garmin-num { font-variant-numeric: tabular-nums; }
+.garmin-strong { color: var(--text); }
+.garmin-block { display: flex; flex-direction: column; gap: var(--space-8); min-width: 0; }
+.garmin-divided { padding-top: var(--space-12); border-top: 1px solid var(--border); }
+.garmin-legend { display: flex; flex-direction: column; gap: var(--space-6); }
+.garmin-chips { display: flex; flex-wrap: wrap; gap: var(--space-6); margin: 0; padding: 0; list-style: none; }
+.garmin-chip { font-size: var(--text-xs); padding: var(--space-4) var(--space-8); border-radius: var(--radius-full); border: 1px solid var(--border); }
+.garmin-bb-delta { display: flex; flex-direction: column; font-size: var(--text-sm); }
+.garmin-tone-pos { color: var(--pos); }
+.garmin-tone-neg { color: var(--neg); }
+.garmin-none { margin: 0; }
+.garmin-workouts { display: flex; justify-content: space-between; align-items: center; gap: var(--space-12); padding: var(--space-12); border: 1px dashed var(--border); border-radius: var(--radius-sm); }
+.garmin-workout-list { margin: 0; padding: 0; list-style: none; font-size: var(--text-sm); text-align: right; }

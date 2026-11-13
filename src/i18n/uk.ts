@@ -572,6 +572,7 @@ export const uk: Dict = {
   'garmin.day.syncYesterday': "учора о {time}",
   'garmin.day.back': "Назад",
   'garmin.day.noDetail': "Детальних даних немає — синхронізуйте знову",
+  'garmin.day.empty': "Даних Garmin за цей день немає",
   'garmin.day.allFields': "Усі поля",
   'garmin.day.points': "{n} точок",
   'garmin.day.section.activity': "Активність",

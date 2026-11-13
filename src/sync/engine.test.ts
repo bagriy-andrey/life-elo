@@ -332,4 +332,28 @@ describe('sync engine', () => {
     expect(await db.garmin.count()).toBe(0)
     expect(remote.pushes).toBe(0)
   })
+
+  it('pulls garmin_detail rows (schema 5 <= verno 6), never pushes, tombstone deletes', async () => {
+    const remote = new FakeRemote()
+    const e = engine(remote)
+    const rec = (key: string, deleted = false): RemoteRecord => ({
+      tbl: 'garmin_detail',
+      key,
+      data: deleted ? null : { summary: { x: 1 } },
+      deleted,
+      schema: 5,
+      client_updated_at: new Date(1000).toISOString(),
+      rev: ++remote.rev,
+    })
+    remote.rows.set('garmin_detail/2026-11-10', rec('2026-11-10'))
+    await e.run()
+    expect(await db.garminDetail.get('2026-11-10')).toEqual({ day: '2026-11-10', summary: { x: 1 } })
+    expect(await db.garmin.count()).toBe(0)
+    expect(await db.outbox.count()).toBe(0)
+    expect(remote.pushes).toBe(0)
+    remote.rows.set('garmin_detail/2026-11-10', rec('2026-11-10', true))
+    await e.run()
+    expect(await db.garminDetail.count()).toBe(0)
+    expect(remote.pushes).toBe(0)
+  })
 })

@@ -66,7 +66,7 @@ analytics) and show **sections + charts**. Read-only; Elo untouched (AGENTS.md: 
   verify: verifier review; the user runs `npx supabase db push --remote --yes` and
   `npx supabase functions deploy garmin-pull --yes` (any time: schema-5 detail rows are skipped by old clients);
   smoke + read-only schema check.
-- [ ] 3. Client data: Dexie v6 `garminDetail` table; sync pulls `garmin_detail` (pull-only), wipe/logout clear it;
+- [x] 3. Client data: Dexie v6 `garminDetail` table; sync pulls `garmin_detail` (pull-only), wipe/logout clear it;
   engine + wipe tests — files: `src/db/db.ts`, `src/sync/engine.ts`, `src/sync/outbox.ts`, `src/sync/wipe.ts`,
   tests — verify: `npm test`.
 - [ ] 4. View-model + i18n: `garminDayDetailView` (sections with labelled values/units, chart series arrays, HR

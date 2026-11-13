@@ -24,8 +24,8 @@ or backups). The user asked for secure storage (2026-11-11): keep secrets encryp
 (none)
 
 ## Decisions
-- Table is empty in production (checked 2026-11-11: 0 rows), so the migration drops `api_key` / `token`
-  columns without a data migration; it asserts emptiness first (`raise exception` if any row has them).
+- Production had 1 row with plaintext credentials (user connected 2026-11-11), so the migration moves them into Vault
+  (same helper, names `garmin_key_<user>` / `garmin_token_<user>`, secret ids set) in one transaction, then drops `api_key` / `token`.
 - RPCs (public schema, service_role only): `garmin_save_key(p_user uuid, p_key text, p_key_expires_at timestamptz,
   p_token text, p_token_expires_at timestamptz)`, `garmin_get_secrets(p_user uuid) returns (api_key, token,
   token_expires_at, key_expires_at, last_pull_at)`, `garmin_save_token(p_user, p_token, p_token_expires_at)`,

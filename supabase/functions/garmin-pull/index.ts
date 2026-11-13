@@ -1,4 +1,3 @@
-import postgres from 'npm:postgres@3'
 import { coverage, deviceLastSyncAt, parseGarmin } from '../../../src/garmin/parse.ts'
 import {
   adminClient,
@@ -127,24 +126,12 @@ Deno.serve(async (req) => {
 
     stage = 'db'
     if (rows.length > 0) {
-      // One statement under the user's advisory lock, like push_records, so rev order = commit order.
-      const sql = postgres(Deno.env.get('SUPABASE_DB_URL')!, { max: 1, prepare: false })
-      try {
-        await sql.begin(async (tx) => {
-          await tx`select pg_advisory_xact_lock(hashtext(${userId}::text))`
-          await tx`
-            insert into public.records as r (user_id, tbl, key, data, deleted, schema, client_updated_at, rev)
-            select ${userId}::uuid, 'garmin', x.key, x.data, false, ${RECORD_SCHEMA}::int, now(),
-                   nextval('public.records_rev_seq')
-            from jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) as x(key text, data jsonb)
-            on conflict (user_id, tbl, key) do update
-              set data = excluded.data, deleted = false, schema = excluded.schema,
-                  client_updated_at = excluded.client_updated_at,
-                  rev = nextval('public.records_rev_seq')`
-        })
-      } finally {
-        await sql.end({ timeout: 5 })
-      }
+      const { error: upErr } = await admin.rpc('garmin_upsert_records', {
+        p_user: userId,
+        p_rows: rows,
+        p_schema: RECORD_SCHEMA,
+      })
+      if (upErr) throw upErr
     }
 
     const lastPullAt = await record(null, true)

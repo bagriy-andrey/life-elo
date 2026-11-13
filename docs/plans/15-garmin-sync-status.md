@@ -52,6 +52,7 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
   (coverage helper) + test — verify: verifier review; then the user runs
   `npx supabase db push --remote --yes` and `npx supabase functions deploy garmin-connect garmin-pull --yes`;
   smoke (401 without user) and read-only schema check.
+  - fix: records upsert via RPC `garmin_upsert_records` (migration `20261113010000_garmin_upsert_rpc.sql`); direct Postgres from Edge Functions failed in prod.
 - [x] 3. Client logic: `src/garmin/api.ts` (20 s timeout, `pull(from, to, { force })`, ok result carries coverage +
   deviceLastSyncAt, error carries stage; status carries lastAttemptAt/lastError), `reviewGarminStatus` in
   `src/domain/garminStatus.ts` + tests, triggers: after connect (7 days) and app start/foreground (throttled) —

@@ -1,6 +1,6 @@
 # 16 — View synced Garmin data
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -27,4 +27,4 @@ The data is already persisted (server `records` tbl `garmin` → Dexie `garmin`)
 - [x] 2. Profile button + `GarminDataSheet` (BottomSheet, useLiveQuery on `db.garmin`) + CSS in `Profile.css` +
   smoke tests (with rows, empty) — files: `src/ui/GarminDataSheet.tsx`, `src/ui/GarminDataSheet.test.tsx`,
   `src/ui/Profile.tsx`, `src/ui/Profile.css` — verify: renderToString smoke tests; manual 375 px light/dark.
-- [ ] 3. Version `0.16.0` — verify: `npm test`, `npm run lint`, `npm run build`.
+- [x] 3. Version `0.16.0` — verify: `npm test`, `npm run lint`, `npm run build`.

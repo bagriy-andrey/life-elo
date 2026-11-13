@@ -1,7 +1,7 @@
 # Handoff
 Updated: 2026-11-13 by Claude Code
 Branch: garmin-sync-status (from main)
-Plan: docs/plans/15-garmin-sync-status.md — done, v0.15.0; plan 14 (Vault) done too.
+Plan: docs/plans/16-garmin-data-view.md — done, v0.16.0 (plans 14, 15 done; fix 0.15.1: records upsert via RPC, applied + deployed).
 Server is live: migrations vault + status applied, garmin-connect/garmin-pull v2 deployed; key+token moved to Vault (checked).
 ## In progress
 Nothing uncommitted. PR open for garmin-sync-status.

@@ -12,6 +12,7 @@ import { useI18n } from '../i18n'
 import type { Key } from '../i18n/types'
 import { Card, FactGrid, LegendRow, ProgressBar, RangeScale, SegmentBar, WeekChart, type SegmentColor, type WeekChartDay } from './components'
 import { LineSeriesChart } from './garmin/LineSeriesChart'
+import { useScrollToSection } from './garmin/useScrollToSection'
 import { useGarminWeek, type WeekData } from './garmin/useGarminWeek'
 import { formatClock, formatDayShort, formatDelta, formatDistance, formatDuration, formatNumber, formatWeekRange } from './format'
 import type { GarminSection } from './route'
@@ -78,9 +79,7 @@ export function GarminDayPage({ day, onBack, today, section, backLabel = 'home',
   }, [section])
   const inProgress = day === todayKey
   const ready = !!loaded
-  useEffect(() => {
-    if (ready && section) document.getElementById(section)?.scrollIntoView?.({ block: 'start' })
-  }, [ready, section])
+  useScrollToSection(section, ready)
   const tk = (k: string, params?: Record<string, string | number>) => t(k as Key, params)
 
   const stale = syncAt ? nowDate.getTime() - new Date(syncAt).getTime() > 24 * 3600_000 : false

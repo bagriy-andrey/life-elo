@@ -560,4 +560,12 @@ export const uk: Dict = {
   'garmin.syncNow': "Синхронізувати зараз",
   'garmin.syncing': "Синхронізуємо…",
   'garmin.retry': "Повторити",
+  'garmin.viewData': "Переглянути дані синхронізації",
+  'garmin.data.title': "Дані Garmin",
+  'garmin.data.steps': "Кроки",
+  'garmin.data.sleep': "Сон (ніч на {date})",
+  'garmin.data.activities': "Тренування",
+  'garmin.data.none': "—",
+  'garmin.data.empty': "Даних Garmin поки немає — натисніть «Синхронізувати зараз»",
+  'garmin.data.minutes': "{n} хв",
 }

@@ -559,4 +559,12 @@ export const ru = {
   'garmin.syncNow': "Синхронизировать сейчас",
   'garmin.syncing': "Синхронизируем…",
   'garmin.retry': "Повторить",
+  'garmin.viewData': "Посмотреть данные синхронизации",
+  'garmin.data.title': "Данные Garmin",
+  'garmin.data.steps': "Шаги",
+  'garmin.data.sleep': "Сон (ночь на {date})",
+  'garmin.data.activities': "Тренировки",
+  'garmin.data.none': "—",
+  'garmin.data.empty': "Данных Garmin пока нет — нажмите «Синхронизировать сейчас»",
+  'garmin.data.minutes': "{n} мин",
 }

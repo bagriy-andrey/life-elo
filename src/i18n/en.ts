@@ -526,4 +526,12 @@ export const en: Dict = {
   'garmin.syncNow': "Sync now",
   'garmin.syncing': "Syncing…",
   'garmin.retry': "Retry",
+  'garmin.viewData': "View synced data",
+  'garmin.data.title': "Garmin data",
+  'garmin.data.steps': "Steps",
+  'garmin.data.sleep': "Sleep (night to {date})",
+  'garmin.data.activities': "Workouts",
+  'garmin.data.none': "—",
+  'garmin.data.empty': "No Garmin data yet — tap “Sync now”",
+  'garmin.data.minutes': "{n} min",
 }

@@ -22,7 +22,7 @@ The data is already persisted (server `records` tbl `garmin` → Dexie `garmin`)
 (none)
 
 ## Steps
-- [ ] 1. Pure helper `garminDaysView(rows, limit)` (sort, limit, format-agnostic shape) + tests; i18n keys
+- [x] 1. Pure helper `garminDaysView(rows, limit)` (sort, limit, format-agnostic shape) + tests; i18n keys
   (ru/en/uk) — files: `src/garmin/ui.ts`, `src/garmin/ui.test.ts`, `src/i18n/{ru,en,uk}.ts` — verify: `npm test`.
 - [ ] 2. Profile button + `GarminDataSheet` (BottomSheet, useLiveQuery on `db.garmin`) + CSS in `Profile.css` +
   smoke tests (with rows, empty) — files: `src/ui/GarminDataSheet.tsx`, `src/ui/GarminDataSheet.test.tsx`,

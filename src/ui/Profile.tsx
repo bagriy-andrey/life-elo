@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
 import { connect, disconnect, pull as garminPull, GARMIN_LIFETIMES, status as garminStatusCall } from '../garmin/api'
-import type { GarminLifetime, GarminStatus } from '../garmin/api'
+import type { GarminErrorReason, GarminLifetime, GarminStatus } from '../garmin/api'
 import { keyExpiry } from '../garmin/ui'
 import { saveProfile } from '../db/profile'
 import { addDays, reviewDay, toDayKey } from '../domain/day'
@@ -295,6 +295,8 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
   const [failed, setFailed] = useState<'connect' | 'invalid' | 'disconnect' | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [now] = useState(() => Date.now())
+  const [syncing, setSyncing] = useState(false)
+  const [syncReason, setSyncReason] = useState<GarminErrorReason | 'timeout' | 'offline' | null>(null)
   useEffect(() => {
     if (initial) return
     let live = true
@@ -303,6 +305,23 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
       live = false
     }
   }, [initial])
+
+  const retryStatus = async () => {
+    setStatus(undefined)
+    setStatus(await garminStatusCall())
+  }
+  const syncNow = async () => {
+    if (syncing) return
+    setSyncing(true)
+    setSyncReason(null)
+    const to = toDayKey(new Date())
+    const r = await garminPull(addDays(to, -6), to, { force: true })
+    if (r.kind === 'error') setSyncReason(r.stage)
+    else if (r.kind === 'key_invalid' || r.kind === 'timeout' || r.kind === 'offline') setSyncReason(r.kind)
+    const s = await garminStatusCall()
+    if (s.kind !== 'error') setStatus(s)
+    setSyncing(false)
+  }
 
   const doConnect = async () => {
     if (busy || !key.trim()) return
@@ -334,10 +353,20 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
   if (!status) {
     body = <Spinner size={16} />
   } else if (status.kind === 'error') {
-    body = <p className="muted">{t('garmin.error.status')}</p>
+    body = (
+      <>
+        <p className="muted">{t('garmin.error.status')}</p>
+        <Button onClick={retryStatus}>{t('garmin.retry')}</Button>
+      </>
+    )
   } else if (status.kind === 'connected') {
     const expiry = keyExpiry(status.keyExpiresAt, now)
     const expires = status.keyExpiresAt ? date(status.keyExpiresAt) : ''
+    const lastFailed =
+      status.lastError !== null &&
+      status.lastAttemptAt !== null &&
+      (!status.lastPullAt || new Date(status.lastAttemptAt).getTime() > new Date(status.lastPullAt).getTime())
+    const when = (iso: string) => new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })
     const last = status.lastPullAt
       ? t('garmin.lastSync', { time: new Date(status.lastPullAt).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) })
       : t('garmin.neverSynced')
@@ -355,6 +384,15 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
           </>
         )}
         <span className="muted">{last}</span>
+        {lastFailed && status.lastAttemptAt && status.lastError && (
+          <span className="garmin-fail">
+            {t('garmin.lastAttemptFailed', { time: when(status.lastAttemptAt), reason: t(`garmin.reason.${status.lastError}`) })}
+          </span>
+        )}
+        {syncReason && <span className="garmin-fail">{t('garmin.status.error', { reason: t(`garmin.reason.${syncReason}`) })}</span>}
+        <Button onClick={syncNow} loading={syncing} disabled={busy || syncing}>
+          {syncing ? t('garmin.syncing') : t('garmin.syncNow')}
+        </Button>
         {failed === 'disconnect' && <Notice tone="error">{t('garmin.error.disconnect')}</Notice>}
         <Button onClick={() => setConfirmOpen(true)} disabled={busy}>{t('garmin.disconnect')}</Button>
         <Dialog open={confirmOpen} title={t('garmin.disconnect')} onClose={() => !busy && setConfirmOpen(false)}>

@@ -94,8 +94,25 @@ describe('Profile Garmin section', () => {
     expect(html).toContain('Ключ недействителен')
   })
 
-  it('status error is neutral text', () => {
-    expect(render(profile, 1, { kind: 'error' })).toContain('Не удалось узнать статус Garmin')
+  it('status error is neutral text with retry', () => {
+    const html = render(profile, 1, { kind: 'error' })
+    expect(html).toContain('Не удалось узнать статус Garmin')
+    expect(html).toContain('Повторить')
+  })
+
+  it('connected with success: last sync and sync-now, no failure line', () => {
+    const at = new Date(Date.now() + 100 * 86_400_000).toISOString()
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: '2026-11-13T08:00:00Z', lastAttemptAt: '2026-11-13T08:00:00Z', lastError: null })
+    expect(html).toContain('Последняя синхронизация')
+    expect(html).toContain('Синхронизировать сейчас')
+    expect(html).not.toContain('не удалась')
+  })
+
+  it('connected with a failed last attempt shows time and reason', () => {
+    const at = new Date(Date.now() + 100 * 86_400_000).toISOString()
+    const html = render(profile, 1, { kind: 'connected', keyExpiresAt: at, lastPullAt: '2026-11-13T08:00:00Z', lastAttemptAt: '2026-11-13T09:00:00Z', lastError: 'garmin' })
+    expect(html).toContain('не удалась')
+    expect(html).toContain('Garmin не ответил')
   })
 })
 

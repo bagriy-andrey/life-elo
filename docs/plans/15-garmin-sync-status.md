@@ -60,7 +60,7 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
   Note: connect-trigger lives in Profile.doConnect (force pull of 7 days); reviewGarminStatus takes `rows` (no separate deviceLastSyncAt, it is in the pull result) and returns `{state, reason?}`.
 - [x] 4. Review status line + «Обновить» — files: `src/ui/YesterdayReview.tsx`, `src/ui/YesterdayReview.css`,
   `src/ui/YesterdayReview.test.tsx` — verify: smoke tests per state; existing components only.
-- [ ] 5. Profile: last sync / last attempt + error / «Синхронизировать сейчас» / «Повторить» — files:
+- [x] 5. Profile: last sync / last attempt + error / «Синхронизировать сейчас» / «Повторить» — files:
   `src/ui/Profile.tsx`, `src/ui/Profile.test.tsx` — verify: smoke tests.
 - [ ] 6. Docs + version: `docs/setup/backend.md` (status columns, triggers), plan 14 boxes checked + `Status: done`,
   `chore: version 0.15.0` — verify: `npm test`, `npm run lint`, `npm run build`.

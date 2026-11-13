@@ -121,3 +121,8 @@
 .profile-listrow + .profile-listrow { border-top: 1px solid var(--border); }
 .profile-version { text-align: center; font-size: var(--text-xs); }
 .profile-export-hint { display: inline-flex; align-items: center; gap: var(--space-6); }
+
+.garmin-fail {
+  color: var(--neg);
+  font-size: 0.875rem;
+}

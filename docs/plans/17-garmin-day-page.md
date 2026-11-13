@@ -69,7 +69,7 @@ analytics) and show **sections + charts**. Read-only; Elo untouched (AGENTS.md: 
 - [x] 3. Client data: Dexie v6 `garminDetail` table; sync pulls `garmin_detail` (pull-only), wipe/logout clear it;
   engine + wipe tests — files: `src/db/db.ts`, `src/sync/engine.ts`, `src/sync/outbox.ts`, `src/sync/wipe.ts`,
   tests — verify: `npm test`.
-- [ ] 4. View-model + i18n: `garminDayDetailView` (sections with labelled values/units, chart series arrays, HR
+- [x] 4. View-model + i18n: `garminDayDetailView` (sections with labelled values/units, chart series arrays, HR
   zones, sleep stages, stress durations) + tests; all i18n keys (ru/en/uk) for the page — files:
   `src/garmin/detailView.ts`, `src/garmin/detailView.test.ts`, `src/i18n/{ru,en,uk}.ts` — verify: `npm test`.
 - [ ] 5. Charts (load `dataviz` skill): screen-local `LineSeriesChart` (time series with optional band) and

@@ -30,7 +30,6 @@
   width: 100%;
   height: auto;
   display: block;
-  overflow: visible;
 }
 .line-series__band {
   fill: var(--line-series-band);

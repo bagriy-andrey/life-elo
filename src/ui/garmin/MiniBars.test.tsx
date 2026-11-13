@@ -16,3 +16,20 @@ describe('MiniBars', () => {
     expect(html).toContain('aria-label="SpO2"')
   })
 })
+
+describe('MiniBars label bounds', () => {
+  it('keeps all labels inside the viewBox', () => {
+    const bars = Array.from({ length: 24 }, (_, i) => ({ label: `${i}:00`, v: 9999 - i }))
+    const html = renderToString(<MiniBars bars={bars} formatValue={(v) => `${v} шагов`} label="Steps" />)
+    const W = Number(/viewBox="0 0 (\d+) /.exec(html)![1])
+    const texts = [...html.matchAll(/<text[^>]*? x="([\d.]+)"[^>]*>([^<]*)<\/text>/g)]
+    expect(texts.length).toBeGreaterThan(1)
+    for (const m of texts) {
+      const x = Number(m[1]), w = m[2].length * 5.5
+      const centered = m[0].includes('middle')
+      const left = centered ? x - w / 2 : x
+      expect(left).toBeGreaterThanOrEqual(0)
+      expect(left + w).toBeLessThanOrEqual(W)
+    }
+  })
+})

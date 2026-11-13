@@ -152,6 +152,7 @@ function MainApp() {
             day={garminDay}
             today={today}
             section={garminSection}
+            onSelectDay={(d) => navigate({ tab: 'home', garminDay: d }, { replace: true })}
             onBack={() => {
               if (garminFromApp.current) history.back()
               else navigate({ tab: 'home' }, { replace: true })

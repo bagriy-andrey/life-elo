@@ -140,3 +140,41 @@ describe('GarminDayPage sections', () => {
     expect(css).not.toContain('text-transform: capitalize')
   })
 })
+
+describe('GarminDayPage week card', () => {
+  const keys = ['2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12', '2026-11-13', '2026-11-14', '2026-11-15']
+  const full = {
+    rows: Object.fromEntries(keys.slice(0, 5).map((k, i) => [k, { steps: 4000 + i * 1000, sleepStart: '23:00', sleepEnd: '07:00', activities: [] }])),
+    details: Object.fromEntries(
+      keys.slice(0, 5).map((k) => [k, { summary: { movement: { steps: { goal: 11400 } }, intensityMinutes: { goal: 150, moderate: 20, vigorous: 10 } } }]),
+    ),
+  }
+  const renderWeek = (week: Parameters<typeof GarminDayPage>[0]['week'], onSelectDay: ((d: string) => void) | null = () => {}) =>
+    renderToString(
+      <I18nProvider>
+        <GarminDayPage day="2026-11-13" today="2026-11-13" onBack={() => {}} sync={{ at: null }} data={{ detail }} week={week} onSelectDay={onSelectDay ?? undefined} />
+      </I18nProvider>,
+    )
+  it('renders the card under the header with range, captions, 7 buttons and the goal label', () => {
+    const html = renderWeek(full)
+    expect(html).toContain('>Неделя</h2>')
+    expect(html).toContain('9–15 ноября')
+    expect(html).toContain('Шаги · пунктир — цель 11')
+    expect(html).toContain('11,4к')
+    expect((html.match(/class="wchart-day /g) ?? []).length).toBe(7)
+    expect((html.match(/<button[^>]*disabled/g) ?? []).length).toBe(2)
+    expect(html).toContain('aria-current="date"')
+    expect(html).toContain('шагов, сон 8 ч')
+    expect(html.indexOf('wchart')).toBeLessThan(html.indexOf('id="sleep"'))
+  })
+  it('feeds the week intensity (5 x (20 + 2 x 10) = 200) into the activity row', () => {
+    expect(renderWeek(full)).toContain('за неделю')
+  })
+  it('partial week with gaps still renders; no card without onSelectDay or week', () => {
+    const html = renderWeek({ rows: { '2026-11-11': { steps: 3000, activities: [] } }, details: {} })
+    expect((html.match(/class="wchart-day /g) ?? []).length).toBe(7)
+    expect(html).toContain('нет данных')
+    expect(renderWeek(full, null)).not.toContain('wchart')
+    expect(render({ detail })).not.toContain('wchart')
+  })
+})

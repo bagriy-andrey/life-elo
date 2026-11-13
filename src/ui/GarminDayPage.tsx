@@ -3,15 +3,17 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { toDayKey } from '../domain/day'
 import { db } from '../db/db'
 import type { GarminDay, GarminDetail } from '../domain/types'
-import { garminDayDigest, type GarminDayDigest, type StressLevel, type Tone } from '../garmin/dayDigest'
+import { clockMinutes, garminDayDigest, type GarminDayDigest, type StressLevel, type Tone } from '../garmin/dayDigest'
 import { flattenForTree, watchOffsetMs } from '../garmin/detailView'
 import { humanizeType } from '../garmin/ui'
+import { garminWeekView } from '../garmin/weekView'
 import { useGarminSync } from '../garmin/useGarminSync'
 import { useI18n } from '../i18n'
 import type { Key } from '../i18n/types'
-import { Card, FactGrid, LegendRow, ProgressBar, RangeScale, SegmentBar, type SegmentColor } from './components'
+import { Card, FactGrid, LegendRow, ProgressBar, RangeScale, SegmentBar, WeekChart, type SegmentColor, type WeekChartDay } from './components'
 import { LineSeriesChart } from './garmin/LineSeriesChart'
-import { formatClock, formatDayShort, formatDelta, formatDistance, formatDuration, formatNumber } from './format'
+import { useGarminWeek, type WeekData } from './garmin/useGarminWeek'
+import { formatClock, formatDayShort, formatDelta, formatDistance, formatDuration, formatNumber, formatWeekRange } from './format'
 import type { GarminSection } from './route'
 import './GarminDayPage.css'
 
@@ -28,8 +30,10 @@ interface Props {
   sync?: { at: string | null; now?: Date }
   /** Test seam: skip the live Dexie read (`detail: undefined` = none stored). */
   data?: { detail?: GarminDetail; row?: GarminDay }
-  /** Intensity minutes of the week so far (moderate + 2 * vigorous); unknown until the week is loaded. */
-  weekIntensity?: number
+  /** Switch to another day of the same week (`navigate` replace); the week card is hidden without it. */
+  onSelectDay?: (day: string) => void
+  /** Test seam: skip the live week read and the backfill pull. */
+  week?: WeekData
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -51,7 +55,7 @@ const SLEEP_CHIP_KEY = {
   stress: 'garmin.day.f.sleepStress',
 } as const
 
-export function GarminDayPage({ day, onBack, today, section, backLabel = 'home', sync, data, weekIntensity }: Props) {
+export function GarminDayPage({ day, onBack, today, section, backLabel = 'home', sync, data, onSelectDay, week: weekSeam }: Props) {
   const { t, locale } = useI18n()
   const live = useLiveQuery(async () => {
     const [detail, row] = await Promise.all([db.garminDetail.get(day), db.garmin.get(day)])
@@ -59,10 +63,19 @@ export function GarminDayPage({ day, onBack, today, section, backLabel = 'home',
   }, [day])
   const loaded = data ?? live
   const cached = useGarminSync()
-  const syncAt = sync ? sync.at : (cached?.deviceLastSyncAt ?? cached?.lastPullAt ?? null)
+  const [deviceSync, setDeviceSync] = useState<string>()
+  const syncAt = sync ? sync.at : (deviceSync ?? cached?.deviceLastSyncAt ?? cached?.lastPullAt ?? null)
   const [mountedAt] = useState(() => new Date())
   const nowDate = sync?.now ?? mountedAt
   const todayKey = today ?? toDayKey(nowDate)
+  const liveWeek = useGarminWeek(day, todayKey, {
+    enabled: !weekSeam && !sync,
+    onSynced: (c) => setDeviceSync(c.deviceLastSyncAt),
+  })
+  const weekData = weekSeam ?? liveWeek
+  useEffect(() => {
+    if (!section) window.scrollTo?.(0, 0)
+  }, [section])
   const inProgress = day === todayKey
   const ready = !!loaded
   useEffect(() => {
@@ -106,6 +119,51 @@ export function GarminDayPage({ day, onBack, today, section, backLabel = 'home',
     </div>
   )
   const stat = (v: React.ReactNode) => <strong className="garmin-big">{v}</strong>
+
+  const weekView = weekData ? garminWeekView(day, todayKey, weekData.rows, weekData.details) : undefined
+  const weekIntensity = weekView?.intensity.minutes
+  const weekday = (key: string) => {
+    const w = new Date(`${key}T12:00:00`).toLocaleDateString(locale, { weekday: 'short' })
+    return locale.startsWith('en') ? w : w.toLowerCase()
+  }
+  const goalLabel = (g: number) => `${n(g / 1000, 1)}${t('garmin.day.thousandSuffix')}`
+  const weekDays: WeekChartDay[] = (weekView?.days ?? []).map((wd) => {
+    const row = weekData?.rows[wd.key]
+    const a = clockMinutes(row?.sleepStart)
+    const b = clockMinutes(row?.sleepEnd)
+    const parts = [
+      wd.steps !== undefined ? `${n(wd.steps)} ${unit('steps')}` : undefined,
+      a !== undefined && b !== undefined ? t('garmin.day.weekAriaSleep', { h: dur(((b - a + 1440) % 1440) * 60) }) : undefined,
+    ].filter(Boolean)
+    const name = [formatDayShort(wd.key, locale), wd.isToday ? t('garmin.day.weekToday') : undefined].filter(Boolean).join(', ')
+    return {
+      key: wd.key,
+      weekdayLabel: weekday(wd.key),
+      dayNum: wd.dayNum,
+      ...(wd.steps !== undefined && { steps: wd.steps }),
+      ...(wd.sleep && { sleep: wd.sleep }),
+      state: wd.state,
+      isToday: wd.isToday,
+      ariaLabel: t('garmin.day.weekDayAria', { day: name, parts: parts.length ? parts.join(', ') : t('garmin.day.weekNoData') }),
+      ...(wd.state === 'selected' && wd.steps !== undefined && { stepsText: n(wd.steps) }),
+    }
+  })
+  const weekCard =
+    weekView && onSelectDay ? (
+      <Card className="garmin-page-card garmin-week" aria-labelledby="week-h">
+        {heading('week', t('garmin.day.week'), formatWeekRange(weekView.start, weekView.end, locale))}
+        <WeekChart
+          days={weekDays}
+          stepsGoal={weekView.stepsGoal}
+          goalLabel={weekView.stepsGoal ? goalLabel(weekView.stepsGoal) : undefined}
+          stepsCaption={weekView.stepsGoal ? t('garmin.day.weekStepsCaption', { goal: n(weekView.stepsGoal) }) : t('garmin.day.i.steps')}
+          sleepCaption={t('garmin.day.weekSleepCaption')}
+          onSelect={(key) => {
+            if (key !== day && key <= todayKey) onSelectDay(key)
+          }}
+        />
+      </Card>
+    ) : undefined
 
   const { sleep, steps, recovery: rec, stress, respiration, spo2 } = d
 
@@ -406,6 +464,7 @@ export function GarminDayPage({ day, onBack, today, section, backLabel = 'home',
       {header}
       <h1 className="garmin-page-title">{formatDayShort(day, locale)}</h1>
       {caption && <p className="muted garmin-page-sync">{caption}</p>}
+      {weekCard}
       {d.empty ? (
         <p className="muted garmin-page-nodetail">{t('garmin.day.empty')}</p>
       ) : (

@@ -1,6 +1,6 @@
 # Handoff
 Updated: 2026-11-13 by Claude Code
-Branch: garmin-all-data
+Branch: garmin-redesign (local only, not pushed; main = origin/main)
 Plan: docs/plans/18-garmin-redesign.md — done, v0.18.0 (20/20 steps, report + screenshots in docs/plans/18-screens/)
 ## In progress
 Nothing uncommitted. No schema/server changes in plan 18 (status cache is localStorage only).

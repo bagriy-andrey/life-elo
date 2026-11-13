@@ -39,10 +39,11 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
 - Version `0.15.0` (plan 14 rides along; its boxes are checked when applied here).
 
 ## Steps
-- [ ] 1. Spike (key in `.env.local`, never printed): does any Personal API endpoint expose the device's last sync
+- [x] 1. Spike (key in `.env.local`, never printed): does any Personal API endpoint expose the device's last sync
   to Garmin (e.g. a `lastSyncTimestampGMT` in `usersummary-service` daily summary, or a device endpoint)?
   Record field + endpoint in `docs/specs/13-garmin.md` (new section), add a trimmed anonymised fixture —
   files: `docs/specs/13-garmin.md`, `src/garmin/fixtures/` — verify: findings in the spec.
+  Result: no device endpoint; proxy = `dailysummaries[].wellnessChronology.endTimestampGmt` of today (see spec).
 - [ ] 2. Server: migration `supabase/migrations/20261113000000_garmin_status.sql` (columns above);
   `garmin-pull` returns coverage + `deviceLastSyncAt`, writes `last_attempt_at`/`last_error` (stage) on every
   attempt and `last_pull_at` on success; `garmin-connect` GET also returns `lastAttemptAt`, `lastError`;

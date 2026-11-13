@@ -82,3 +82,42 @@ server-side (Edge Function) is required, as planned.
   expiry; either drop "expiry/warning < 7 d" from step 7 or let the user pick the key lifetime when connecting
   (decision for the user). Pull range ≤ 7 days = 1 steps call + up to 7 sleep calls + 1 activities call.
 - Step 5: handle empty/204/`null` sleep body; map 401 -> `key_invalid`.
+
+## Last sync / data completeness (spike, 2026-11-13, plan 15 step 1)
+Live-tested for 2026-11-11..13. Fixture: `src/garmin/fixtures/dailysummary.json` (trimmed, anonymised).
+
+**No endpoint exposes "the watch last synced at"**. The reference client (`garmin_personal_api/client.py`) has no
+device endpoint; `device-service/*` and `userprofile/user-settings` -> 404; `userprofile/settings` has no sync field.
+The Swagger page is a JS app with no static spec, nothing device-related found there.
+
+**Proxy that works: `wellnessChronology` in `GET /usersummary-service/v2/dailysummaries?startDate=&endDate=`**
+(`data[].wellnessChronology`, same window also in `wellness/dailyHeartRate` as `endTimestampGMT`).
+- Fields: `startTimestampGmt/Local`, `endTimestampGmt/Local` (strings `YYYY-MM-DDTHH:MM:SS.0`, **no `Z`/offset**: the
+  `Gmt` one is UTC, the `Local` one is local wall clock; observed offset +1 h), `totalDurationInMillis`.
+- For a finished day the window is the full day: 2026-11-11 `end` = next midnight (`totalDurationInMillis` 86400000).
+- For **today** the entry exists and `end` = the **last data point the watch has uploaded** (not "now"): at 12:59 local
+  it was `2026-11-13T08:37:00.0` Gmt (`09:37` Local), `totalDurationInMillis` 34620000. So `end` is a lower bound of
+  the last sync ("data up to"), accurate to the watch's wellness granularity; it is not the upload time itself.
+- Example (anonymised, from the fixture): `{"calendarDate":"2026-11-13","wellnessChronology":{"startTimestampGmt":
+  "2026-11-12T23:00:00.0","endTimestampGmt":"2026-11-13T08:37:00.0","endTimestampLocal":"2026-11-13T09:37:00.0",...}}`.
+- Today's `steps` is a partial count (40 at that moment) while today's `dailySleep` already existed (sleep is
+  synced first thing after waking).
+
+**Rules**
+- `deviceLastSyncAt` = parse `endTimestampGmt` (append `Z`) of the latest `calendarDate` returned (query up to today).
+  Pull `dailysummaries` for `[from..today]` as one extra call.
+- Day X (local) is **complete** when the watch has data past X's end: `deviceLastSyncAt >= end of X` (equivalently
+  X's own `endTimestampGmt` equals its day end / `totalDurationInMillis` is a full day, or today's entry has
+  `end > today's start`). For yesterday: today's `endTimestampGmt` > today's `startTimestampGmt`.
+- Not verifiable here: whether today's entry is absent before the first sync of the day (the watch had synced). If
+  it is absent, the latest returned entry (yesterday) has `end` = its own day end only if synced after midnight, so
+  treat "no entry for today" as **not complete** (-> `partial`/`no_data`).
+- Sleep finality marker: `dailySleep.sleepWindowConfirmationType` = `enhanced_confirmed_final` (and
+  `sleepWindowConfirmed: true`) for both 11-12 and 11-13. Fallback rule from the plan (a sleep record dated today
+  exists) is consistent with it, since sleep appears right after the morning sync.
+- Fallback if `wellnessChronology` is missing/unparsable: sleep record dated today exists -> complete; otherwise not.
+
+**Timing (deployed pull path, from this machine)**: token exchange 1.4 s; steps range (7 d) 1.0 s; `dailySleep`
+x2 0.3 s each; activities range 0.3 s; extra `dailysummaries` 0.3 s. Wall time for exchange + steps + 2 sleeps +
+activities = **~3 s** (all 200; sequential). A 7-day pull (1 + 1 + 7 + 1 + 1 calls) is ~5 s sequential, so the old 5 s
+client timeout is too tight; 20 s is fine, and sleeps should be fetched in parallel.

@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "calendarDate": "2026-11-11",
+      "wellnessChronology": {
+        "startTimestampGmt": "2026-11-10T23:00:00.0",
+        "startTimestampLocal": "2026-11-11T00:00:00.0",
+        "endTimestampGmt": "2026-11-11T23:00:00.0",
+        "endTimestampLocal": "2026-11-12T00:00:00.0",
+        "totalDurationInMillis": 86400000
+      },
+      "movement": {
+        "steps": {
+          "value": 15100
+        }
+      }
+    },
+    {
+      "calendarDate": "2026-11-12",
+      "wellnessChronology": {
+        "startTimestampGmt": "2026-11-11T23:00:00.0",
+        "startTimestampLocal": "2026-11-12T00:00:00.0",
+        "endTimestampGmt": "2026-11-12T23:00:00.0",
+        "endTimestampLocal": "2026-11-13T00:00:00.0",
+        "totalDurationInMillis": 86400000
+      },
+      "movement": {
+        "steps": {
+          "value": 11700
+        }
+      }
+    },
+    {
+      "calendarDate": "2026-11-13",
+      "wellnessChronology": {
+        "startTimestampGmt": "2026-11-12T23:00:00.0",
+        "startTimestampLocal": "2026-11-13T00:00:00.0",
+        "endTimestampGmt": "2026-11-13T08:37:00.0",
+        "endTimestampLocal": "2026-11-13T09:37:00.0",
+        "totalDurationInMillis": 34620000
+      },
+      "movement": {
+        "steps": {
+          "value": 0
+        }
+      }
+    }
+  ]
+}

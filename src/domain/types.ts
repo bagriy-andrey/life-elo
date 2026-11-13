@@ -81,6 +81,22 @@ export interface GarminDay {
   activities: { type: string; minutes: number }[]
 }
 
+/**
+ * Sanitized Garmin data for one calendar date (plan 17). Holds the Garmin objects as returned (identifiers stripped by
+ * `stripPrivate`), not re-modelled; every part is optional. Raw record, synced from the server (pull-only).
+ */
+export interface GarminDetail {
+  summary?: Record<string, unknown>
+  /** The night ending on this date. */
+  sleep?: Record<string, unknown>
+  heartRate?: Record<string, unknown>
+  hrv?: Record<string, unknown>
+  spo2?: Record<string, unknown>
+  bodyBattery?: Record<string, unknown>
+  /** Activities that started on this date. */
+  activities?: Record<string, unknown>[]
+}
+
 /** A provisional log entry made during the day. Only confirmed reviews drive rating. */
 export interface HabitEvent {
   id: string

@@ -53,11 +53,12 @@ analytics) and show **sections + charts**. Read-only; Elo untouched (AGENTS.md: 
 - Version `0.17.0`.
 
 ## Steps
-- [ ] 1. Fixtures + pure server-side builder: trimmed anonymised fixtures for HR, HRV, SpO2, body battery, full
+- [x] 1. Fixtures + pure server-side builder: trimmed anonymised fixtures for HR, HRV, SpO2, body battery, full
   daily summary, full sleep, activity (from the spike's endpoints, re-fetched with the key; strip identifiers);
   `src/garmin/detail.ts`: `stripPrivate(obj)` (recursive, strip list) and `buildDetail(raw, day)` → GarminDetail;
   tests (no identifiers survive; per-day split of activities) — files: `src/garmin/detail.ts`, `src/garmin/detail.test.ts`,
   `src/garmin/fixtures/*.json`, `src/domain/types.ts` (`GarminDetail`) — verify: `npm test`.
+  Note: fixtures reuse the 2026-11-12 spike responses (stress daily skipped: subset of summaries); `activityName` and sleep `id` also stripped; the lat/lon rule is word-bounded so `latestSpO2` survives.
 - [ ] 2. Server: migration `supabase/migrations/20261113020000_garmin_detail.sql` (tbl check adds `garmin_detail`;
   records insert/update policies and `push_records` also exclude it; RPC `garmin_upsert_records` gains `p_tbl`
   validated to the two values + unchanged-skip); `garmin-pull` fetches the extra endpoints and upserts detail rows

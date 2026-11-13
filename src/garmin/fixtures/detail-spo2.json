@@ -1,0 +1,306 @@
+{
+ "calendarDate": "2026-11-12",
+ "startTimestampGMT": "2026-11-11T23:00:00.0",
+ "endTimestampGMT": "2026-11-12T23:00:00.0",
+ "startTimestampLocal": "2026-11-12T00:00:00.0",
+ "endTimestampLocal": "2026-11-13T00:00:00.0",
+ "sleepStartTimestampGMT": "2026-11-11T22:03:50.0",
+ "sleepEndTimestampGMT": "2026-11-12T06:06:50.0",
+ "sleepStartTimestampLocal": "2026-11-11T23:03:50.0",
+ "sleepEndTimestampLocal": "2026-11-12T07:06:50.0",
+ "tomorrowSleepStartTimestampGMT": "2026-11-12T23:30:48.0",
+ "tomorrowSleepEndTimestampGMT": "2026-11-13T07:48:13.0",
+ "tomorrowSleepStartTimestampLocal": "2026-11-13T00:30:48.0",
+ "tomorrowSleepEndTimestampLocal": "2026-11-13T08:48:13.0",
+ "averageSpO2": 96.0,
+ "lowestSpO2": 89,
+ "lastSevenDaysAvgSpO2": 96.85714285714286,
+ "latestSpO2": 95,
+ "latestSpO2TimestampGMT": "2026-11-12T23:00:00.0",
+ "latestSpO2TimestampLocal": "2026-11-13T00:00:00.0",
+ "avgSleepSpO2": 97.0,
+ "avgTomorrowSleepSpO2": 98.0,
+ "spO2SingleValuesDescriptorList": [
+  {
+   "spo2ValueDescriptorIndex": 0,
+   "spo2ValueDescriptorKey": "timestamp"
+  },
+  {
+   "spo2ValueDescriptorIndex": 1,
+   "spo2ValueDescriptorKey": "spo2Reading"
+  },
+  {
+   "spo2ValueDescriptorIndex": 2,
+   "spo2ValueDescriptorKey": "singleReadingPlottable"
+  }
+ ],
+ "spO2SingleValues": null,
+ "spO2HourlyAveragesDescriptorList": [
+  {
+   "spo2ValueDescIndex": 0,
+   "spo2ValueDescKey": "timestamp"
+  },
+  {
+   "spo2ValueDescIndex": 1,
+   "spo2ValueDescKey": "spo2Level"
+  },
+  {
+   "spo2ValueDescIndex": 2,
+   "spo2ValueDescKey": "monitoringEnvironmentLevel"
+  }
+ ],
+ "spO2HourlyAverages": [
+  [
+   1794438000000,
+   97,
+   258.3999938964844
+  ],
+  [
+   1794441600000,
+   94,
+   258.3999938964844
+  ],
+  [
+   1794445200000,
+   96,
+   258.3999938964844
+  ],
+  [
+   1794448800000,
+   98,
+   230.39999389648438
+  ],
+  [
+   1794452400000,
+   96,
+   228.39999389648438
+  ],
+  [
+   1794456000000,
+   97,
+   228.39999389648438
+  ],
+  [
+   1794459600000,
+   96,
+   228.39999389648438
+  ],
+  [
+   1794463200000,
+   null,
+   223.48666330973307
+  ],
+  [
+   1794466800000,
+   null,
+   226.45332794189454
+  ],
+  [
+   1794470400000,
+   null,
+   227.17332814534504
+  ],
+  [
+   1794474000000,
+   null,
+   225.86666564941407
+  ],
+  [
+   1794477600000,
+   null,
+   230.0
+  ],
+  [
+   1794481200000,
+   null,
+   230.0
+  ],
+  [
+   1794484800000,
+   null,
+   230.0
+  ],
+  [
+   1794488400000,
+   null,
+   208.0866668701172
+  ],
+  [
+   1794492000000,
+   null,
+   208.5133295694987
+  ],
+  [
+   1794495600000,
+   null,
+   226.94000040690105
+  ],
+  [
+   1794499200000,
+   null,
+   236.8000030517578
+  ],
+  [
+   1794502800000,
+   null,
+   236.8000030517578
+  ],
+  [
+   1794506400000,
+   null,
+   236.8000030517578
+  ],
+  [
+   1794510000000,
+   null,
+   231.04666290283203
+  ],
+  [
+   1794513600000,
+   null,
+   231.26666158040365
+  ],
+  [
+   1794517200000,
+   null,
+   237.1999969482422
+  ],
+  [
+   1794520800000,
+   97,
+   237.1999969482422
+  ]
+ ],
+ "monitoringEnvironmentValuesDescriptorList": [
+  {
+   "monEnvValueDescIndex": 0,
+   "monEnvValueDescKey": "timestamp"
+  },
+  {
+   "monEnvValueDescIndex": 1,
+   "monEnvValueDescKey": "monitoringEnvironmentLevel"
+  }
+ ],
+ "monitoringEnvironmentValues": [
+  [
+   1794438000000,
+   258.0
+  ],
+  [
+   1794440880000,
+   258.0
+  ],
+  [
+   1794443760000,
+   258.0
+  ],
+  [
+   1794447000000,
+   258.0
+  ],
+  [
+   1794449880000,
+   228.0
+  ],
+  [
+   1794452760000,
+   228.0
+  ],
+  [
+   1794455640000,
+   228.0
+  ],
+  [
+   1794458880000,
+   228.0
+  ],
+  [
+   1794461760000,
+   228.0
+  ],
+  [
+   1794464640000,
+   228.0
+  ],
+  [
+   1794467520000,
+   228.0
+  ],
+  [
+   1794470760000,
+   229.0
+  ],
+  [
+   1794473640000,
+   226.0
+  ],
+  [
+   1794476520000,
+   230.0
+  ],
+  [
+   1794479400000,
+   230.0
+  ],
+  [
+   1794482640000,
+   230.0
+  ],
+  [
+   1794485520000,
+   230.0
+  ],
+  [
+   1794488400000,
+   220.0
+  ],
+  [
+   1794491280000,
+   206.0
+  ],
+  [
+   1794494520000,
+   211.0
+  ],
+  [
+   1794497400000,
+   237.0
+  ],
+  [
+   1794500280000,
+   237.0
+  ],
+  [
+   1794503160000,
+   237.0
+  ],
+  [
+   1794506400000,
+   237.0
+  ],
+  [
+   1794509280000,
+   237.0
+  ],
+  [
+   1794512160000,
+   232.0
+  ],
+  [
+   1794515040000,
+   232.0
+  ],
+  [
+   1794518280000,
+   237.0
+  ],
+  [
+   1794521160000,
+   237.0
+  ],
+  [
+   1794524040000,
+   237.0
+  ]
+ ]
+}

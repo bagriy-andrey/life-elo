@@ -1,6 +1,6 @@
 # 17 — Garmin day page (all data, sections + charts)
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -59,7 +59,7 @@ analytics) and show **sections + charts**. Read-only; Elo untouched (AGENTS.md: 
   tests (no identifiers survive; per-day split of activities) — files: `src/garmin/detail.ts`, `src/garmin/detail.test.ts`,
   `src/garmin/fixtures/*.json`, `src/domain/types.ts` (`GarminDetail`) — verify: `npm test`.
   Note: fixtures reuse the 2026-11-12 spike responses (stress daily skipped: subset of summaries); `activityName` and sleep `id` also stripped; the lat/lon rule is word-bounded so `latestSpO2` survives.
-- [ ] 2. Server: migration `supabase/migrations/20261113020000_garmin_detail.sql` (tbl check adds `garmin_detail`;
+- [x] 2. Server: migration `supabase/migrations/20261113020000_garmin_detail.sql` (tbl check adds `garmin_detail`;
   records insert/update policies and `push_records` also exclude it; RPC `garmin_upsert_records` gains `p_tbl`
   validated to the two values + unchanged-skip); `garmin-pull` fetches the extra endpoints and upserts detail rows
   (same stage tagging) — files: the migration, `supabase/functions/garmin-pull/index.ts`, `_shared/garmin.ts` —

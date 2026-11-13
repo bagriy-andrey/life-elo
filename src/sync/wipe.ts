@@ -1,3 +1,4 @@
+import { clearStatusCache } from '../garmin/statusCache'
 import { db } from '../db/db'
 import type { SyncEngine } from './engine'
 import { applyRemote, setSyncState } from './outbox'
@@ -22,6 +23,7 @@ export async function wipeAccountData({ engine, remote }: WipeDeps): Promise<voi
     engine.enable()
     throw e
   }
+  clearStatusCache()
   try {
     await applyRemote(async () => {
       await Promise.all([

@@ -30,7 +30,6 @@
   width: 100%;
   height: auto;
   display: block;
-  overflow: visible;
 }
 .line-series__band {
   fill: var(--line-series-band);
@@ -50,7 +49,7 @@
 .line-series__line {
   fill: none;
   stroke: var(--line-series-color);
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-linejoin: round;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;

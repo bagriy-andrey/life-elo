@@ -4,7 +4,7 @@ import './LineSeriesChart.css'
 
 const W = 320
 const H = 140
-const PAD_L = 34
+const PAD_L = 6
 const PAD_R = 6
 const PAD_T = 8
 const PAD_B = 18
@@ -17,15 +17,17 @@ export interface LineSeriesChartProps {
   band?: { low: number; high: number }
   /** Time axis label for an epoch ms (the caller owns the local-time convention). */
   formatTick: (t: number) => string
-  /** Value label for the y axis and the readout. */
+  /** Value label for the readout (may include the unit). */
   formatValue?: (v: number) => string
+  /** Unitless value label for the y axis; labels are drawn inside the plot box. */
+  formatAxis?: (v: number) => string
   /** Accessible summary; also rendered as the SVG <title>. */
   label: string
 }
 
 const valid = (v: number) => Number.isFinite(v) && v >= 0
 
-export function LineSeriesChart({ points, band, formatTick, formatValue = (v) => String(Math.round(v)), label }: LineSeriesChartProps) {
+export function LineSeriesChart({ points, band, formatTick, formatValue = (v) => String(Math.round(v)), formatAxis = (v) => String(Math.round(v)), label }: LineSeriesChartProps) {
   const [active, setActive] = useState<number | null>(null)
   const sorted = [...points].filter((p) => Number.isFinite(p.t)).sort((a, b) => a.t - b.t)
   const good = sorted.filter((p) => valid(p.v))
@@ -108,11 +110,11 @@ export function LineSeriesChart({ points, band, formatTick, formatValue = (v) =>
           {hit && valid(hit.v) && <line className="line-series__guide" x1={f(X(hit.t))} x2={f(X(hit.t))} y1={PAD_T} y2={H - PAD_B} />}
           <path className="line-series__line" d={d} />
           {hit && valid(hit.v) && <circle className="line-series__dot" cx={f(X(hit.t))} cy={f(Y(hit.v))} r="3.5" />}
-          <text className="line-series__lbl" x={PAD_L - 4} y={f(Y(hi))} textAnchor="end" dominantBaseline="hanging">
-            {formatValue(hi)}
+          <text className="line-series__lbl" x={PAD_L + 2} y={f(Y(hi)) + 2} textAnchor="start" dominantBaseline="hanging">
+            {formatAxis(hi)}
           </text>
-          <text className="line-series__lbl" x={PAD_L - 4} y={f(Y(lo))} textAnchor="end" dominantBaseline="auto">
-            {formatValue(lo)}
+          <text className="line-series__lbl" x={PAD_L + 2} y={f(Y(lo)) - 2} textAnchor="start" dominantBaseline="auto">
+            {formatAxis(lo)}
           </text>
           {ticks.map((t, i) => (
             <text

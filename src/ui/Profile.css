@@ -65,34 +65,7 @@
 .clear-hint { font-size: var(--text-xs); }
 .clear-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .profile-listrow:disabled { opacity: 0.6; cursor: default; }
-.sync-row { display: inline-flex; align-items: center; gap: var(--space-6); min-width: 0; }
-.sync-dot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--muted);
-}
-.sync-dot.ok { background: var(--pos); }
-.sync-dot.err { background: var(--neg); }
-.sync-dot.busy { background: var(--muted); opacity: 0.5; }
-.sync-btn {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font-size: var(--text-lg);
-  cursor: pointer;
-}
-.sync-btn:disabled { opacity: 0.6; cursor: default; }
-.sync-btn.spinning { animation: sync-spin 1s linear infinite; }
-@keyframes sync-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) {
-  .sync-btn.spinning { animation: none; }
-}
+.sync-problem { padding-bottom: var(--space-12); }
 .login-email { display: flex; flex-direction: column; min-width: 0; }
 .login-caption { font-size: var(--text-xs); }
 .login-email-value { display: inline-flex; align-items: center; gap: var(--space-6); min-width: 0; }
@@ -122,18 +95,28 @@
 .profile-version { text-align: center; font-size: var(--text-xs); }
 .profile-export-hint { display: inline-flex; align-items: center; gap: var(--space-6); }
 
+.garmin-status-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); }
+.garmin-status-text { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.garmin-connected { display: flex; align-items: center; gap: var(--space-8); }
+.garmin-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--pos); }
+.garmin-synced { font-size: var(--text-sm); }
+.garmin-expires { font-size: var(--text-xs); }
+.garmin-sync-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.garmin-sync-btn:disabled { opacity: 0.6; cursor: default; }
+.garmin-sync-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .garmin-fail {
   color: var(--neg);
   font-size: 0.875rem;
 }
-
-.garmin-data { display: flex; flex-direction: column; gap: var(--space-12); padding-bottom: var(--space-16); }
-.garmin-data-sync { margin: 0; }
-.garmin-data-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-8); }
-.garmin-day { width: 100%; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: var(--space-8); }
-.garmin-day:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.garmin-day-date { text-transform: capitalize; }
-.garmin-day-rows { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto); gap: var(--space-4) var(--space-12); font-size: var(--text-sm); }
-.garmin-day-label { color: var(--muted); }
-.garmin-day-value { margin: 0; text-align: right; overflow-wrap: anywhere; }
-.garmin-day-activity { display: block; }

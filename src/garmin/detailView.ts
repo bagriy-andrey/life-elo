@@ -82,7 +82,7 @@ export interface DayDetailView {
 export const SLEEP_QUALIFIERS = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR'] as const
 export const HRV_STATUSES = ['BALANCED', 'UNBALANCED', 'LOW', 'POOR'] as const
 export const STRESS_QUALIFIERS = ['calm', 'balanced', 'stressful', 'very_stressful', 'unknown'] as const
-export const BB_EVENT_TYPES = ['SLEEP', 'ACTIVITY', 'RECOVERY'] as const
+export const BB_EVENT_TYPES = ['ACTIVITY', 'RECOVERY'] as const
 export const SLEEP_SCORE_KEYS = [
   'totalDuration',
   'stress',
@@ -274,6 +274,8 @@ function bodyBatterySection(detail: GarminDetail): DetailSection | undefined {
     const o = obj(e)
     if (!o) continue
     const type = str(o.eventType)
+    // Sleep is its own section; a SLEEP group here would duplicate it.
+    if (type === 'SLEEP') continue
     const gi: DetailItem[] = []
     add(gi, 'bbEventStart', clock(o.eventStartTimeLocal) ?? clock(o.eventStartTimeGmt))
     add(gi, 'bbEventDuration', sec(o.durationInMillis ?? o.durationInMilliseconds), 'sec')
@@ -488,35 +490,7 @@ export function garminDayDetailView(detail: GarminDetail | undefined, row?: Garm
   return { sections: all.filter((s): s is DetailSection => s !== undefined), summaryOnly: false }
 }
 
-const DURATION_UNITS: Record<string, { h: string; min: string }> = {
-  ru: { h: 'ч', min: 'мин' },
-  uk: { h: 'год', min: 'хв' },
-  en: { h: 'h', min: 'min' },
-}
-const DISTANCE_UNITS: Record<string, { m: string; km: string }> = {
-  ru: { m: 'м', km: 'км' },
-  uk: { m: 'м', km: 'км' },
-  en: { m: 'm', km: 'km' },
-}
-const lang = (locale: string) => locale.slice(0, 2).toLowerCase()
-
-/** `28080` -> `7 ч 48 мин`. Seconds are rounded to the nearest minute, so under 30 s shows `0 мин`. */
-export function formatDuration(seconds: number, locale: string): string {
-  const u = DURATION_UNITS[lang(locale)] ?? DURATION_UNITS.en
-  const total = Math.max(0, Math.round(seconds / 60))
-  const h = Math.floor(total / 60)
-  const m = total % 60
-  if (h === 0) return `${m} ${u.min}`
-  return m === 0 ? `${h} ${u.h}` : `${h} ${u.h} ${m} ${u.min}`
-}
-
-/** `9760` -> `9,76 км` (2 decimals max); under 1 km whole metres. */
-export function formatDistance(meters: number, locale: string): string {
-  const u = DISTANCE_UNITS[lang(locale)] ?? DISTANCE_UNITS.en
-  if (Math.abs(meters) < 1000) return `${Math.round(meters)} ${u.m}`
-  const km = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(meters / 1000)
-  return `${km} ${u.km}`
-}
+export { formatDistance, formatDuration } from '../ui/format'
 
 /**
  * Watch UTC offset in ms (local start - GMT start of any stored block), 0 when unknown. Chart ticks must show

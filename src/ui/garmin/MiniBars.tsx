@@ -11,6 +11,7 @@ const W = 320
 const H = 80
 const PAD_B = 14
 const PAD_T = 12
+const CHAR_W = 5.5
 
 export function MiniBars({ bars, formatValue = (v) => String(Math.round(v)), label }: MiniBarsProps) {
   const good = bars.filter((b) => Number.isFinite(b.v) && b.v >= 0)
@@ -23,6 +24,11 @@ export function MiniBars({ bars, formatValue = (v) => String(Math.round(v)), lab
   const bw = Math.max(2, slot * 0.64)
   const labelEvery = Math.ceil(bars.length / 6)
   const f = (n: number) => +n.toFixed(1)
+  // Keep centered labels fully inside the viewBox (approximate glyph width).
+  const labelX = (cx: number, text: string) => {
+    const half = (text.length * CHAR_W) / 2
+    return f(Math.min(W - half, Math.max(half, cx)))
+  }
   return (
     <div className="mini-bars">
       <svg className="mini-bars__svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
@@ -35,12 +41,12 @@ export function MiniBars({ bars, formatValue = (v) => String(Math.round(v)), lab
         })}
         {bars.map((b, i) =>
           i % labelEvery === 0 ? (
-            <text key={i} className="mini-bars__lbl" x={f(i * slot + slot / 2)} y={H - 2} textAnchor="middle">
+            <text key={i} className="mini-bars__lbl" x={labelX(i * slot + slot / 2, b.label)} y={H - 2} textAnchor="middle">
               {b.label}
             </text>
           ) : null,
         )}
-        <text className="mini-bars__lbl mini-bars__lbl--max" x="0" y="8">
+        <text className="mini-bars__lbl mini-bars__lbl--max" x="2" y="8">
           {formatValue(hi)}
         </text>
       </svg>

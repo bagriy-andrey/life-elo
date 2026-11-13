@@ -37,6 +37,10 @@ Plain `<h2>` is pre-styled (`--text-lg`, no margin) for section headings. A nati
 - `Avatar name src`: photo or initials on an accent tint (`size` defaults to 96). With `onClick` it becomes a button: always pass `label`.
 - `Dialog open title onClose`: confirm modal. Children = `<p className="dialog-body">` + `<div className="dialog-actions">`; put `autoFocus` on the safe action.
 - `TabBar` is `position: fixed` to the viewport bottom. Render it once per screen and leave ~96px bottom padding on the content.
+- `MetricTile` (`icon title value unit sub footer`, `href` or `onClick`): tappable card tile for a metric grid; use `—` as value when missing, `loading` for skeletons.
+- `WeekChart`: week card body (steps bars + goal line, sleep strips, day buttons); `goalLabel` must be ≤5 chars (e.g. `11,4к`); a day that is today and selected sets `isToday`.
+- `SegmentBar` (decorative bar) + `LegendRow` (swatch, name, value, percent): `color` maps to tokens `tier-weak|tier-medium|tier-strong|pos|neg|warn|muted` → `var(--<color>)`.
+- `RangeScale` (decorative min/max bar, optional `corridor`, value dot), `ProgressBar` (`value`/`max`, `tone`), `FactGrid` (`items` label/value/hint): always state the value in text beside decorative bars.
 
 ## Where the truth lives
 

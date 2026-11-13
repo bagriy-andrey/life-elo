@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { MAX_BY_UNIT, parseNumeric, parseTime, stepFor, type NumericUnit, type ParseError } from '../domain/reviewFlow'
 import { useI18n } from '../i18n'
 import { Button, Field } from './components'
@@ -14,7 +14,7 @@ interface Props {
   /** Previously given answer (kept across back/forward and summary edits). */
   initial?: number | string
   /** Small note under the input (e.g. «из Garmin»). */
-  hint?: string
+  hint?: ReactNode
   onConfirm: (value: number | string) => void
   onNotApplicable: () => void
 }
@@ -96,7 +96,7 @@ export function YesterdayNumeric({ unit, title, typeLabel, question, goal, initi
             </>
           )}
           {goal && <span className="yr-num-goal">{goal}</span>}
-          {hint && initial !== undefined && draft === String(initial) && <span className="yr-garmin-hint">{hint}</span>}
+          {hint && initial !== undefined && draft === String(initial) && <div className="yr-garmin-hint">{hint}</div>}
         </div>
         {!isTime && <span className="yr-num-hint">{t('yr.num.hint')}</span>}
       </div>

@@ -39,3 +39,28 @@ describe('LineSeriesChart', () => {
     expect(html).not.toContain('>-1<')
   })
 })
+
+describe('LineSeriesChart axis labels', () => {
+  it('keeps every label inside the viewBox for wide values and drops units', () => {
+    const html = renderToString(
+      <LineSeriesChart
+        points={pts([9999, 12000, 10500, 9999])}
+        formatTick={hhmm}
+        formatValue={(v) => `${v} уд/мин`}
+        label="HR"
+      />,
+    )
+    const vb = /viewBox="0 0 (\d+) (\d+)"/.exec(html)!
+    const W = Number(vb[1])
+    const texts = [...html.matchAll(/<text[^>]*? x="([\d.]+)"[^>]*?text-anchor="(\w+)"[^>]*>([^<]*)<\/text>/g)]
+    expect(texts.length).toBeGreaterThanOrEqual(4)
+    for (const [, x, anchor, txt] of texts) {
+      const w = txt.length * 6
+      const left = anchor === 'start' ? Number(x) : anchor === 'end' ? Number(x) - w : Number(x) - w / 2
+      expect(left).toBeGreaterThanOrEqual(0)
+      expect(left + w).toBeLessThanOrEqual(W)
+      expect(txt).not.toContain('уд/мин')
+    }
+    expect(html).toContain('>12000<')
+  })
+})

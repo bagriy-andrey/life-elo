@@ -126,3 +126,4 @@
   font: inherit; font-weight: 600; color: var(--accent); cursor: pointer;
 }
 .yr-garmin-refresh:disabled { color: var(--muted); cursor: default; }
+.yr-garmin-ev { justify-content: center; }

@@ -40,6 +40,9 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
 - Plan 18 (Garmin redesign) adds MetricTile, WeekChart, SegmentBar + LegendRow, RangeScale, ProgressBar, FactGrid: all i18n-free
   (texts are props), all have `dtsPropsFor` entries and previews (`cardMode: column`). WeekChart preview needs a 326px-wide box;
   `goalLabel` ≤5 chars. SegmentBar colors are `var(--tier-*|pos|neg|warn|muted)` tokens.
+- TabBar (2026-11-13): items take an optional `icon`; at ≤600px the icon replaces the label. Preview `WithIcons`
+  (primary story) inlines the same Lucide-style SVGs as `src/ui/tabIcons.tsx` (that module isn't a DS export) — keep
+  them in step if the app's icons change.
 
 ## Known render warns
 - none

@@ -306,12 +306,15 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
     }
   }, [initial])
 
+  const retrying = useRef(false)
   const retryStatus = async () => {
+    if (retrying.current) return
+    retrying.current = true
     setStatus(undefined)
     setStatus(await garminStatusCall())
+    retrying.current = false
   }
-  const syncNow = async () => {
-    if (syncing) return
+  const runPull = async () => {
     setSyncing(true)
     setSyncReason(null)
     const to = toDayKey(new Date())
@@ -319,28 +322,33 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
     if (r.kind === 'error') setSyncReason(r.stage)
     else if (r.kind === 'key_invalid' || r.kind === 'timeout' || r.kind === 'offline') setSyncReason(r.kind)
     const s = await garminStatusCall()
-    if (s.kind !== 'error') setStatus(s)
+    if (s.kind === 'connected') setStatus((cur) => (cur?.kind === 'connected' ? s : cur))
     setSyncing(false)
+  }
+  const syncNow = async () => {
+    if (syncing) return
+    await runPull()
   }
 
   const doConnect = async () => {
-    if (busy || !key.trim()) return
+    if (busy || syncing || !key.trim()) return
     setBusy(true)
     setFailed(null)
+    setSyncReason(null)
     const r = await connect(key.trim(), lifetime)
     setBusy(false)
     if (r.kind === 'connected') {
       setKey('')
       setVisible(false)
       setStatus({ kind: 'connected', keyExpiresAt: r.keyExpiresAt, lastPullAt: null, lastAttemptAt: null, lastError: null })
-      const to = toDayKey(new Date())
-      void garminPull(addDays(to, -6), to, { force: true })
+      await runPull()
     } else setFailed(r.kind === 'key_invalid' ? 'invalid' : 'connect')
   }
   const doDisconnect = async () => {
-    if (busy) return
+    if (busy || syncing) return
     setBusy(true)
     setFailed(null)
+    setSyncReason(null)
     const r = await disconnect()
     setBusy(false)
     setConfirmOpen(false)
@@ -394,7 +402,7 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
           {syncing ? t('garmin.syncing') : t('garmin.syncNow')}
         </Button>
         {failed === 'disconnect' && <Notice tone="error">{t('garmin.error.disconnect')}</Notice>}
-        <Button onClick={() => setConfirmOpen(true)} disabled={busy}>{t('garmin.disconnect')}</Button>
+        <Button onClick={() => setConfirmOpen(true)} disabled={busy || syncing}>{t('garmin.disconnect')}</Button>
         <Dialog open={confirmOpen} title={t('garmin.disconnect')} onClose={() => !busy && setConfirmOpen(false)}>
           <div className="dialog-actions">
             <Button variant="danger" className="clear-btn" onClick={doDisconnect} loading={busy}>

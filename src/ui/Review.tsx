@@ -1,14 +1,20 @@
-import { useState } from 'react'
+import { useContext, useState, type MouseEvent } from 'react'
+import { AuthContext } from '../auth/context'
 import { confirmDay } from '../db/db'
 import { DayLockedError } from '../db/confirm'
 import { addDays, dayOf, isDayLocked } from '../domain/day'
 import { settingsOn } from '../domain/settings'
 import { weeklyGoalNote } from '../domain/reviewFlow'
-import type { DayReview, Habit, HabitEntry, Zone } from '../domain/types'
+import type { DayReview, GarminDay, Habit, HabitEntry, Zone } from '../domain/types'
 import { classifyZone } from '../engine/zones'
 import { quotaZone } from '../engine/quota'
 import { Button, Card, Pill, SegmentedControl } from './components'
 import { groupByDirectionAndTier } from './grouping'
+import { GarminHint } from './garmin/GarminHint'
+import { WatchIcon } from './garmin/icons'
+import { useGarminPrefill } from './garmin/useGarminPrefill'
+import { routePath } from './route'
+import './Review.css'
 import { useI18n } from '../i18n'
 import {
   booleanOptions,
@@ -30,6 +36,10 @@ interface Props {
   existing?: DayReview
   onDayChange: (day: string) => void
   onDone: () => void
+  /** Opens the Garmin day page for the reviewed day (app navigation, no reload). */
+  onOpenGarmin?: (day: string) => void
+  /** Preview/test seam: Garmin rows used instead of the Dexie ones. */
+  garminRows?: (GarminDay & { day: string })[]
 }
 
 type Entries = Record<string, HabitEntry>
@@ -51,7 +61,7 @@ const currentTime = () => new Date()
 
 const toneOfZone = (z: Zone) => (z === 'excellent' || z === 'ok' ? 'pos' : 'neg')
 
-export function Review({ day, maxDay, habits, reviews, existing, onDayChange, onDone }: Props) {
+export function Review({ day, maxDay, habits, reviews, existing, onDayChange, onDone, onOpenGarmin, garminRows }: Props) {
   const { t, locale } = useI18n()
   const BOOLEAN_OPTIONS = booleanOptions(t)
   const DIRECTION_GROUP_LABEL = directionGroupLabels(t)
@@ -68,16 +78,32 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   const locked = isDayLocked(day, now)
   const minDay = addDays(dayOf(now), -1) // earliest day that is not locked
 
+  // Garmin only suggests answers for a day that is still open and unconfirmed; the user's own answer always wins.
+  const signedIn = !!useContext(AuthContext)?.session
+  const { suggestions } = useGarminPrefill({
+    day,
+    habits: applicable,
+    enabled: (signedIn || !!garminRows) && !existing && !locked,
+    rows: garminRows,
+  })
+  const hintCount = Object.keys(suggestions).length
+  const shown = (id: string): HabitEntry | undefined => entries[id] ?? suggestions[id]?.entry
+  const effective = (): Entries => {
+    const out: Entries = { ...entries }
+    for (const [id, s] of Object.entries(suggestions)) if (!(id in out)) out[id] = s.entry
+    return out
+  }
+
   const set = (id: string, e: HabitEntry) => setEntries((prev) => ({ ...prev, [id]: e }))
 
   const zoneOf = (h: Habit): Zone | null => {
-    const entry = entries[h.id]
+    const entry = shown(h.id)
     if (!entry) return null
     const s = settingsOn(h, day)
     if (s.quota) {
       const byDay: Record<string, Entries> = {}
       for (const r of reviews) byDay[r.day] = r.entries
-      byDay[day] = entries
+      byDay[day] = effective()
       return quotaZone({ id: h.id, quota: s.quota }, day, byDay)
     }
     return classifyZone({ direction: h.direction, rule: s.rule }, entry)
@@ -87,7 +113,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
     if (saving) return
     setSaving(true)
     setError(undefined)
-    const full: Entries = Object.fromEntries(applicable.map((h) => [h.id, entries[h.id] ?? UNKNOWN]))
+    const full: Entries = Object.fromEntries(applicable.map((h) => [h.id, effective()[h.id] ?? UNKNOWN]))
     try {
       await confirmDay(day, full, currentTime())
       onDone()
@@ -104,13 +130,13 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
   const byDayWithEntries = () => {
     const byDay: Record<string, Entries> = {}
     for (const r of reviews) byDay[r.day] = r.entries
-    byDay[day] = entries
+    byDay[day] = effective()
     return byDay
   }
 
   const control = (h: Habit) => {
     const s = settingsOn(h, day)
-    const entry = entries[h.id]
+    const entry = shown(h.id)
     const numeric = s.quota || (s.rule.kind === 'measured' && s.rule.unit !== 'time')
     const timed = !s.quota && s.rule.kind === 'measured' && s.rule.unit === 'time'
     if (!numeric && !timed) {
@@ -173,6 +199,12 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
       {!locked && existing && (
         <p className="muted">{t('review.confirmedNote')}</p>
       )}
+      {hintCount > 0 && (
+        <div className="review-banner" role="status">
+          <span className="review-banner-icon"><WatchIcon /></span>
+          <p>{t('garmin.review.banner', { count: hintCount })}</p>
+        </div>
+      )}
       {applicable.length === 0 && (
         <p className="muted">{t('review.noHabits')}</p>
       )}
@@ -196,6 +228,7 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
                       <strong>{h.name}</strong>
                       {zone && zone !== 'tolerable' && <Pill tone={toneOfZone(zone)}>{ZONE_LABEL[zone]}</Pill>}
                     </div>
+                    {suggestions[h.id] && <GarminHint evidence={suggestions[h.id].evidence} className="review-hint" />}
                     <fieldset className="plain" disabled={locked}>
                       {control(h)}
                     </fieldset>
@@ -207,6 +240,19 @@ export function Review({ day, maxDay, habits, reviews, existing, onDayChange, on
           ))}
         </section>
       ))}
+      {onOpenGarmin && (signedIn || !!garminRows) && (
+        <a
+          className="review-garmin-link"
+          href={routePath({ tab: 'home', garminDay: day })}
+          onClick={(e: MouseEvent<HTMLAnchorElement>) => {
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+            e.preventDefault()
+            onOpenGarmin(day)
+          }}
+        >
+          {t('garmin.review.openDay')}
+        </a>
+      )}
       {applicable.length > 0 && !locked && (
         <>
           <p className="muted">{t('review.unknownNote')}</p>

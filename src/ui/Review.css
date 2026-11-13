@@ -1,0 +1,5 @@
+.review-banner { display: flex; align-items: flex-start; gap: var(--space-10); padding: var(--space-12); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); }
+.review-banner p { margin: 0; font-size: var(--text-sm); color: var(--text); }
+.review-banner-icon { flex: none; display: inline-flex; color: var(--accent); }
+.review-hint { margin-top: calc(-1 * var(--space-4)); }
+.review-garmin-link { align-self: flex-start; font-size: var(--text-sm); color: var(--accent); text-decoration: none; }

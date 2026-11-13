@@ -41,6 +41,8 @@ function MainApp() {
   const [route, navigate] = useRoute()
   // Back from the Garmin day page uses history only when the page was opened from inside the app.
   const garminFromApp = useRef(false)
+  // The day page's back label: «Главная» from Home tiles, «Назад» from the review screen.
+  const [garminBack, setGarminBack] = useState<'home' | 'back'>('home')
   const tab = route.tab
   const passwordOpen = route.tab === 'profile' && !!route.password
   const garminDay = route.tab === 'home' ? route.garminDay : undefined
@@ -140,6 +142,7 @@ function MainApp() {
             today={today}
             onOpenGarmin={(day, section) => {
               garminFromApp.current = true
+              setGarminBack('home')
               navigate({ tab: 'home', garminDay: day, section })
             }}
             onOpenProfile={() => setTab('profile')}
@@ -155,6 +158,11 @@ function MainApp() {
             existing={reviews.find((r) => r.day === reviewing)}
             onDayChange={(day) => navigate({ tab: 'review', day: day < yesterday ? day : undefined }, { replace: true })}
             onDone={() => setTab('home')}
+            onOpenGarmin={(d) => {
+              garminFromApp.current = true
+              setGarminBack('back')
+              navigate({ tab: 'home', garminDay: d })
+            }}
           />
         )}
         {dataReady && tab === 'home' && garminDay && (
@@ -163,6 +171,7 @@ function MainApp() {
             day={garminDay}
             today={today}
             section={garminSection}
+            backLabel={garminBack}
             onSelectDay={(d) => navigate({ tab: 'home', garminDay: d }, { replace: true })}
             onBack={() => {
               if (garminFromApp.current) history.back()

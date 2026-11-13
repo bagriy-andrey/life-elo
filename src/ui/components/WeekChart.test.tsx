@@ -25,7 +25,7 @@ describe('WeekChart', () => {
     expect(html).toContain('wchart-day-selected')
     expect(html).toContain('wchart-bar-selected')
     expect(html).toContain('aria-pressed="true"')
-    expect(html).toContain('aria-current="true"')
+    expect(html).not.toContain('aria-current="true"')
     expect(html).toContain('aria-current="date"')
     expect((html.match(/<button[^>]*disabled/g) ?? []).length).toBe(2)
     expect((html.match(/<button/g) ?? []).length).toBe(7)
@@ -72,5 +72,12 @@ describe('WeekChart', () => {
     expect(sleepStrip({ startFrac: 0.5, endFrac: 0.5 })).toBeNull()
     expect(sleepStrip({ startFrac: NaN, endFrac: 0.5 })).toBeNull()
     expect(sleepStrip(undefined)).toBeNull()
+  })
+
+  it('today+selected is aria-current=date; long goal label is truncated', () => {
+    const d = days.map((x, i) => (i === 4 ? { ...x, isToday: true } : x))
+    const html = renderToString(<WeekChart days={d} stepsGoal={11400} goalLabel="123456789" stepsCaption="s" sleepCaption="z" onSelect={() => {}} />)
+    expect((html.match(/aria-current="date"/g) ?? []).length).toBe(2)
+    expect(html).toContain('>12345<')
   })
 })

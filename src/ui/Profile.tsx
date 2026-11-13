@@ -1,5 +1,7 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
+import { db } from '../db/db'
 import { buildExport, deliverExport, exportLedger, readExportTables } from '../db/exportData'
 import { connect, disconnect, pull as garminPull, GARMIN_LIFETIMES, status as garminStatusCall } from '../garmin/api'
 import type { GarminErrorReason, GarminLifetime, GarminStatus } from '../garmin/api'
@@ -20,6 +22,7 @@ import { cx } from './components/cx'
 import { formatBirth, formatSigned } from './labels'
 import { resizeImage } from './photo'
 import { applyTheme } from './prefs'
+import { GarminDataSheet } from './GarminDataSheet'
 import './Profile.css'
 
 interface Props {
@@ -38,6 +41,8 @@ interface Props {
   onClearData: () => Promise<void>
   /** Initial Garmin status (test seam); omitted = loaded from the server on mount. */
   garminStatus?: GarminStatus
+  /** Test seam: number of cached Garmin days; omitted = live `db.garmin.count()`. */
+  garminDayCount?: number
 }
 
 type FieldName = 'name' | 'nick' | 'email' | 'birth'
@@ -285,7 +290,7 @@ function DataSection({ onClear, version }: { onClear: () => Promise<void>; versi
   )
 }
 
-function GarminSection({ initial }: { initial?: GarminStatus }) {
+function GarminSection({ initial, dayCount }: { initial?: GarminStatus; dayCount?: number }) {
   const { t, locale } = useI18n()
   const [status, setStatus] = useState<GarminStatus | undefined>(initial)
   const [key, setKey] = useState('')
@@ -296,6 +301,9 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [now] = useState(() => Date.now())
   const [syncing, setSyncing] = useState(false)
+  const [dataOpen, setDataOpen] = useState(false)
+  const liveCount = useLiveQuery(() => db.garmin.count(), [])
+  const hasData = (dayCount ?? liveCount ?? 0) > 0
   const [syncReason, setSyncReason] = useState<GarminErrorReason | 'timeout' | 'offline' | null>(null)
   useEffect(() => {
     if (initial) return
@@ -401,6 +409,8 @@ function GarminSection({ initial }: { initial?: GarminStatus }) {
         <Button onClick={syncNow} loading={syncing} disabled={busy || syncing}>
           {syncing ? t('garmin.syncing') : t('garmin.syncNow')}
         </Button>
+        {hasData && <Button onClick={() => setDataOpen(true)}>{t('garmin.viewData')}</Button>}
+        <GarminDataSheet open={dataOpen} onClose={() => setDataOpen(false)} lastPullAt={status.lastPullAt} />
         {failed === 'disconnect' && <Notice tone="error">{t('garmin.error.disconnect')}</Notice>}
         <Button onClick={() => setConfirmOpen(true)} disabled={busy || syncing}>{t('garmin.disconnect')}</Button>
         <Dialog open={confirmOpen} title={t('garmin.disconnect')} onClose={() => !busy && setConfirmOpen(false)}>
@@ -507,7 +517,7 @@ function Settings() {
   )
 }
 
-export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus }: Props) {
+export function Profile({ profile, rating, today, accountSection, accountActions, version = APP_VERSION, onClearData, garminStatus, garminDayCount }: Props) {
   const { t, locale } = useI18n()
   const [editing, setEditing] = useState(false)
   if (!profile || editing) {
@@ -558,7 +568,7 @@ export function Profile({ profile, rating, today, accountSection, accountActions
         <h3 className="profile-section-title">{t('account.title')}</h3>
         {accountSection}
       </section>
-      <GarminSection initial={garminStatus} />
+      <GarminSection initial={garminStatus} dayCount={garminDayCount} />
       <Settings />
       <DataSection onClear={onClearData} version={version} />
       {accountActions}

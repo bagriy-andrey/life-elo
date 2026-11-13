@@ -15,10 +15,10 @@ const profile = {
   createdAt: Date.UTC(2026, 0, 5),
 } as unknown as ProfileData
 
-const render = (p: ProfileData | null, rating = 12.3, garminStatus?: GarminStatus) =>
+const render = (p: ProfileData | null, rating = 12.3, garminStatus?: GarminStatus, garminDayCount?: number) =>
   renderToString(
     <I18nProvider>
-      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} garminStatus={garminStatus} />
+      <Profile profile={p} rating={rating} today={today} version="0.9.0" onClearData={async () => {}} garminStatus={garminStatus} garminDayCount={garminDayCount} />
     </I18nProvider>,
   )
 
@@ -87,6 +87,13 @@ describe('Profile Garmin section', () => {
     expect(html).toContain('Синхронизации ещё не было')
     expect(html).toContain('Отключить')
     expect(html).not.toContain('скоро истечёт')
+  })
+
+  it('connected: data button only when Garmin rows exist', () => {
+    const st = { kind: 'connected', keyExpiresAt: null, lastPullAt: null, lastAttemptAt: null, lastError: null } as const
+    expect(render(profile, 1, st, 3)).toContain('Посмотреть данные синхронизации')
+    expect(render(profile, 1, st, 0)).not.toContain('Посмотреть данные синхронизации')
+    expect(render(profile, 1, { kind: 'not_connected' }, 3)).not.toContain('Посмотреть данные синхронизации')
   })
 
   it('connected with an expired key shows the invalid state', () => {

@@ -50,11 +50,10 @@ export function formatNumber(n: number, locale: string, maxFractionDigits = 0): 
 /** Signed delta, «+62» / «−4» (U+2212), via `labels.formatSigned`. */
 export const formatDelta = (n: number, digits = 0) => formatSigned(n, digits)
 
-/** «пт, 13 ноября»: short weekday, lower-case month. */
+/** «пт, 13 ноября» (ru/uk lower-case month); English stays standard «Fri, November 13». */
 export function formatDayShort(day: string, locale: string): string {
-  return new Date(`${day}T12:00:00`)
-    .toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'long' })
-    .toLowerCase()
+  const text = new Date(`${day}T12:00:00`).toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'long' })
+  return lang(locale) === 'en' ? text : text.toLowerCase()
 }
 
 /** «9–15 ноября», or «28 окт – 3 нояб» style across months: «30 октября – 5 ноября». */

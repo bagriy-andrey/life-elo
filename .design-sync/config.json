@@ -30,7 +30,9 @@
     "Spinner": "/** Diameter in px (default 18). Spinning ring in currentColor. */\n  size?: number;\n  /** Accessible text (role=status); decorative when omitted. */\n  label?: string;\n  className?: string;",
     "StatTile": "/** Read-only summary tile: colored dot + title + total, then one row per tier (importance bars, label, count; zero counts dimmed). */\n  title: string;\n  /** Big number at the top right. */\n  total: number;\n  /** Dot color: pos = green, neg = red. */\n  tone: \"pos\" | \"neg\";\n  /** Rows top to bottom; level (1-3) sets the filled bars. */\n  rows: { label: string; value: number; level: 1 | 2 | 3 }[];\n  className?: string;",
     "Menu": "/** ⋮ button (44x44) with a small popover menu: opens under the trigger, flips above near the bottom; closes on outside tap, Esc, second tap and after a pick. */\n  items: { id: string; label: string; tone?: \"danger\"; separatorBefore?: boolean }[];\n  /** Called with the picked item id. */\n  onSelect: (id: string) => void;\n  /** Accessible name of the ⋮ trigger. */\n  triggerLabel: string;\n  className?: string;",
-    "Skeleton": "/** Shimmering placeholder block while data loads (aria-hidden). CSS width, default 100%. */\n  width?: number | string;\n  /** CSS height, default 1em. */\n  height?: number | string;\n  /** Border radius in px, or \"full\" for circles/pills; default --radius-sm. */\n  radius?: number | \"full\";\n  className?: string;\n  style?: React.CSSProperties;"
+    "Skeleton": "/** Shimmering placeholder block while data loads (aria-hidden). CSS width, default 100%. */\n  width?: number | string;\n  /** CSS height, default 1em. */\n  height?: number | string;\n  /** Border radius in px, or \"full\" for circles/pills; default --radius-sm. */\n  radius?: number | \"full\";\n  className?: string;\n  style?: React.CSSProperties;",
+    "ProgressBar": "/** Horizontal meter (value of max, clamped). Visible text beside it is the caller's. */\n  value: number;\n  max: number;\n  /** Fill color; accent when omitted. */\n  tone?: \"accent\" | \"pos\" | \"neg\" | \"warn\";\n  /** Accessible name (role=progressbar). */\n  label: string;\n  /** Bar height: sm 6px, md 10px (default). */\n  size?: \"sm\" | \"md\";\n  className?: string;",
+    "FactGrid": "/** Two-column grid of facts: muted small label above a bold tabular value, optional muted hint below. */\n  items: { label: string; value: string; hint?: string }[];\n  className?: string;"
   },
   "overrides": {
     "TabBar": {
@@ -118,6 +120,12 @@
       "cardMode": "column"
     },
     "Menu": {
+      "cardMode": "column"
+    },
+    "ProgressBar": {
+      "cardMode": "column"
+    },
+    "FactGrid": {
       "cardMode": "column"
     }
   },

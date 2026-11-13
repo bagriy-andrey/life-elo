@@ -13,7 +13,7 @@ const tFor = (lang: Lang) => {
 describe('format', () => {
   it('formatDayShort: short weekday, lower-case month', () => {
     expect(formatDayShort('2026-11-13', 'ru')).toBe('пт, 13 ноября')
-    expect(formatDayShort('2026-11-13', 'en')).toBe('fri, november 13')
+    expect(formatDayShort('2026-11-13', 'en')).toBe('Fri, November 13')
     expect(formatDayShort('2026-11-13', 'uk')).toMatch(/^пт, 13 листопада$/)
   })
 

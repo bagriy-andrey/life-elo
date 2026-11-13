@@ -12,16 +12,22 @@ describe('route', () => {
       { tab: 'habits', id: 'a b/c' },
       { tab: 'profile' },
       { tab: 'profile', password: true },
-      { tab: 'profile', garminDay: '2026-11-12' },
+      { tab: 'home', garminDay: '2026-11-12' },
+      { tab: 'home', garminDay: '2026-11-13', section: 'sleep' },
     ]
-    for (const r of routes) expect(parseRoute(routePath(r))).toEqual(r)
+    for (const r of routes) {
+      const [path, hash] = routePath(r).split('#')
+      expect(parseRoute(path, hash ? `#${hash}` : '')).toEqual(r)
+    }
   })
-  it('parses the Garmin day page and sends invalid days to the profile', () => {
-    expect(parseRoute('/garmin/2026-11-12')).toEqual({ tab: 'profile', garminDay: '2026-11-12' })
-    expect(routePath({ tab: 'profile', garminDay: '2026-11-12' })).toBe('/garmin/2026-11-12')
-    expect(parseRoute('/garmin/nope')).toEqual({ tab: 'profile' })
-    expect(parseRoute('/garmin/2026-02-30')).toEqual({ tab: 'profile' })
-    expect(parseRoute('/garmin')).toEqual({ tab: 'profile' })
+  it('parses the Garmin day page under home; invalid days and sections degrade', () => {
+    expect(parseRoute('/garmin/2026-11-13', '#sleep')).toEqual({ tab: 'home', garminDay: '2026-11-13', section: 'sleep' })
+    expect(routePath({ tab: 'home', garminDay: '2026-11-13', section: 'sleep' })).toBe('/garmin/2026-11-13#sleep')
+    expect(routePath({ tab: 'home', garminDay: '2026-11-12' })).toBe('/garmin/2026-11-12')
+    expect(parseRoute('/garmin/2026-11-13', '#bogus')).toEqual({ tab: 'home', garminDay: '2026-11-13' })
+    expect(parseRoute('/garmin/nope')).toEqual({ tab: 'home' })
+    expect(parseRoute('/garmin/2026-02-30')).toEqual({ tab: 'home' })
+    expect(parseRoute('/garmin')).toEqual({ tab: 'home' })
   })
   it('tolerates a trailing slash', () => {
     expect(parseRoute('/habits/')).toEqual({ tab: 'habits' })

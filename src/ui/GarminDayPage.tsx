@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { toDayKey } from '../domain/day'
 import { db } from '../db/db'
 import type { GarminDay, GarminDetail } from '../domain/types'
 import {
@@ -12,43 +14,61 @@ import {
   type DetailItem,
   type DetailSection,
 } from '../garmin/detailView'
+import { useGarminSync } from '../garmin/useGarminSync'
 import { useI18n } from '../i18n'
 import type { Key } from '../i18n/types'
 import { Card } from './components'
 import { LineSeriesChart } from './garmin/LineSeriesChart'
 import { MiniBars } from './garmin/MiniBars'
 import { StackedBar } from './garmin/StackedBar'
+import { formatClock, formatDayShort } from './format'
+import type { GarminSection } from './route'
 import './GarminDayPage.css'
 
 interface Props {
   day: string
   onBack: () => void
+  /** Today's day key (the page marks it «день идёт»); defaults to the device date. */
+  today?: string
+  /** Section to scroll to on open. */
+  section?: GarminSection
+  /** «‹ Назад» (opened from the review) instead of «‹ Главная». */
+  backLabel?: 'home' | 'back'
+  /** Test seam: skip the status cache/`status()` (`null` = unknown sync). */
+  sync?: { at: string | null; now?: Date }
   /** Test seam: skip the live Dexie read (`detail: undefined` = none stored). */
   data?: { detail?: GarminDetail; row?: GarminDay }
 }
 
-/** `YYYY-MM-DD` as a local calendar date. */
-function localDate(day: string): Date {
-  const [y, m, d] = day.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
-
 const pad = (n: number) => String(n).padStart(2, '0')
 
-export function GarminDayPage({ day, onBack, data }: Props) {
+export function GarminDayPage({ day, onBack, today, section, backLabel = 'home', sync, data }: Props) {
   const { t, locale } = useI18n()
   const live = useLiveQuery(async () => {
     const [detail, row] = await Promise.all([db.garminDetail.get(day), db.garmin.get(day)])
     return { detail, row }
   }, [day])
   const loaded = data ?? live
+  const cached = useGarminSync()
+  const syncAt = sync ? sync.at : (cached?.deviceLastSyncAt ?? cached?.lastPullAt ?? null)
+  const [mountedAt] = useState(() => new Date())
+  const nowDate = sync?.now ?? mountedAt
+  const inProgress = day === (today ?? toDayKey(nowDate))
+  const ready = !!loaded
+  useEffect(() => {
+    if (ready && section) document.getElementById(`garmin-sec-${section}`)?.scrollIntoView?.({ block: 'start' })
+  }, [ready, section])
   const tk = (k: string, params?: Record<string, string | number>) => t(k as Key, params)
 
-  const date = localDate(day).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
+  const stale = syncAt ? nowDate.getTime() - new Date(syncAt).getTime() > 24 * 3600_000 : false
+  const syncText = syncAt
+    ? t(stale ? 'garmin.day.syncedYesterdayAt' : 'garmin.day.syncedAt', { time: formatClock(new Date(syncAt)) })
+    : undefined
+  const caption = [syncText, inProgress ? t('garmin.day.inProgressTail') : undefined].filter(Boolean).join(' ')
   const header = (
     <div className="garmin-page-bar">
       <button type="button" className="garmin-page-back" onClick={onBack}>
-        ‹ {t('garmin.day.back')}
+        {backLabel === 'home' ? t('garmin.day.backHome') : `‹ ${t('garmin.day.back')}`}
       </button>
     </div>
   )
@@ -143,7 +163,8 @@ export function GarminDayPage({ day, onBack, data }: Props) {
   return (
     <section className="garmin-page stack">
       {header}
-      <h1 className="garmin-page-title">{t('garmin.day.title', { date })}</h1>
+      <h1 className="garmin-page-title">{formatDayShort(day, locale)}</h1>
+      {caption && <p className="muted garmin-page-sync">{caption}</p>}
       {view.summaryOnly && <p className="muted garmin-page-nodetail">{t('garmin.day.noDetail')}</p>}
       {view.sections.map(sectionCard)}
       {rows.length > 0 && (

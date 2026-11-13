@@ -20,15 +20,46 @@ const detail = buildDetail({ summaries, sleep, heartRate: hr, hrv, spo2, bodyBat
 const render = (data: Parameters<typeof GarminDayPage>[0]['data']) =>
   renderToString(
     <I18nProvider>
-      <GarminDayPage day={DAY} onBack={() => {}} data={data} />
+      <GarminDayPage day={DAY} onBack={() => {}} sync={{ at: null }} data={data} />
     </I18nProvider>,
   )
+
+const at = new Date(2026, 10, 12, 13, 57).toISOString()
+const renderSync = (sync: NonNullable<Parameters<typeof GarminDayPage>[0]['sync']>, day = DAY, today = '2026-11-13') =>
+  renderToString(
+    <I18nProvider>
+      <GarminDayPage day={day} today={today} onBack={() => {}} sync={sync} data={{ detail }} />
+    </I18nProvider>,
+  )
+
+describe('GarminDayPage header', () => {
+  it('shows the sync time and «день идёт» on today', () => {
+    const html = renderSync({ at, now: new Date(2026, 10, 12, 15, 0) }, '2026-11-12', '2026-11-12')
+    expect(html).toContain('Garmin · синхронизировано в 13:57 · день идёт')
+  })
+  it('says «вчера в» when the sync is older than 24 h; no tail for past days', () => {
+    const html = renderSync({ at, now: new Date(2026, 10, 13, 15, 0) })
+    expect(html).toContain('Garmin · синхронизировано вчера в 13:57')
+    expect(html).not.toContain('день идёт')
+  })
+  it('hides the caption when the sync is unknown', () => {
+    expect(renderSync({ at: null })).not.toContain('синхронизировано')
+  })
+  it('uses «Назад» when opened from the review', () => {
+    const html = renderToString(
+      <I18nProvider>
+        <GarminDayPage day={DAY} backLabel="back" onBack={() => {}} sync={{ at: null }} data={{ detail }} />
+      </I18nProvider>,
+    )
+    expect(html).toContain('‹ Назад')
+  })
+})
 
 describe('GarminDayPage smoke render', () => {
   it('renders every section, charts and the collapsed all-fields list', () => {
     const html = render({ detail })
-    expect(html).toContain('Garmin · ')
-    expect(html).toContain('Назад')
+    expect(html).toContain('‹ Главная')
+    expect(html).toContain('чт, 12 ноября')
     for (const s of ['Активность', 'Пульс', 'HRV', 'Стресс', 'Body Battery', 'Сон', 'Дыхание и SpO2', 'Тренировки']) {
       expect(html).toContain(`>${s}</h2>`)
     }
@@ -53,7 +84,7 @@ describe('GarminDayPage smoke render', () => {
 
   it('empty day renders only the header and hint', () => {
     const html = render({})
-    expect(html).toContain('Назад')
+    expect(html).toContain('‹ Главная')
     expect(html).toContain('Подробных данных нет')
     expect(html).not.toContain('<h2')
   })

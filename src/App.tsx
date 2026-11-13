@@ -43,7 +43,8 @@ function MainApp() {
   const garminFromApp = useRef(false)
   const tab = route.tab
   const passwordOpen = route.tab === 'profile' && !!route.password
-  const garminDay = route.tab === 'profile' ? route.garminDay : undefined
+  const garminDay = route.tab === 'home' ? route.garminDay : undefined
+  const garminSection = route.tab === 'home' ? route.section : undefined
   const [now, setNow] = useState(() => new Date())
   const yesterday = reviewDay(now)
   const today = toDayKey(now)
@@ -130,7 +131,7 @@ function MainApp() {
     <div className="app">
       <main ref={mainRef}>
         {!dataReady && <ScreenSkeleton tab={tab} />}
-        {dataReady && tab === 'home' && (
+        {dataReady && tab === 'home' && !garminDay && (
           <Home result={result} habits={habits} pendingDay={pendingDay} onReview={openReview} />
         )}
         {dataReady && tab === 'review' && (
@@ -145,25 +146,27 @@ function MainApp() {
             onDone={() => setTab('home')}
           />
         )}
-        {dataReady && tab === 'profile' && garminDay && (
+        {dataReady && tab === 'home' && garminDay && (
           <GarminDayPage
             key={garminDay}
             day={garminDay}
+            today={today}
+            section={garminSection}
             onBack={() => {
               if (garminFromApp.current) history.back()
-              else navigate({ tab: 'profile' }, { replace: true })
+              else navigate({ tab: 'home' }, { replace: true })
             }}
           />
         )}
         {dataReady && tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => navigate({ tab: 'profile' })} />}
-        {dataReady && tab === 'profile' && !garminDay && !passwordOpen && profile !== undefined && (
+        {dataReady && tab === 'profile' && !passwordOpen && profile !== undefined && (
           <Profile
             profile={profile}
             rating={result.rating}
             today={today}
             onOpenGarminDay={(day) => {
               garminFromApp.current = true
-              navigate({ tab: 'profile', garminDay: day })
+              navigate({ tab: 'home', garminDay: day })
             }}
             onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
             accountSection={<AccountSection engine={syncEngine} />}

@@ -10,6 +10,7 @@
   cursor: pointer;
 }
 .garmin-page-title { margin: 0; overflow-wrap: anywhere; }
+.garmin-page-sync { margin: 0; font-size: var(--text-sm); }
 .garmin-page-nodetail { margin: 0; }
 .garmin-page-card { display: flex; flex-direction: column; gap: var(--space-12); min-width: 0; }
 .garmin-page-card h2 { margin: 0; font-size: var(--text-lg); }

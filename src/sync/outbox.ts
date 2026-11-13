@@ -1,3 +1,4 @@
+import { clearStatusCache } from "../garmin/statusCache";
 import Dexie, { type DBCore, type DBCoreMutateRequest } from "dexie";
 import { db } from "../db/db";
 
@@ -133,6 +134,7 @@ export function applyRemote<T>(fn: () => Promise<T>): Promise<T> {
 
 /** Wipes all local data (synced tables, outbox, syncState) without enqueueing anything. */
 export function clearLocalData(): Promise<void> {
+  clearStatusCache();
   return applyRemote(async () => {
     await Promise.all([
       db.habits.clear(),

@@ -55,6 +55,6 @@ export const Recovery = () => (
 export const Empty = () => (
   <Grid>
     <MetricTile href="#stress" icon={svg('M22 12h-4l-3 9L9 3l-3 9H2')} title="Тренировки и стресс" value="—" footer={<span style={{ color: 'var(--muted)' }}>Тренировок пока нет</span>} />
-    <MetricTile href="#sleep" icon={svg('M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z')} title="Сон" value="" loading />
+    <MetricTile href="#sleep" icon={svg('M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z')} title="Сон" value="" loading loadingLabel="Загрузка…" />
   </Grid>
 )

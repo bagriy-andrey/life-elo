@@ -28,8 +28,9 @@ describe('MetricTile', () => {
     expect(html).not.toContain('mtile-footer')
   })
   it('shows skeletons while loading', () => {
-    const html = renderToString(<MetricTile href="#" icon={icon} title="Сон" value="8" loading />)
+    const html = renderToString(<MetricTile href="#" icon={icon} title="Сон" value="8" loading loadingLabel="Загрузка…" />)
     expect(html).toContain('skeleton')
+    expect(html).toContain('mtile-hidden">Загрузка…')
     expect(html).not.toContain('mtile-value')
   })
   it('css: shrinkable, wraps long values, min height, focus ring, inherits colour', () => {

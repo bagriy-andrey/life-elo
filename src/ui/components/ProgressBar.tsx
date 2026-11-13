@@ -17,7 +17,7 @@ export function ProgressBar({ value, max, tone = 'accent', label, size = 'md', c
   const now = Math.min(Math.max(value, 0), safeMax)
   const pct = (now / safeMax) * 100
   return (
-    <div
+    <span
       className={cx('meter', `meter-${size}`, `meter-${tone}`, className)}
       role="progressbar"
       aria-label={label}
@@ -26,6 +26,6 @@ export function ProgressBar({ value, max, tone = 'accent', label, size = 'md', c
       aria-valuemax={safeMax}
     >
       <span className="meter-fill" style={{ width: `${pct}%` }} />
-    </div>
+    </span>
   )
 }

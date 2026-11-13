@@ -10,21 +10,23 @@ interface Props {
   /** Inline SVG (16px, currentColor); decorative. */
   icon: ReactNode
   title: string
-  /** Big value (1.5rem/700); use «—» when the metric is missing. */
+  /** Big value (1.5rem/700); use «—» when the metric is missing. Non-interactive content only (the tile is a link/button). */
   value: ReactNode
   /** Muted small text after the value, e.g. «/ 100». */
   unit?: ReactNode
-  /** Muted extra-small line under the value. */
+  /** Muted extra-small line under the value. Non-interactive content only. */
   sub?: ReactNode
-  /** Pinned to the bottom of the tile. */
+  /** Pinned to the bottom of the tile. Non-interactive, phrasing content only. */
   footer?: ReactNode
   /** Shows skeleton placeholders instead of value/sub/footer. */
   loading?: boolean
+  /** Visually hidden text announced while loading (pass the translated «Загрузка…»). */
+  loadingLabel?: string
   className?: string
 }
 
 /** Card-styled tappable metric tile (link or button); min height 150px, tap target ≥44px, text colour inherited. */
-export function MetricTile({ href, onClick, icon, title, value, unit, sub, footer, loading, className }: Props) {
+export function MetricTile({ href, onClick, icon, title, value, unit, sub, footer, loading, loadingLabel, className }: Props) {
   const body = (
     <>
       <span className="mtile-title">
@@ -35,6 +37,7 @@ export function MetricTile({ href, onClick, icon, title, value, unit, sub, foote
         <>
           <Skeleton width="60%" height="1.5rem" />
           <Skeleton width="80%" height="0.75rem" />
+          {loadingLabel && <span className="mtile-hidden">{loadingLabel}</span>}
         </>
       ) : (
         <>

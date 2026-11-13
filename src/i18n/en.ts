@@ -535,6 +535,7 @@ export const en: Dict = {
   'garmin.data.empty': "No Garmin data yet — tap “Sync now”",
   'garmin.data.minutes': "{n} min",
   'garmin.day.title': "Garmin · {date}",
+  'garmin.day.syncYesterday': "yesterday at {time}",
   'garmin.day.back': "Back",
   'garmin.day.noDetail': "No detailed data — sync again",
   'garmin.day.allFields': "All fields",

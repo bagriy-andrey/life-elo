@@ -153,7 +153,7 @@ export function GarminDayPage({ day, onBack, data }: Props) {
             <dl className="garmin-page-tree">
               {rows.map((r) => (
                 <div key={r.path} className="garmin-page-tree-row">
-                  <dt>{r.path}</dt>
+                  <dt>{r.path.split('.').flatMap((seg, i, arr) => (i < arr.length - 1 ? [seg, '.', <wbr key={i} />] : [seg]))}</dt>
                   <dd>{String(r.value)}</dd>
                 </div>
               ))}

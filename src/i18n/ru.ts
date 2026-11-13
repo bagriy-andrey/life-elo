@@ -568,6 +568,7 @@ export const ru = {
   'garmin.data.empty': "Данных Garmin пока нет — нажмите «Синхронизировать сейчас»",
   'garmin.data.minutes': "{n} мин",
   'garmin.day.title': "Garmin · {date}",
+  'garmin.day.syncYesterday': "вчера в {time}",
   'garmin.day.back': "Назад",
   'garmin.day.noDetail': "Подробных данных нет — синхронизируйте снова",
   'garmin.day.allFields': "Все поля",

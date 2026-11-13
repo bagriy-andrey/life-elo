@@ -11,6 +11,9 @@ import spo2 from '../garmin/fixtures/detail-spo2.json'
 import bodyBattery from '../garmin/fixtures/detail-bodybattery.json'
 import activities from '../garmin/fixtures/detail-activities.json'
 
+// @ts-ignore node builtin, no @types/node in this project
+import { readFileSync } from 'node:fs'
+const css: string = readFileSync(new URL('./GarminDayPage.css', import.meta.url), 'utf8')
 const DAY = '2026-11-12'
 const detail = buildDetail({ summaries, sleep, heartRate: hr, hrv, spo2, bodyBattery, activities } as GarminDetailRaw, DAY)
 
@@ -35,7 +38,7 @@ describe('GarminDayPage smoke render', () => {
     expect(html).toContain('Время в пульсовых зонах')
     expect(html).toContain('<details')
     expect(html).not.toContain('<details open')
-    expect(html).toContain('summary.movement.steps.value')
+    expect(html).toContain('<dt>summary<!-- -->.<wbr/>')
     expect(html).toMatch(/\d+ точек/)
     expect(html).not.toContain('Подробных данных нет')
   })
@@ -53,5 +56,18 @@ describe('GarminDayPage smoke render', () => {
     expect(html).toContain('Назад')
     expect(html).toContain('Подробных данных нет')
     expect(html).not.toContain('<h2')
+  })
+
+  it('long all-fields key gets <wbr> and the tree css never breaks letter by letter', () => {
+    const longKey = 'averageLongNestedKeyNameThatKeepsGoingOnAndOnForeverAndEver'
+    expect(longKey.length).toBeGreaterThanOrEqual(55)
+    const html = render({ detail: { ...detail, extra: { [longKey]: { value: 1 } } } as unknown as typeof detail })
+    expect(html).toContain(`<dt>extra<!-- -->.<wbr/>${longKey}<!-- -->.<wbr/>value</dt>`)
+    const rule = (sel: string) => css.split('\n').filter((l: string) => l.startsWith(sel)).join('\n')
+    for (const sel of ['.garmin-page-tree-row dt', '.garmin-page-tree-row dd']) {
+      expect(rule(sel)).toContain('overflow-wrap: break-word')
+      expect(rule(sel)).not.toMatch(/break-all|anywhere/)
+    }
+    expect(css).not.toContain('text-transform: capitalize')
   })
 })

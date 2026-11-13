@@ -41,6 +41,16 @@ describe('Home smoke render', () => {
   it('10 days or fewer: no toggle', () => {
     expect(render(5)).not.toContain('role="tablist"')
   })
+  it('the Body block sits between the header and the chart when wired', () => {
+    const html = renderToString(
+      <I18nProvider>
+        <Home result={mk(5)} habits={[]} onReview={() => {}} today="2026-01-06" onOpenGarmin={() => {}} onOpenProfile={() => {}} />
+      </I18nProvider>,
+    )
+    expect(html).toContain('Тело')
+    expect(html.indexOf('Тело')).toBeLessThan(html.indexOf('Динамика'))
+    expect(render(5)).not.toContain('Тело')
+  })
   it('pending day shows the banner', () => {
     expect(render(3, '2026-01-04')).toContain('Как прошёл вчерашний день?')
     expect(render(3)).not.toContain('Как прошёл вчерашний день?')

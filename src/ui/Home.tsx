@@ -5,6 +5,8 @@ import { Banner, HistoryEntry, Pill } from './components'
 import { cx } from './components/cx'
 import { settingsOn } from '../domain/settings'
 import { useI18n } from '../i18n'
+import { BodyTiles } from './BodyTiles'
+import type { GarminSection } from './route'
 import { HomeChart } from './HomeChart'
 import { rangeStart, type HomeRange } from './homeStats'
 import { formatDay, formatSigned } from './labels'
@@ -14,9 +16,13 @@ interface Props {
   habits: Habit[]
   pendingDay?: string
   onReview: () => void
+  /** The «Тело» block is shown when `today` and both handlers are given. */
+  today?: string
+  onOpenGarmin?: (day: string, section: GarminSection) => void
+  onOpenProfile?: () => void
 }
 
-export function Home({ result, habits, pendingDay, onReview }: Props) {
+export function Home({ result, habits, pendingDay, onReview, today, onOpenGarmin, onOpenProfile }: Props) {
   const { t, locale } = useI18n()
   const habitsOn = (day: string) =>
     new Map(
@@ -70,6 +76,10 @@ export function Home({ result, habits, pendingDay, onReview }: Props) {
           subtitle={t('home.pendingSubtitle', { day: formatDay(pendingDay, locale) })}
           onClick={onReview}
         />
+      )}
+
+      {today && onOpenGarmin && onOpenProfile && (
+        <BodyTiles today={today} onOpenGarmin={onOpenGarmin} onOpenProfile={onOpenProfile} />
       )}
 
       {entry && (

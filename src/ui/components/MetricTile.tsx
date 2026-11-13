@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import { cx } from './cx'
 import { Skeleton } from './Skeleton'
 import './MetricTile.css'
@@ -6,7 +6,8 @@ import './MetricTile.css'
 interface Props {
   /** Renders an <a> when set, otherwise a <button type="button">. */
   href?: string
-  onClick?: () => void
+  /** Link tiles may call `e.preventDefault()` to navigate in-app. */
+  onClick?: (e: MouseEvent<HTMLElement>) => void
   /** Inline SVG (16px, currentColor); decorative. */
   icon: ReactNode
   title: string

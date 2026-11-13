@@ -132,7 +132,18 @@ function MainApp() {
       <main ref={mainRef}>
         {!dataReady && <ScreenSkeleton tab={tab} />}
         {dataReady && tab === 'home' && !garminDay && (
-          <Home result={result} habits={habits} pendingDay={pendingDay} onReview={openReview} />
+          <Home
+            result={result}
+            habits={habits}
+            pendingDay={pendingDay}
+            onReview={openReview}
+            today={today}
+            onOpenGarmin={(day, section) => {
+              garminFromApp.current = true
+              navigate({ tab: 'home', garminDay: day, section })
+            }}
+            onOpenProfile={() => setTab('profile')}
+          />
         )}
         {dataReady && tab === 'review' && (
           <Review

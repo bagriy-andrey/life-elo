@@ -1,6 +1,6 @@
 # 15 — Garmin sync status (profile + morning review) and sync triggers
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -44,7 +44,7 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
   Record field + endpoint in `docs/specs/13-garmin.md` (new section), add a trimmed anonymised fixture —
   files: `docs/specs/13-garmin.md`, `src/garmin/fixtures/` — verify: findings in the spec.
   Result: no device endpoint; proxy = `dailysummaries[].wellnessChronology.endTimestampGmt` of today (see spec).
-- [ ] 2. Server: migration `supabase/migrations/20261113000000_garmin_status.sql` (columns above);
+- [x] 2. Server: migration `supabase/migrations/20261113000000_garmin_status.sql` (columns above);
   `garmin-pull` returns coverage + `deviceLastSyncAt`, writes `last_attempt_at`/`last_error` (stage) on every
   attempt and `last_pull_at` on success; `garmin-connect` GET also returns `lastAttemptAt`, `lastError`;
   stage-tagged logging (stage name only). Includes the plan-14 Vault code already on main — files: the migration,
@@ -62,5 +62,5 @@ succeed while yesterday's data is missing or partial. Plan 14 (Vault) is merged 
   `src/ui/YesterdayReview.test.tsx` — verify: smoke tests per state; existing components only.
 - [x] 5. Profile: last sync / last attempt + error / «Синхронизировать сейчас» / «Повторить» — files:
   `src/ui/Profile.tsx`, `src/ui/Profile.test.tsx` — verify: smoke tests.
-- [ ] 6. Docs + version: `docs/setup/backend.md` (status columns, triggers), plan 14 boxes checked + `Status: done`,
+- [x] 6. Docs + version: `docs/setup/backend.md` (status columns, triggers), plan 14 boxes checked + `Status: done`,
   `chore: version 0.15.0` — verify: `npm test`, `npm run lint`, `npm run build`.

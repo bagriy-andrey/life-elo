@@ -1,6 +1,6 @@
 # 14 — Garmin credentials in Supabase Vault
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -36,11 +36,11 @@ or backups). The user asked for secure storage (2026-11-11): keep secrets encryp
 - Version: `0.14.0`.
 
 ## Steps
-- [ ] 1. Migration `supabase/migrations/20261111010000_garmin_vault.sql`: emptiness assert; add secret-id columns;
+- [x] 1. Migration `supabase/migrations/20261111010000_garmin_vault.sql`: emptiness assert; add secret-id columns;
   drop `api_key`, `token`; the four RPCs + updated `delete_own_garmin_credentials()` (deletes Vault secrets too);
   grants as above. Apply: the user runs `npx supabase db push --remote --yes`; then read-only check of columns,
   function owners/grants — files: the migration — verify: remote read-only query.
-- [ ] 2. Edge Functions use the RPCs (connect: save/delete/status; pull: get secrets, save refreshed token);
+- [x] 2. Edge Functions use the RPCs (connect: save/delete/status; pull: get secrets, save refreshed token);
   redeploy (user runs `npx supabase functions deploy garmin-connect garmin-pull --yes`); smoke check
   (401 without user, CORS) — files: `supabase/functions/_shared/garmin.ts`, `supabase/functions/garmin-connect/index.ts`,
   `supabase/functions/garmin-pull/index.ts`, `docs/setup/backend.md` (Vault note) — verify: verifier code review + smoke.

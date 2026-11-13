@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildDetail, type GarminDetailRaw } from './detail'
-import { flattenForTree, formatDistance, formatDuration, garminDayDetailView, type DetailSection } from './detailView'
+import { flattenForTree, watchOffsetMs, formatDistance, formatDuration, garminDayDetailView, type DetailSection } from './detailView'
 import { ru } from '../i18n/ru'
 import { en } from '../i18n/en'
 import { uk } from '../i18n/uk'
@@ -204,5 +204,26 @@ describe('flattenForTree', () => {
     expect(get('bodyBattery.bodyBatteryActivityEvent[1].eventType')).toBe('ACTIVITY')
     expect(flattenForTree({ hrv: { a: [1, 2] } }, (n) => `${n} pts`)).toEqual([{ path: 'hrv.a', value: '2 pts' }])
     expect(flattenForTree(undefined)).toEqual([])
+  })
+  it('collapses long arrays of flat records, keeps short ones indexed, guards depth', () => {
+    expect(get('hrv.hrvReadings')).toMatch(/^\d+ точек$/)
+    const long = Array.from({ length: 25 }, (_, i) => ({ v: i, at: 'x' }))
+    expect(flattenForTree({ summary: { a: long } }, (n) => `${n}p`)).toEqual([{ path: 'summary.a', value: '25p' }])
+    expect(flattenForTree({ summary: { a: [{ v: 1 }, { v: 2 }] } })).toEqual([
+      { path: 'summary.a[0].v', value: 1 },
+      { path: 'summary.a[1].v', value: 2 },
+    ])
+    let deep: Record<string, unknown> = { leaf: 1 }
+    for (let i = 0; i < 20; i++) deep = { n: deep }
+    expect(flattenForTree({ summary: deep })).toEqual([])
+    expect(flattenForTree({ summary: { n: { leaf: 1 } } })).toEqual([{ path: 'summary.n.leaf', value: 1 }])
+  })
+})
+
+describe('watchOffsetMs', () => {
+  it('is local start minus GMT start (+1 h in the fixtures), 0 when unknown', () => {
+    expect(watchOffsetMs(detail)).toBe(3_600_000)
+    expect(watchOffsetMs({})).toBe(0)
+    expect(watchOffsetMs(undefined)).toBe(0)
   })
 })

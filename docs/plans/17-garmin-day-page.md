@@ -75,9 +75,10 @@ analytics) and show **sections + charts**. Read-only; Elo untouched (AGENTS.md: 
 - [x] 5. Charts (load `dataviz` skill): screen-local `LineSeriesChart` (time series with optional band) and
   `StackedBar` (segments with legend) under `src/ui/garmin/` + CSS + tests — files: `src/ui/garmin/LineSeriesChart.tsx`,
   `src/ui/garmin/StackedBar.tsx`, their `.css` and `.test.tsx` — verify: renderToString tests; light/dark tokens.
-- [ ] 6. Page `/garmin/:day` (route in `src/ui/route.ts`), sections, «Все поля» tree, back navigation; day cards in
+- [x] 6. Page `/garmin/:day` (route in `src/ui/route.ts`), sections, «Все поля» tree, back navigation; day cards in
   `GarminDataSheet` become buttons that navigate — files: `src/ui/GarminDayPage.tsx`, `.css`, `.test.tsx`,
   `src/ui/route.ts`, `src/App.tsx`, `src/ui/GarminDataSheet.tsx` — verify: smoke tests (full detail, summary-only,
   empty); manual 375 px light/dark.
+  Note: route is `{tab:'profile', garminDay}` (path `/garmin/:day`, profile tab stays active); also touched `Profile.tsx`/`Profile.css` (thread `onOpenGarminDay`, day-card button style) and `detailView.ts` (`watchOffsetMs`, series/depth fixes).
 - [ ] 7. Docs + version: `docs/setup/backend.md` (detail table, endpoints, size), AGENTS.md Layout line if needed,
   `chore: version 0.17.0` — verify: `npm test`, `npm run lint`, `npm run build`.

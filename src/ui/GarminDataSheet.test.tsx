@@ -32,6 +32,7 @@ describe('GarminDataSheet smoke render', () => {
     expect(html).toContain('Падел · 126 мин')
     expect(html).toContain('Rowing · 30 мин')
     expect(html).toContain('—')
+    expect(html).toContain('<button type="button" class="garmin-day"')
     expect(html.indexOf('12')).toBeLessThan(html.lastIndexOf('11'))
   })
 

@@ -500,7 +500,7 @@ const DISTANCE_UNITS: Record<string, { m: string; km: string }> = {
 }
 const lang = (locale: string) => locale.slice(0, 2).toLowerCase()
 
-/** `28080` -> `7 ч 48 мин`; under a minute `45 с`-free: shows `0 мин`. Seconds are rounded to the nearest minute. */
+/** `28080` -> `7 ч 48 мин`. Seconds are rounded to the nearest minute, so under 30 s shows `0 мин`. */
 export function formatDuration(seconds: number, locale: string): string {
   const u = DURATION_UNITS[lang(locale)] ?? DURATION_UNITS.en
   const total = Math.max(0, Math.round(seconds / 60))
@@ -518,6 +518,21 @@ export function formatDistance(meters: number, locale: string): string {
   return `${km} ${u.km}`
 }
 
+/**
+ * Watch UTC offset in ms (local start - GMT start of any stored block), 0 when unknown. Chart ticks must show
+ * the watch's clock, not the viewer's: format `t + offset` with UTC getters.
+ */
+export function watchOffsetMs(detail: GarminDetail | undefined): number {
+  for (const block of [detail?.heartRate, detail?.spo2, detail?.bodyBattery, detail?.hrv]) {
+    const gmt = str(block?.startTimestampGMT)
+    const local = str(block?.startTimestampLocal)
+    if (!gmt || !local) continue
+    const d = Date.parse(`${local.replace(' ', 'T')}Z`) - Date.parse(`${gmt.replace(' ', 'T')}Z`)
+    if (Number.isFinite(d)) return d
+  }
+  return 0
+}
+
 export interface TreeRow {
   path: string
   value: string | number | boolean
@@ -526,32 +541,41 @@ export interface TreeRow {
 function isPrimitive(v: unknown): v is string | number | boolean | null {
   return v === null || ['string', 'number', 'boolean'].includes(typeof v)
 }
-/** An array that is a series: numbers, or arrays/records of primitives only (e.g. `[[epoch, bpm], ...]`). */
+/** Object arrays at least this long (e.g. `hrvReadings`) are treated as series; short ones (events, sets) stay indexed. */
+const SERIES_OBJECT_MIN = 20
+const MAX_DEPTH = 12
+/** A series: numbers, arrays of primitives (`[[epoch, bpm], ...]`), or long arrays of flat primitive records. */
 function isSeries(arr: unknown[]): boolean {
-  return arr.every((x) => typeof x === 'number' || (Array.isArray(x) && x.every(isPrimitive)))
+  return arr.every(
+    (x) =>
+      typeof x === 'number' ||
+      (Array.isArray(x) && x.every(isPrimitive)) ||
+      (arr.length >= SERIES_OBJECT_MIN && !!obj(x) && Object.values(x as Obj).every(isPrimitive)),
+  )
 }
 
 /**
  * Whole detail as sorted `{ path, value }` rows for the «Все поля» tree. Nulls and empty containers are skipped;
- * number series become `pointsLabel(n)`; arrays of objects are indexed (`activities[0].calories`).
+ * series (see `isSeries`) become `pointsLabel(n)`; other arrays of objects are indexed (`activities[0].calories`).
+ * Nesting deeper than 12 levels is dropped.
  */
 export function flattenForTree(
   detail: GarminDetail | undefined,
   pointsLabel: (n: number) => string = (n) => `${n} точек`,
 ): TreeRow[] {
   const rows: TreeRow[] = []
-  const walk = (v: unknown, path: string): void => {
-    if (v === null || v === undefined) return
+  const walk = (v: unknown, path: string, depth: number): void => {
+    if (v === null || v === undefined || depth > MAX_DEPTH) return
     if (isPrimitive(v)) {
       rows.push({ path, value: v })
     } else if (Array.isArray(v)) {
       if (v.length === 0) return
       if (isSeries(v)) rows.push({ path, value: pointsLabel(v.length) })
-      else v.forEach((x, i) => walk(x, `${path}[${i}]`))
+      else v.forEach((x, i) => walk(x, `${path}[${i}]`, depth + 1))
     } else if (typeof v === 'object') {
-      for (const [k, x] of Object.entries(v as Obj)) walk(x, path ? `${path}.${k}` : k)
+      for (const [k, x] of Object.entries(v as Obj)) walk(x, path ? `${path}.${k}` : k, depth + 1)
     }
   }
-  walk(detail, '')
+  walk(detail, '', 0)
   return rows.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
 }

@@ -12,6 +12,8 @@ interface Props {
   lastPullAt?: string | null
   /** Test seam: rows to show instead of the live `db.garmin` query. */
   rows?: GarminRow[]
+  /** Day card tapped: the caller closes the sheet and opens the day page. */
+  onOpenDay?: (day: string) => void
 }
 
 /** `YYYY-MM-DD` as a local calendar date. */
@@ -20,7 +22,7 @@ function localDate(day: string): Date {
   return new Date(y, m - 1, d)
 }
 
-export function GarminDataSheet({ open, onClose, lastPullAt, rows }: Props) {
+export function GarminDataSheet({ open, onClose, lastPullAt, rows, onOpenDay }: Props) {
   const { t, locale } = useI18n()
   const live = useLiveQuery(() => db.garmin.toArray(), [])
   const days = garminDaysView(rows ?? live ?? [])
@@ -42,7 +44,8 @@ export function GarminDataSheet({ open, onClose, lastPullAt, rows }: Props) {
         ) : (
           <ul className="garmin-data-list">
             {days.map((d) => (
-              <li key={d.day} className="garmin-day">
+              <li key={d.day}>
+                <button type="button" className="garmin-day" onClick={() => onOpenDay?.(d.day)}>
                 <strong className="garmin-day-date">{fmt(d.day)}</strong>
                 <dl className="garmin-day-rows">
                   <dt>{t('garmin.data.steps')}</dt>
@@ -60,6 +63,7 @@ export function GarminDataSheet({ open, onClose, lastPullAt, rows }: Props) {
                         ))}
                   </dd>
                 </dl>
+                </button>
               </li>
             ))}
           </ul>

@@ -12,8 +12,16 @@ describe('route', () => {
       { tab: 'habits', id: 'a b/c' },
       { tab: 'profile' },
       { tab: 'profile', password: true },
+      { tab: 'profile', garminDay: '2026-11-12' },
     ]
     for (const r of routes) expect(parseRoute(routePath(r))).toEqual(r)
+  })
+  it('parses the Garmin day page and sends invalid days to the profile', () => {
+    expect(parseRoute('/garmin/2026-11-12')).toEqual({ tab: 'profile', garminDay: '2026-11-12' })
+    expect(routePath({ tab: 'profile', garminDay: '2026-11-12' })).toBe('/garmin/2026-11-12')
+    expect(parseRoute('/garmin/nope')).toEqual({ tab: 'profile' })
+    expect(parseRoute('/garmin/2026-02-30')).toEqual({ tab: 'profile' })
+    expect(parseRoute('/garmin')).toEqual({ tab: 'profile' })
   })
   it('tolerates a trailing slash', () => {
     expect(parseRoute('/habits/')).toEqual({ tab: 'habits' })

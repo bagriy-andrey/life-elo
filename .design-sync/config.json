@@ -35,7 +35,7 @@
   "overrides": {
     "TabBar": {
       "cardMode": "single",
-      "primaryStory": "WithBadge",
+      "primaryStory": "WithIcons",
       "viewport": "420x160"
     },
     "Banner": {

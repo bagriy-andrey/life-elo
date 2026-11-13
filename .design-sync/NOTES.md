@@ -37,6 +37,10 @@ Target: Claude Design project "Life Elo" — https://claude.ai/design/p/67c2bfac
   A preview with only the closed ⋮ trigger trips `[RENDER_THIN]` (a 44px icon button paints almost nothing).
   `dialog-actions--row` (two buttons side by side) is documented only in `dtsPropsFor.Dialog`, not in conventions.md.
 
+- TabBar (2026-11-13): items take an optional `icon`; at ≤600px the icon replaces the label. Preview `WithIcons`
+  (primary story) inlines the same Lucide-style SVGs as `src/ui/tabIcons.tsx` (that module isn't a DS export) — keep
+  them in step if the app's icons change.
+
 ## Known render warns
 - none
 

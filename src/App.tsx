@@ -39,6 +39,8 @@ function MainApp() {
   const { t } = useI18n()
   useGarminAutoPull(true)
   const [route, navigate] = useRoute()
+  // Back from the Garmin day page uses history only when the page was opened from inside the app.
+  const garminFromApp = useRef(false)
   const tab = route.tab
   const passwordOpen = route.tab === 'profile' && !!route.password
   const garminDay = route.tab === 'profile' ? route.garminDay : undefined
@@ -147,7 +149,10 @@ function MainApp() {
           <GarminDayPage
             key={garminDay}
             day={garminDay}
-            onBack={() => (history.length > 1 ? history.back() : navigate({ tab: 'profile' }, { replace: true }))}
+            onBack={() => {
+              if (garminFromApp.current) history.back()
+              else navigate({ tab: 'profile' }, { replace: true })
+            }}
           />
         )}
         {dataReady && tab === 'profile' && passwordOpen && <ProfilePassword onBack={() => navigate({ tab: 'profile' })} />}
@@ -156,7 +161,10 @@ function MainApp() {
             profile={profile}
             rating={result.rating}
             today={today}
-            onOpenGarminDay={(day) => navigate({ tab: 'profile', garminDay: day })}
+            onOpenGarminDay={(day) => {
+              garminFromApp.current = true
+              navigate({ tab: 'profile', garminDay: day })
+            }}
             onClearData={() => wipeAccountData({ engine: syncEngine, remote: supabaseRemote })}
             accountSection={<AccountSection engine={syncEngine} />}
             accountActions={<AccountActions engine={syncEngine} onPassword={() => navigate({ tab: 'profile', password: true })} />}

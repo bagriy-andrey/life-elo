@@ -31,6 +31,12 @@ export function GarminDataSheet({ open, onClose, lastPullAt, rows, onOpenDay }: 
   const typeName = (k: string) =>
     (NAMED_ACTIVITY_TYPES as readonly string[]).includes(k) ? t(`garmin.type.${k as (typeof NAMED_ACTIVITY_TYPES)[number]}`) : humanizeType(k)
 
+  type Day = (typeof days)[number]
+  const steps = (d: Day) => (d.steps !== undefined ? d.steps.toLocaleString(locale) : none)
+  const sleep = (d: Day) => (d.sleepStart && d.sleepEnd ? `${d.sleepStart} → ${d.sleepEnd}` : none)
+  const acts = (d: Day) =>
+    d.activities.length === 0 ? none : d.activities.map((a) => `${typeName(a.type)} ${t('garmin.data.minutes', { n: a.minutes })}`).join(', ')
+
   return (
     <BottomSheet open={open} title={t('garmin.data.title')} onClose={onClose} closeLabel={t('habits.close')}>
       <div className="garmin-data">
@@ -45,24 +51,29 @@ export function GarminDataSheet({ open, onClose, lastPullAt, rows, onOpenDay }: 
           <ul className="garmin-data-list">
             {days.map((d) => (
               <li key={d.day}>
-                <button type="button" className="garmin-day" onClick={() => onOpenDay?.(d.day)}>
-                <strong className="garmin-day-date">{fmt(d.day)}</strong>
-                <dl className="garmin-day-rows">
-                  <dt>{t('garmin.data.steps')}</dt>
-                  <dd>{d.steps !== undefined ? d.steps.toLocaleString(locale) : none}</dd>
-                  <dt>{t('garmin.data.sleep', { date: fmt(d.day) })}</dt>
-                  <dd>{d.sleepStart && d.sleepEnd ? `${d.sleepStart} → ${d.sleepEnd}` : none}</dd>
-                  <dt>{t('garmin.data.activities')}</dt>
-                  <dd>
-                    {d.activities.length === 0
-                      ? none
-                      : d.activities.map((a, i) => (
-                          <span key={i} className="garmin-day-activity">
-                            {`${typeName(a.type)} · ${t('garmin.data.minutes', { n: a.minutes })}`}
-                          </span>
-                        ))}
-                  </dd>
-                </dl>
+                <button
+                  type="button"
+                  className="garmin-day"
+                  aria-label={`${fmt(d.day)}: ${steps(d)}, ${sleep(d)}, ${acts(d)}`}
+                  onClick={() => onOpenDay?.(d.day)}
+                >
+                  <strong className="garmin-day-date">{fmt(d.day)}</strong>
+                  <span className="garmin-day-rows">
+                    <span className="garmin-day-label">{t('garmin.data.steps')}</span>
+                    <span className="garmin-day-value">{steps(d)}</span>
+                    <span className="garmin-day-label">{t('garmin.data.sleep', { date: fmt(d.day) })}</span>
+                    <span className="garmin-day-value">{sleep(d)}</span>
+                    <span className="garmin-day-label">{t('garmin.data.activities')}</span>
+                    <span className="garmin-day-value">
+                      {d.activities.length === 0
+                        ? none
+                        : d.activities.map((a, i) => (
+                            <span key={i} className="garmin-day-activity">
+                              {`${typeName(a.type)} · ${t('garmin.data.minutes', { n: a.minutes })}`}
+                            </span>
+                          ))}
+                    </span>
+                  </span>
                 </button>
               </li>
             ))}

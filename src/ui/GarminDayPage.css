@@ -38,3 +38,5 @@
 .garmin-page-fields summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 600; }
 .garmin-page-tree { padding-top: var(--space-8); font-size: var(--text-xs); }
 .garmin-page-tree-row dt { color: var(--muted); overflow-wrap: anywhere; font-family: ui-monospace, monospace; }
+.garmin-page-back:focus-visible,
+.garmin-page-fields summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

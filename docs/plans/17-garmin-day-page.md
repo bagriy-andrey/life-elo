@@ -1,6 +1,6 @@
 # 17 — Garmin day page (all data, sections + charts)
 
-Status: approved
+Status: done
 Design input: none
 
 ## Why
@@ -80,5 +80,5 @@ analytics) and show **sections + charts**. Read-only; Elo untouched (AGENTS.md: 
   `src/ui/route.ts`, `src/App.tsx`, `src/ui/GarminDataSheet.tsx` — verify: smoke tests (full detail, summary-only,
   empty); manual 375 px light/dark.
   Note: route is `{tab:'profile', garminDay}` (path `/garmin/:day`, profile tab stays active); also touched `Profile.tsx`/`Profile.css` (thread `onOpenGarminDay`, day-card button style) and `detailView.ts` (`watchOffsetMs`, series/depth fixes).
-- [ ] 7. Docs + version: `docs/setup/backend.md` (detail table, endpoints, size), AGENTS.md Layout line if needed,
+- [x] 7. Docs + version: `docs/setup/backend.md` (detail table, endpoints, size), AGENTS.md Layout line if needed,
   `chore: version 0.17.0` — verify: `npm test`, `npm run lint`, `npm run build`.

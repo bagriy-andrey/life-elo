@@ -72,9 +72,10 @@ describe('garminDayDetailView', () => {
     const b = sec('bodyBattery')
     expect(item(b, 'bbMin')?.value).toBe(24)
     expect(item(b, 'bbCharged')?.value).toBe(66)
-    expect(b.groups!.length).toBe(3)
-    expect(b.groups![0]).toMatchObject({ titleKey: 'garmin.day.bbEvent.SLEEP' })
-    expect(b.groups![0].items.map((i) => i.value)).toEqual(['23:03', 28980, 55])
+    // SLEEP events are dropped (the Sleep section covers them)
+    expect(b.groups!.length).toBe(2)
+    expect(b.groups!.some((g) => g.titleKey === 'garmin.day.bbEvent.SLEEP')).toBe(false)
+    expect(b.groups![0]).toMatchObject({ titleKey: 'garmin.day.bbEvent.ACTIVITY' })
   })
 
   it('sleep: stages, score + sub-scores with qualifiers', () => {

@@ -274,6 +274,8 @@ function bodyBatterySection(detail: GarminDetail): DetailSection | undefined {
     const o = obj(e)
     if (!o) continue
     const type = str(o.eventType)
+    // Sleep is its own section; a SLEEP group here would duplicate it.
+    if (type === 'SLEEP') continue
     const gi: DetailItem[] = []
     add(gi, 'bbEventStart', clock(o.eventStartTimeLocal) ?? clock(o.eventStartTimeGmt))
     add(gi, 'bbEventDuration', sec(o.durationInMillis ?? o.durationInMilliseconds), 'sec')
